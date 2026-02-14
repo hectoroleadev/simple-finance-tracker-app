@@ -1,0 +1,5 @@
+{
+  "name": "Simple Finance Tracker",
+  "description": "Una aplicación completa para el seguimiento de finanzas personales basada en el formato de hoja de cálculo del usuario, con gestión de activos, deudas, ahorros para el retiro y visualización histórica con gráficos.",
+  "requestFramePermissions": []
+}

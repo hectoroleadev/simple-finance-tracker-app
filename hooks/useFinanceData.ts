@@ -1,0 +1,147 @@
+
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { FinanceItem, HistoryEntry, CategoryType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+
+// Domain & Infrastructure Imports
+import { FinanceCalculator } from '../domain/finance.logic';
+import { FinanceRepository } from '../domain/ports';
+import { LocalStorageAdapter } from '../infrastructure/LocalStorageAdapter';
+import { ApiGatewayAdapter } from '../infrastructure/ApiGatewayAdapter';
+
+// Determine which repository to use based on environment variables
+const getRepository = (): FinanceRepository => {
+  // Safely access import.meta.env which might be undefined in some environments
+  // @ts-ignore - handling potential missing env property on import.meta
+  const env = (import.meta.env || {}) as { VITE_API_URL?: string; VITE_API_KEY?: string };
+  
+  const apiUrl = env.VITE_API_URL;
+  const apiKey = env.VITE_API_KEY;
+
+  if (apiUrl) {
+    console.log('Using API Gateway Repository');
+    return new ApiGatewayAdapter(apiUrl, apiKey);
+  }
+  
+  console.log('Using LocalStorage Repository');
+  return new LocalStorageAdapter();
+};
+
+const repository = getRepository();
+
+export const useFinanceData = () => {
+  const { language, t } = useLanguage();
+  
+  // --- State ---
+  const [items, setItems] = useState<FinanceItem[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const isInitialized = useRef(false);
+
+  // --- Initial Data Loading ---
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [fetchedItems, fetchedHistory] = await Promise.all([
+          repository.getItems(),
+          repository.getHistory()
+        ]);
+        setItems(fetchedItems);
+        setHistory(fetchedHistory);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load finance data', err);
+        setError(t('errors.loadFailed') || 'Failed to load data');
+      } finally {
+        setLoading(false);
+        isInitialized.current = true;
+      }
+    };
+
+    loadData();
+  }, [t]);
+
+  // --- Persistence Effects ---
+  // Only save if data has been initialized to avoid overwriting remote data with empty initial state
+  useEffect(() => {
+    if (isInitialized.current) {
+      const save = async () => {
+        try {
+          await repository.saveItems(items);
+        } catch (err) {
+          console.error('Failed to save items', err);
+        }
+      };
+      save();
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (isInitialized.current) {
+      const save = async () => {
+        try {
+          await repository.saveHistory(history);
+        } catch (err) {
+          console.error('Failed to save history', err);
+        }
+      };
+      save();
+    }
+  }, [history]);
+
+  // --- Domain Logic ---
+  const totals = useMemo(() => FinanceCalculator.calculateTotals(items), [items]);
+  
+  const chartData = useMemo(() => FinanceCalculator.prepareChartData(history), [history]);
+
+  // --- Actions (Use Cases) ---
+  const actions = {
+    updateItem: (id: string, name: string, amount: number) => {
+      setItems(prev => prev.map(item => item.id === id ? { ...item, name, amount } : item));
+    },
+
+    deleteItem: (id: string) => {
+      setItems(prev => prev.filter(item => item.id !== id));
+    },
+
+    addItem: (category: CategoryType) => {
+      const newItem: FinanceItem = {
+        id: crypto.randomUUID(),
+        name: 'New Item',
+        amount: 0,
+        category,
+      };
+      setItems(prev => [...prev, newItem]);
+    },
+
+    snapshotHistory: () => {
+      // Get dynamic month name based on current language
+      const now = new Date();
+      const monthName = now.toLocaleString(language === 'es' ? 'es-MX' : 'en-US', { month: 'long' });
+      // Capitalize first letter
+      const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      
+      const newEntry = FinanceCalculator.createSnapshot(totals, formattedMonth);
+      setHistory(prev => [newEntry, ...prev]);
+      return true;
+    },
+
+    clearHistory: () => {
+      if (window.confirm(t('confirmClear'))) {
+        setHistory([]);
+      }
+    }
+  };
+
+  return {
+    items,
+    history,
+    totals,
+    chartData,
+    loading,
+    error,
+    actions
+  };
+};
