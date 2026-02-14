@@ -43,16 +43,19 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
     if (isNaN(date.getTime())) return 'Invalid Date';
     
     // Format: "24 January" (EN) or "24 enero" (ES)
-    // Using day: 'numeric' to show the number of day
     return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', {
       day: 'numeric',
       month: 'long'
     });
   };
 
+  // Keys to display in order
+  const dataKeys: ('savings' | 'debt' | 'balance' | 'retirement')[] = ['savings', 'debt', 'balance', 'retirement'];
+
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-[600px] transition-colors">
-      <div className="flex bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-200px)] md:h-[600px] transition-colors">
+      {/* Desktop Header - Hidden on Mobile */}
+      <div className="hidden md:flex bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         <div className="w-20 text-left">{t('year')}</div>
         <div className="flex-1 text-left">{t('date')}</div>
         <div className="w-28 text-right">{t('savings')}</div>
@@ -67,24 +70,55 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
           history.map((entry) => (
             <div 
               key={entry.id}
-              className="flex border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors px-6 items-center h-[60px] group"
+              className="flex flex-col md:flex-row border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors p-4 md:px-6 md:py-0 md:h-[60px] md:items-center group relative"
             >
-              <div className="w-20 text-slate-400 dark:text-slate-500 text-sm">
+              {/* Mobile Header: Date & Delete Button */}
+              <div className="md:hidden flex justify-between items-start mb-3">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                    {formatYear(entry.date)}
+                  </span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 text-lg capitalize">
+                    {formatDate(entry.date)}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => onDelete(entry.id)}
+                  className="p-2 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+
+              {/* Desktop: Year & Date Columns */}
+              <div className="hidden md:block w-20 text-slate-400 dark:text-slate-500 text-sm">
                 {formatYear(entry.date)}
               </div>
-              <div className="flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
+              <div className="hidden md:block flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
                 {formatDate(entry.date)}
               </div>
               
-              {['savings', 'debt', 'balance', 'retirement'].map((key) => (
-                <div key={key} className="w-28 text-right px-1">
-                  <div className={`inline-flex items-center justify-end rounded-md px-3 py-1 text-xs font-bold tabular-nums border transition-colors ${getHeatmapColor(entry[key as keyof HistoryEntry] as number, key as any)}`}>
-                    {formatCurrencyNoDecimals(entry[key as keyof HistoryEntry] as number)}
+              {/* Data Grid: 2 cols on mobile, flex row on desktop */}
+              <div className="grid grid-cols-2 gap-3 md:flex md:gap-0 w-full md:w-auto">
+                {dataKeys.map((key) => (
+                  <div key={key} className="flex flex-col md:block md:w-28 text-left md:text-right md:px-1">
+                    {/* Mobile Label */}
+                    <span className="md:hidden text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1">
+                      {key === 'debt' ? t('totalDebt') : 
+                       key === 'savings' ? t('savings') :
+                       key === 'balance' ? t('netBalance') : t('retirementCapital')}
+                    </span>
+                    
+                    {/* Value Badge */}
+                    <div className={`inline-flex items-center md:justify-end rounded-md px-2 md:px-3 py-1.5 md:py-1 text-sm md:text-xs font-bold tabular-nums border transition-colors w-full md:w-auto ${getHeatmapColor(entry[key], key)}`}>
+                      {formatCurrencyNoDecimals(entry[key])}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
               
-              <div className="w-10 flex justify-end">
+              {/* Desktop Delete Button */}
+              <div className="hidden md:flex w-10 justify-end">
                 <button 
                   onClick={() => onDelete(entry.id)}
                   className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"

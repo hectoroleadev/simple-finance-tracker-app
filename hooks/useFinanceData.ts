@@ -59,8 +59,15 @@ export const useFinanceData = () => {
           repository.getItems(),
           repository.getHistory()
         ]);
+        
         setItems(fetchedItems);
-        setHistory(fetchedHistory);
+        
+        // Sort history by date descending (newest first)
+        const sortedHistory = fetchedHistory.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setHistory(sortedHistory);
+        
         setError(null);
       } catch (err: any) {
         console.error('Failed to load finance data', err);
@@ -138,14 +145,9 @@ export const useFinanceData = () => {
 
     snapshotHistory: () => {
       const newEntry = FinanceCalculator.createSnapshot(totals);
+      // Prepend new entry (which is the newest date) to maintain desc order
       setHistory(prev => [newEntry, ...prev]);
       return true;
-    },
-
-    clearHistory: () => {
-      if (window.confirm(t('confirmClear'))) {
-        setHistory([]);
-      }
     },
 
     deleteHistoryItem: (id: string) => {      

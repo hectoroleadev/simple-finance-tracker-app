@@ -112,16 +112,4 @@ describe('useFinanceData Hook', () => {
     // useEffect should trigger saveItems
     expect(mockSaveItems).toHaveBeenCalled();
   });
-
-  it('clears history if user confirms', () => {
-     // Mock window.confirm is true in beforeEach
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
-    
-    act(() => {
-      result.current.actions.clearHistory();
-    });
-
-    expect(result.current.history).toEqual([]);
-    expect(mockSaveHistory).toHaveBeenCalledWith([]);
-  });
 });

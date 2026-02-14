@@ -18,7 +18,6 @@ export const translations = {
     snapshot: "Record Snapshot",
     historyTitle: "History",
     historyDesc: "Monthly record of your wealth evolution.",
-    clearAll: "Clear All",
     trendWealth: "Wealth Trend",
     trendWealthDesc: "Net balance compared to debt.",
     evolutionRetirement: "Retirement Evolution",
@@ -50,7 +49,6 @@ export const translations = {
       nov: "Nov",
       dec: "Dec"
     },
-    confirmClear: "Do you want to delete the history records?",
     confirmDeleteHistory: "Are you sure you want to delete this history record?"
   },
   es: {
@@ -71,7 +69,6 @@ export const translations = {
     snapshot: "Registrar Snapshot",
     historyTitle: "Historial",
     historyDesc: "Registro mensual de tu evolución patrimonial.",
-    clearAll: "Limpiar todo",
     trendWealth: "Tendencia de Patrimonio",
     trendWealthDesc: "Balance neto comparado con deuda.",
     evolutionRetirement: "Evolución de Retiro",
@@ -103,7 +100,6 @@ export const translations = {
       nov: "Nov",
       dec: "Dic"
     },
-    confirmClear: "¿Deseas eliminar el historial de registros?",
     confirmDeleteHistory: "¿Estás seguro de que deseas eliminar este registro histórico?"
   }
 };
