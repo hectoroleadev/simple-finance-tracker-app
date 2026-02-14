@@ -21,18 +21,43 @@ export class ApiGatewayAdapter implements FinanceRepository {
     return headers;
   }
 
+  private async handleResponseError(response: Response, action: string): Promise<never> {
+    let errorMessage = `Failed to ${action}`;
+    
+    // Try to parse JSON error message from backend
+    try {
+      const data = await response.json();
+      if (data && data.message) {
+        errorMessage = data.message;
+      } else if (data && data.error) {
+        errorMessage = data.error;
+      } else {
+        errorMessage = `${errorMessage}: ${response.status} ${response.statusText}`;
+      }
+    } catch (e) {
+      // Fallback if JSON parsing fails
+      errorMessage = `${errorMessage}: ${response.status} ${response.statusText}`;
+    }
+
+    throw new Error(errorMessage);
+  }
+
   async getItems(): Promise<FinanceItem[]> {
     try {
       const response = await fetch(`${this.apiUrl}/items`, {
         method: 'GET',
         headers: this.headers,
       });
-      if (!response.ok) throw new Error(`Failed to fetch items: ${response.statusText}`);
+      
+      if (!response.ok) {
+        await this.handleResponseError(response, 'fetch items');
+      }
+      
       const data = await response.json();
       return data.items || [];
     } catch (error) {
       console.error('API Gateway Error (getItems):', error);
-      return [];
+      throw error;
     }
   }
 
@@ -43,7 +68,10 @@ export class ApiGatewayAdapter implements FinanceRepository {
         headers: this.headers,
         body: JSON.stringify({ items }),
       });
-      if (!response.ok) throw new Error(`Failed to save items: ${response.statusText}`);
+      
+      if (!response.ok) {
+        await this.handleResponseError(response, 'save items');
+      }
     } catch (error) {
       console.error('API Gateway Error (saveItems):', error);
       throw error;
@@ -52,17 +80,13 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async deleteItem(id: string): Promise<void> {
     try {
-      // Try DELETE with body first, as this is common for single-resource Lambdas
-      // If the backend expects /items/{id}, this might need adjustment based on specific backend logic
-      const response = await fetch(`${this.apiUrl}/items`, {
+      const response = await fetch(`${this.apiUrl}/items/${id}`, {
         method: 'DELETE',
         headers: this.headers,
-        body: JSON.stringify({ id }),
       });
       
       if (!response.ok) {
-        // Fallback or retry logic could go here, but for now just log
-        console.warn(`Initial delete attempt failed: ${response.statusText}.`);
+        await this.handleResponseError(response, 'delete item');
       }
     } catch (error) {
       console.error('API Gateway Error (deleteItem):', error);
@@ -76,12 +100,16 @@ export class ApiGatewayAdapter implements FinanceRepository {
         method: 'GET',
         headers: this.headers,
       });
-      if (!response.ok) throw new Error(`Failed to fetch history: ${response.statusText}`);
+      
+      if (!response.ok) {
+        await this.handleResponseError(response, 'fetch history');
+      }
+      
       const data = await response.json();
       return data.history || [];
     } catch (error) {
       console.error('API Gateway Error (getHistory):', error);
-      return [];
+      throw error;
     }
   }
 
@@ -92,9 +120,28 @@ export class ApiGatewayAdapter implements FinanceRepository {
         headers: this.headers,
         body: JSON.stringify({ history }),
       });
-      if (!response.ok) throw new Error(`Failed to save history: ${response.statusText}`);
+      
+      if (!response.ok) {
+        await this.handleResponseError(response, 'save history');
+      }
     } catch (error) {
       console.error('API Gateway Error (saveHistory):', error);
+      throw error;
+    }
+  }
+
+  async deleteHistoryItem(id: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.apiUrl}/history/${id}`, {
+        method: 'DELETE',
+        headers: this.headers,
+      });
+      
+      if (!response.ok) {
+        await this.handleResponseError(response, 'delete history item');
+      }
+    } catch (error) {
+      console.error('API Gateway Error (deleteHistoryItem):', error);
       throw error;
     }
   }

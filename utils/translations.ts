@@ -49,7 +49,8 @@ export const translations = {
       nov: "Nov",
       dec: "Dec"
     },
-    confirmClear: "Do you want to delete the history records?"
+    confirmClear: "Do you want to delete the history records?",
+    confirmDeleteHistory: "Are you sure you want to delete this history record?"
   },
   es: {
     appTitle: "Finanzas",
@@ -100,7 +101,8 @@ export const translations = {
       nov: "Nov",
       dec: "Dic"
     },
-    confirmClear: "¿Deseas eliminar el historial de registros?"
+    confirmClear: "¿Deseas eliminar el historial de registros?",
+    confirmDeleteHistory: "¿Estás seguro de que deseas eliminar este registro histórico?"
   }
 };
 

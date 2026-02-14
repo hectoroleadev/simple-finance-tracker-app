@@ -3,12 +3,14 @@ import React from 'react';
 import { HistoryEntry } from '../types';
 import { formatCurrencyNoDecimals } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
+import { Trash2 } from 'lucide-react';
 
 interface HistoryTableProps {
   history: HistoryEntry[];
+  onDelete: (id: string) => void;
 }
 
-const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
+const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
   const { t } = useLanguage();
 
   const getHeatmapColor = (val: number, type: 'savings' | 'debt' | 'balance' | 'retirement') => {
@@ -40,6 +42,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
         <div className="w-28 text-right">{t('totalDebt')}</div>
         <div className="w-28 text-right">{t('netBalance')}</div>
         <div className="w-28 text-right">{t('retirementCapital')}</div>
+        <div className="w-10"></div>
       </div>
       
       <div className="flex-1 overflow-y-auto virtual-list">
@@ -47,7 +50,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
           history.map((entry) => (
             <div 
               key={entry.id}
-              className="flex border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors px-6 items-center h-[60px]"
+              className="flex border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors px-6 items-center h-[60px] group"
             >
               <div className="w-20 text-slate-400 dark:text-slate-500 text-sm">{entry.year}</div>
               <div className="flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm">{entry.month}</div>
@@ -59,6 +62,15 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
                   </div>
                 </div>
               ))}
+              
+              <div className="w-10 flex justify-end">
+                <button 
+                  onClick={() => onDelete(entry.id)}
+                  className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           ))
         ) : (

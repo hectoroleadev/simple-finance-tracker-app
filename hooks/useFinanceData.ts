@@ -1,6 +1,5 @@
-
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { FinanceItem, HistoryEntry, CategoryType } from '../types';
+import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
+import { FinanceItem, HistoryEntry, CategoryType, FinanceContextType } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
 // Domain & Infrastructure Imports
@@ -30,6 +29,16 @@ const getRepository = (): FinanceRepository => {
 
 const repository = getRepository();
 
+export const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
+
+export const useFinanceContext = () => {
+  const context = useContext(FinanceContext);
+  if (!context) {
+    throw new Error('useFinanceContext must be used within a FinanceProvider');
+  }
+  return context;
+};
+
 export const useFinanceData = () => {
   const { language, t } = useLanguage();
   
@@ -52,9 +61,10 @@ export const useFinanceData = () => {
         setItems(fetchedItems);
         setHistory(fetchedHistory);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to load finance data', err);
-        setError(t('errors.loadFailed') || 'Failed to load data');
+        // Use the specific error message if available, otherwise fallback to translation
+        setError(err.message || t('errors.loadFailed') || 'Failed to load data');
       } finally {
         setLoading(false);
         isInitialized.current = true;
@@ -141,6 +151,15 @@ export const useFinanceData = () => {
       if (window.confirm(t('confirmClear'))) {
         setHistory([]);
       }
+    },
+
+    deleteHistoryItem: (id: string) => {      
+        // Optimistic update
+        setHistory(prev => prev.filter(item => item.id !== id));        
+        // Explicitly call delete on repository
+        repository.deleteHistoryItem(id).catch(err => {
+          console.error('Failed to delete history item in repository', err);
+        });      
     }
   };
 

@@ -1,13 +1,11 @@
-
 import React from 'react';
 import { Trash2 } from 'lucide-react';
-import { useOutletContext } from 'react-router-dom';
-import { FinanceContextType } from '../types';
 import HistoryTable from '../components/HistoryTable';
 import { useLanguage } from '../context/LanguageContext';
+import { useFinanceContext } from '../hooks/useFinanceData';
 
 const HistoryPage: React.FC = () => {
-  const { history, actions } = useOutletContext<FinanceContextType>();
+  const { history, actions } = useFinanceContext();
   const { t } = useLanguage();
 
   return (
@@ -26,7 +24,7 @@ const HistoryPage: React.FC = () => {
         </button>
       </div>
       
-      <HistoryTable history={history} />
+      <HistoryTable history={history} onDelete={actions.deleteHistoryItem} />
     </div>
   );
 };

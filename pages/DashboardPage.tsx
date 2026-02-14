@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   TrendingUp, 
@@ -6,15 +5,15 @@ import {
   Wallet, 
   ExternalLink 
 } from 'lucide-react';
-import { useOutletContext } from 'react-router-dom';
-import { CategoryType, FinanceContextType } from '../types';
+import { CategoryType } from '../types';
 import StatCard from '../components/StatCard';
 import CategoryTable from '../components/CategoryTable';
 import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
+import { useFinanceContext } from '../hooks/useFinanceData';
 
 const DashboardPage: React.FC = () => {
-  const { items, totals, actions, onSnapshot } = useOutletContext<FinanceContextType>();
+  const { items, totals, actions, onSnapshot } = useFinanceContext();
   const { t } = useLanguage();
 
   const getItemsByCategory = (cat: CategoryType) => items.filter(i => i.category === cat);

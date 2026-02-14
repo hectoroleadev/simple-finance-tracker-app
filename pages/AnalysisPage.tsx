@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   AreaChart, 
@@ -11,13 +10,12 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-import { useOutletContext } from 'react-router-dom';
-import { FinanceContextType } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useFinanceContext } from '../hooks/useFinanceData';
 
 const AnalysisPage: React.FC = () => {
-  const { chartData } = useOutletContext<FinanceContextType>();
+  const { chartData } = useFinanceContext();
   const { state: { theme } } = useTheme();
   const { t } = useLanguage();
 

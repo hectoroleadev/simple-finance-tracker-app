@@ -1,23 +1,26 @@
 
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useFinanceData } from '../hooks/useFinanceData';
+import { useNavigate } from 'react-router-dom';
+import { useFinanceData, FinanceContext } from '../hooks/useFinanceData';
 import MainLayout from './MainLayout';
 import Loading from '../components/Loading';
 import { FinanceContextType } from '../types';
 
-const RootLayout: React.FC = () => {
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const navigate = useNavigate();
   const { 
     items, 
-    history, 
+    history: financeHistory, 
     totals, 
     chartData, 
     loading,
     error,
     actions 
   } = useFinanceData();
-
-  const navigate = useNavigate();
 
   const handleSnapshot = () => {
     actions.snapshotHistory();
@@ -27,7 +30,7 @@ const RootLayout: React.FC = () => {
   const contextValue: FinanceContextType = {
     items,
     totals,
-    history,
+    history: financeHistory,
     chartData,
     loading,
     error,
@@ -55,9 +58,11 @@ const RootLayout: React.FC = () => {
   }
 
   return (
-    <MainLayout netWorth={totals.balance}>
-      <Outlet context={contextValue} />
-    </MainLayout>
+    <FinanceContext.Provider value={contextValue}>
+      <MainLayout netWorth={totals.balance}>
+        {children}
+      </MainLayout>
+    </FinanceContext.Provider>
   );
 };
 

@@ -8,7 +8,7 @@ import {
   Moon, 
   Sun
 } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/format';
@@ -20,12 +20,12 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ 
   children, 
-  netWorth 
+  netWorth
 }) => {
   const { state: { theme }, dispatch } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
