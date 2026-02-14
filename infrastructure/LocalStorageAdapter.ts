@@ -28,6 +28,16 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
+  async deleteItem(id: string): Promise<void> {
+    try {
+      const items = await this.getItems();
+      const newItems = items.filter(item => item.id !== id);
+      await this.saveItems(newItems);
+    } catch (error) {
+      console.error('Error deleting item from local storage', error);
+    }
+  }
+
   async getHistory(): Promise<HistoryEntry[]> {
     try {
       const saved = localStorage.getItem(KEYS.HISTORY);

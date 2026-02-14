@@ -15,11 +15,12 @@ const getRepository = (): FinanceRepository => {
   // @ts-ignore - handling potential missing env property on import.meta
   const env = (import.meta.env || {}) as { VITE_API_URL?: string; VITE_API_KEY?: string };
   
-  const apiUrl = env.VITE_API_URL;
+  // Use the provided API Gateway URL as default if env var is not set
+  const apiUrl = env.VITE_API_URL || 'https://vdra964tzg.execute-api.mx-central-1.amazonaws.com/prod';
   const apiKey = env.VITE_API_KEY;
 
   if (apiUrl) {
-    console.log('Using API Gateway Repository');
+    console.log('Using API Gateway Repository:', apiUrl);
     return new ApiGatewayAdapter(apiUrl, apiKey);
   }
   
@@ -103,7 +104,14 @@ export const useFinanceData = () => {
     },
 
     deleteItem: (id: string) => {
+      // Optimistic update
       setItems(prev => prev.filter(item => item.id !== id));
+      
+      // Explicitly call delete on repository
+      repository.deleteItem(id).catch(err => {
+        console.error('Failed to delete item in repository', err);
+        // Note: In a production app, we might want to revert the state change or show a toast error here
+      });
     },
 
     addItem: (category: CategoryType) => {
@@ -114,6 +122,7 @@ export const useFinanceData = () => {
         category,
       };
       setItems(prev => [...prev, newItem]);
+      return newItem;
     },
 
     snapshotHistory: () => {

@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFinanceData } from './useFinanceData';
@@ -29,7 +30,7 @@ beforeEach(() => {
   mockGetItems.mockReturnValue([]);
   mockGetHistory.mockReturnValue([]);
   
-  Object.defineProperty(global, 'crypto', {
+  Object.defineProperty(globalThis, 'crypto', {
     value: { randomUUID: () => 'uuid-test' }
   });
   

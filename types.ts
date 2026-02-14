@@ -46,7 +46,7 @@ export interface FinanceContextType {
   actions: {
     updateItem: (id: string, name: string, amount: number) => void;
     deleteItem: (id: string) => void;
-    addItem: (category: CategoryType) => void;
+    addItem: (category: CategoryType) => FinanceItem;
     snapshotHistory: () => boolean;
     clearHistory: () => void;
   };

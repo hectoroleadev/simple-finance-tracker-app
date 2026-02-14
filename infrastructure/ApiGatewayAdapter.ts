@@ -50,6 +50,26 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
+  async deleteItem(id: string): Promise<void> {
+    try {
+      // Try DELETE with body first, as this is common for single-resource Lambdas
+      // If the backend expects /items/{id}, this might need adjustment based on specific backend logic
+      const response = await fetch(`${this.apiUrl}/items`, {
+        method: 'DELETE',
+        headers: this.headers,
+        body: JSON.stringify({ id }),
+      });
+      
+      if (!response.ok) {
+        // Fallback or retry logic could go here, but for now just log
+        console.warn(`Initial delete attempt failed: ${response.statusText}.`);
+      }
+    } catch (error) {
+      console.error('API Gateway Error (deleteItem):', error);
+      throw error;
+    }
+  }
+
   async getHistory(): Promise<HistoryEntry[]> {
     try {
       const response = await fetch(`${this.apiUrl}/history`, {

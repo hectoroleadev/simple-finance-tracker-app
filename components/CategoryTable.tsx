@@ -13,7 +13,7 @@ interface CategoryTableProps {
   color: 'green' | 'red' | 'yellow';
   onUpdateItem: (id: string, name: string, amount: number) => void;
   onDeleteItem: (id: string) => void;
-  onAddItem: (category: CategoryType) => void;
+  onAddItem: (category: CategoryType) => FinanceItem;
 }
 
 const CategoryTable: React.FC<CategoryTableProps> = ({
@@ -45,12 +45,17 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
     yellow: 'text-amber-600 dark:text-amber-400',
   }[color];
 
+  const handleAddItem = () => {
+    const newItem = onAddItem(type);
+    startEditing(newItem);
+  };
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-[450px] overflow-hidden transition-colors">
       <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
         <button 
-          onClick={() => onAddItem(type)}
+          onClick={handleAddItem}
           className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors p-1"
         >
           <Plus size={18} />
@@ -72,6 +77,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                     value={editName}
                     onChange={(e) => handleNameChange(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    onFocus={(e) => e.target.select()}
                   />
                 ) : (
                   <span className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate block">{item.name}</span>

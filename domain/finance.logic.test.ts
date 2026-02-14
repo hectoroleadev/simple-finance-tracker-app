@@ -6,7 +6,7 @@ import { CategoryType, FinanceItem, HistoryEntry } from '../types';
 describe('FinanceCalculator Domain Logic', () => {
   // Mock for crypto.randomUUID
   beforeAll(() => {
-    Object.defineProperty(global, 'crypto', {
+    Object.defineProperty(globalThis, 'crypto', {
       value: {
         randomUUID: () => 'test-uuid-123'
       }

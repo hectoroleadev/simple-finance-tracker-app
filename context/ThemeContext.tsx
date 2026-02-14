@@ -29,7 +29,7 @@ const themeReducer = (state: ThemeState, action: ThemeAction): ThemeState => {
 };
 
 // Provider
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Inicializar estado basado en localStorage o preferencia del sistema
   const getInitialTheme = (): Theme => {
     const savedTheme = localStorage.getItem('theme') as Theme;
