@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Estilos para el scrollbar de las listas virtualizadas */
+.virtual-list::-webkit-scrollbar {
+  width: 6px;
+}
+.virtual-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.virtual-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.virtual-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Dark mode scrollbar */
+.dark .virtual-list::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+.dark .virtual-list::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
