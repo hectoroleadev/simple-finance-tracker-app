@@ -28,6 +28,7 @@ export const translations = {
     total: "Total",
     year: "Year",
     month: "Month",
+    date: "Date",
     categories: {
       debt: "Debts",
       investments: "Investments",
@@ -80,6 +81,7 @@ export const translations = {
     total: "Total",
     year: "Año",
     month: "Mes",
+    date: "Fecha",
     categories: {
       debt: "Deudas",
       investments: "Inversiones",

@@ -23,16 +23,31 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   private async handleResponseError(response: Response, action: string): Promise<never> {
     let errorMessage = `Failed to ${action}`;
-    
-    // Try to parse JSON error message from backend
+
     try {
       const data = await response.json();
-      if (data && data.message) {
-        errorMessage = data.message;
-      } else if (data && data.error) {
-        errorMessage = data.error;
+      
+      // Check for various common error field names
+      const message = data.message || data.error || data.errorMessage;
+      const code = data.code || data.errorCode || data.statusCode;
+      const details = data.details || data.context || data.cause;
+
+      // Prioritize the server's message, fallback to status text
+      if (message) {
+        errorMessage = message;
       } else {
         errorMessage = `${errorMessage}: ${response.status} ${response.statusText}`;
+      }
+
+      // Append error code if available
+      if (code) {
+        errorMessage += ` (Code: ${code})`;
+      }
+
+      // Append details if available
+      if (details) {
+        const detailsStr = typeof details === 'object' ? JSON.stringify(details) : String(details);
+        errorMessage += ` | Details: ${detailsStr}`;
       }
     } catch (e) {
       // Fallback if JSON parsing fails

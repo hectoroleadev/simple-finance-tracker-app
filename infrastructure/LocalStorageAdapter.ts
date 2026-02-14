@@ -41,7 +41,28 @@ export class LocalStorageAdapter implements FinanceRepository {
   async getHistory(): Promise<HistoryEntry[]> {
     try {
       const saved = localStorage.getItem(KEYS.HISTORY);
-      return saved ? JSON.parse(saved) : INITIAL_HISTORY;
+      if (!saved) return INITIAL_HISTORY;
+
+      const parsed = JSON.parse(saved);
+      
+      // Migration: If legacy data (missing date field), add a synthetic date based on month/year if available, or current date
+      return parsed.map((item: any) => {
+        if (!item.date && item.year && item.month) {
+          // Attempt to convert "MonthName" to month index
+          const monthIndex = new Date(`${item.month} 1, 2000`).getMonth();
+          const month = isNaN(monthIndex) ? 0 : monthIndex;
+          // Default to the 1st of the month
+          const date = new Date(item.year, month, 1);
+          return {
+            ...item,
+            date: date.toISOString(),
+            // Clean up old fields
+            year: undefined,
+            month: undefined
+          };
+        }
+        return item;
+      });
     } catch (error) {
       console.error('Error loading history from local storage', error);
       return INITIAL_HISTORY;

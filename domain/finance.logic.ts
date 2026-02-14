@@ -1,3 +1,4 @@
+
 import { FinanceItem, CategoryType, HistoryEntry, FinanceTotals } from '../types';
 
 export const FinanceCalculator = {
@@ -20,12 +21,10 @@ export const FinanceCalculator = {
     return { debt, investments, liquid, pending, retirement, savings, balance };
   },
 
-  createSnapshot: (totals: FinanceTotals, monthName: string): HistoryEntry => {
-    const now = new Date();
+  createSnapshot: (totals: FinanceTotals): HistoryEntry => {
     return {
       id: crypto.randomUUID(),
-      year: now.getFullYear(),
-      month: monthName,
+      date: new Date().toISOString(),
       savings: totals.savings,
       debt: totals.debt,
       balance: totals.balance,
@@ -34,11 +33,16 @@ export const FinanceCalculator = {
   },
 
   prepareChartData: (history: HistoryEntry[]) => {
-    return [...history].reverse().map(h => ({
-      name: h.month.substring(0, 3), // Short name
-      Balance: h.balance,
-      Debt: h.debt,
-      Retirement: h.retirement,
-    }));
+    return [...history].reverse().map(h => {
+      const date = new Date(h.date);
+      // Fallback for invalid dates
+      const monthShort = isNaN(date.getTime()) ? '---' : date.toLocaleString('default', { month: 'short' });
+      return {
+        name: monthShort, 
+        Balance: h.balance,
+        Debt: h.debt,
+        Retirement: h.retirement,
+      };
+    });
   }
 };

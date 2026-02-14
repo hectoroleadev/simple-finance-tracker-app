@@ -11,6 +11,11 @@ describe('FinanceCalculator Domain Logic', () => {
         randomUUID: () => 'test-uuid-123'
       }
     });
+    
+    // Mock Date to ensure consistent ISO strings in tests
+    vi.useFakeTimers();
+    const date = new Date(2024, 7, 15); // August 15, 2024
+    vi.setSystemTime(date);
   });
 
   const mockItems: FinanceItem[] = [
@@ -47,12 +52,11 @@ describe('FinanceCalculator Domain Logic', () => {
 
   it('creates a history snapshot with correct structure', () => {
     const totals = FinanceCalculator.calculateTotals(mockItems);
-    const snapshot = FinanceCalculator.createSnapshot(totals, 'August');
+    const snapshot = FinanceCalculator.createSnapshot(totals);
 
     expect(snapshot).toEqual({
       id: 'test-uuid-123',
-      year: new Date().getFullYear(),
-      month: 'August',
+      date: new Date().toISOString(),
       savings: 300,
       debt: 100,
       balance: 200,
@@ -62,8 +66,8 @@ describe('FinanceCalculator Domain Logic', () => {
 
   it('prepares chart data by reversing order', () => {
     const history: HistoryEntry[] = [
-      { id: '1', year: 2024, month: 'January', savings: 10, debt: 5, balance: 5, retirement: 10 },
-      { id: '2', year: 2024, month: 'February', savings: 20, debt: 5, balance: 15, retirement: 20 },
+      { id: '1', date: '2024-01-01T00:00:00Z', savings: 10, debt: 5, balance: 5, retirement: 10 },
+      { id: '2', date: '2024-02-01T00:00:00Z', savings: 20, debt: 5, balance: 15, retirement: 20 },
     ];
 
     const chartData = FinanceCalculator.prepareChartData(history);

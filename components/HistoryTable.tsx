@@ -11,7 +11,7 @@ interface HistoryTableProps {
 }
 
 const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const getHeatmapColor = (val: number, type: 'savings' | 'debt' | 'balance' | 'retirement') => {
     const vals = history.map(h => h[type]);
@@ -33,11 +33,28 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
     }
   };
 
+  const formatYear = (isoDate: string) => {
+    const date = new Date(isoDate);
+    return isNaN(date.getTime()) ? '----' : date.getFullYear();
+  };
+
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    
+    // Format: "24 January" (EN) or "24 enero" (ES)
+    // Using day: 'numeric' to show the number of day
+    return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', {
+      day: 'numeric',
+      month: 'long'
+    });
+  };
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-[600px] transition-colors">
       <div className="flex bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         <div className="w-20 text-left">{t('year')}</div>
-        <div className="flex-1 text-left">{t('month')}</div>
+        <div className="flex-1 text-left">{t('date')}</div>
         <div className="w-28 text-right">{t('savings')}</div>
         <div className="w-28 text-right">{t('totalDebt')}</div>
         <div className="w-28 text-right">{t('netBalance')}</div>
@@ -52,8 +69,12 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
               key={entry.id}
               className="flex border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors px-6 items-center h-[60px] group"
             >
-              <div className="w-20 text-slate-400 dark:text-slate-500 text-sm">{entry.year}</div>
-              <div className="flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm">{entry.month}</div>
+              <div className="w-20 text-slate-400 dark:text-slate-500 text-sm">
+                {formatYear(entry.date)}
+              </div>
+              <div className="flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
+                {formatDate(entry.date)}
+              </div>
               
               {['savings', 'debt', 'balance', 'retirement'].map((key) => (
                 <div key={key} className="w-28 text-right px-1">

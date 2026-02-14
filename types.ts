@@ -26,8 +26,7 @@ export interface FinanceTotals {
 
 export interface HistoryEntry {
   id: string;
-  year: number;
-  month: string;
+  date: string; // ISO Date string
   savings: number;
   debt: number;
   balance: number;

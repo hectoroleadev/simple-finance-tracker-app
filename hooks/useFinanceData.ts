@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
 import { FinanceItem, HistoryEntry, CategoryType, FinanceContextType } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -136,13 +137,7 @@ export const useFinanceData = () => {
     },
 
     snapshotHistory: () => {
-      // Get dynamic month name based on current language
-      const now = new Date();
-      const monthName = now.toLocaleString(language === 'es' ? 'es-MX' : 'en-US', { month: 'long' });
-      // Capitalize first letter
-      const formattedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      
-      const newEntry = FinanceCalculator.createSnapshot(totals, formattedMonth);
+      const newEntry = FinanceCalculator.createSnapshot(totals);
       setHistory(prev => [newEntry, ...prev]);
       return true;
     },
