@@ -52,6 +52,21 @@ describe('FinanceCalculator', () => {
     expect(totals.debt).toBe(0);
   });
 
+  it('should handle negative amounts correctly', () => {
+    const itemsWithNegative: FinanceItem[] = [
+      { id: '1', name: 'Cash', amount: -500, category: CategoryType.LIQUID_CASH },
+      { id: '2', name: 'Debt', amount: 1000, category: CategoryType.DEBT },
+    ];
+    const totals = FinanceCalculator.calculateTotals(itemsWithNegative);
+
+    // savings = -500
+    expect(totals.savings).toBe(-500);
+    // debt = 1000
+    expect(totals.debt).toBe(1000);
+    // balance = -500 - 1000 = -1500
+    expect(totals.balance).toBe(-1500);
+  });
+
   it('should prepare chart data and reverse history order', () => {
     const history = [
       { id: 'h1', date: '2024-01-01T00:00:00Z', savings: 100, debt: 10, balance: 90, retirement: 1000 },
@@ -61,12 +76,24 @@ describe('FinanceCalculator', () => {
     const chartData = FinanceCalculator.prepareChartData(history);
 
     expect(chartData).toHaveLength(2);
-    // Data is reversed for the chart (oldest to newest)
-    // History [h1 (Jan), h2 (Feb)] -> Reversed [h2 (Feb), h1 (Jan)]
-    // We check the values instead of names to avoid locale issues
-    expect(chartData[0].Balance).toBe(180); // h2
+    // Original prepares chart data as: [...history].reverse()
+    // [h1, h2] -> [h2, h1]
     expect(chartData[1].Balance).toBe(90);  // h1
-    expect(typeof chartData[0].name).toBe('string');
-    expect(chartData[0].Balance).toBe(180);
+    expect(chartData[0].Balance).toBe(180); // h2 (newest)
+    expect(chartData[0].date).toBe('2024-02-01T00:00:00Z');
+  });
+
+  it('should handle invalid dates in prepareChartData', () => {
+    const history = [
+      { id: 'h1', date: 'invalid-date', savings: 100, debt: 10, balance: 90, retirement: 1000 },
+    ];
+    const chartData = FinanceCalculator.prepareChartData(history);
+    expect(chartData[0].name).toBe('---');
+    expect(chartData[0].Balance).toBe(90);
+  });
+
+  it('should handle empty history in prepareChartData', () => {
+    const chartData = FinanceCalculator.prepareChartData([]);
+    expect(chartData).toEqual([]);
   });
 });

@@ -5,7 +5,20 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        include: ['**/*.test.ts'],
-        exclude: ['**/node_modules/**', '**/dist/**', '**/*.test.tsx'],
+        include: ['**/*.test.{ts,tsx}'],
+        exclude: ['**/node_modules/**', '**/dist/**'],
+        setupFiles: ['./vitest.setup.tsx'],
+        css: false,
+        server: {
+            deps: {
+                inline: true,
+            },
+        },
+    },
+    resolve: {
+        alias: {
+            '@asamuzakjp/css-color': new URL('./empty-module.ts', import.meta.url).pathname,
+            '@csstools/css-calc': new URL('./empty-module.ts', import.meta.url).pathname,
+        },
     },
 });

@@ -14,7 +14,7 @@ export const FinanceCalculator = {
     const liquid = FinanceCalculator.getCategorySum(items, CategoryType.LIQUID_CASH);
     const pending = FinanceCalculator.getCategorySum(items, CategoryType.PENDING_PAYMENTS);
     const retirement = FinanceCalculator.getCategorySum(items, CategoryType.RETIREMENT);
-    
+
     const savings = investments + liquid + pending;
     const balance = savings - debt;
 
@@ -38,7 +38,8 @@ export const FinanceCalculator = {
       // Fallback for invalid dates
       const monthShort = isNaN(date.getTime()) ? '---' : date.toLocaleString('default', { month: 'short' });
       return {
-        name: monthShort, 
+        name: monthShort,
+        date: h.date,
         Balance: h.balance,
         Debt: h.debt,
         Retirement: h.retirement,
