@@ -1,8 +1,8 @@
 
 export const translations = {
   en: {
-    appTitle: "Finance",
-    appTitleCore: "Core",
+    appTitle: "Simple Finance",
+    appTitleCore: " Tracker",
     netWorth: "Net Worth",
     summary: "Summary",
     history: "History",
@@ -22,7 +22,7 @@ export const translations = {
     trendWealthDesc: "Net balance compared to debt.",
     evolutionRetirement: "Retirement Evolution",
     evolutionRetirementDesc: "Growth of retirement capital.",
-    footer: "FinanceCore • Smart Management",
+    footer: "Simple Finance Tracker • Smart Management",
     emptyList: "No items",
     total: "Total",
     year: "Year",
@@ -49,11 +49,26 @@ export const translations = {
       nov: "Nov",
       dec: "Dec"
     },
-    confirmDeleteHistory: "Are you sure you want to delete this history record?"
+    confirmDelete: "Delete Item",
+    confirmDeleteMessage: "Are you sure you want to delete this item? This action cannot be undone.",
+    confirmDeleteHistory: "Delete History Record",
+    confirmDeleteHistoryMessage: "Are you sure you want to delete this history record? This action cannot be undone.",
+    delete: "Delete",
+    cancel: "Cancel",
+    appDescription: "Smart personal wealth management",
+    dashboard: "Summary",
+    charts: "Analysis",
+    settings: "Settings",
+    theme: "Theme",
+    lightMode: "Light Mode",
+    darkMode: "Dark Mode",
+    language: "Language",
+    english: "English",
+    spanish: "Spanish"
   },
   es: {
-    appTitle: "Finanzas",
-    appTitleCore: "Core",
+    appTitle: "Simple Finance",
+    appTitleCore: " Tracker",
     netWorth: "Patrimonio Neto",
     summary: "Resumen",
     history: "Historial",
@@ -73,7 +88,7 @@ export const translations = {
     trendWealthDesc: "Balance neto comparado con deuda.",
     evolutionRetirement: "Evolución de Retiro",
     evolutionRetirementDesc: "Crecimiento del capital para el retiro.",
-    footer: "FinanzasCore • Gestión Inteligente",
+    footer: "Simple Finance Tracker • Gestión Inteligente",
     emptyList: "Sin elementos",
     total: "Total",
     year: "Año",
@@ -100,7 +115,22 @@ export const translations = {
       nov: "Nov",
       dec: "Dic"
     },
-    confirmDeleteHistory: "¿Estás seguro de que deseas eliminar este registro histórico?"
+    confirmDelete: "Eliminar elemento",
+    confirmDeleteMessage: "¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.",
+    confirmDeleteHistory: "Eliminar registro histórico",
+    confirmDeleteHistoryMessage: "¿Estás seguro de que deseas eliminar este registro histórico? Esta acción no se puede deshacer.",
+    delete: "Eliminar",
+    cancel: "Cancelar",
+    appDescription: "Gestión inteligente de patrimonio personal",
+    dashboard: "Resumen",
+    charts: "Análisis",
+    settings: "Ajustes",
+    theme: "Tema",
+    lightMode: "Modo Claro",
+    darkMode: "Modo Oscuro",
+    language: "Idioma",
+    english: "Inglés",
+    spanish: "Español"
   }
 };
 

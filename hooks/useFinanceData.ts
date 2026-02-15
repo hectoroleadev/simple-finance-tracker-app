@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
-import { FinanceItem, HistoryEntry, CategoryType, FinanceContextType } from '../types';
+import { FinanceItem, HistoryEntry, CategoryType, FinanceContextType, FinanceTotals } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
 // Domain & Infrastructure Imports
@@ -14,7 +14,7 @@ const getRepository = (): FinanceRepository => {
   // Safely access import.meta.env which might be undefined in some environments
   // @ts-ignore - handling potential missing env property on import.meta
   const env = (import.meta.env || {}) as { VITE_API_URL?: string; VITE_API_KEY?: string };
-  
+
   // Use the provided API Gateway URL as default if env var is not set
   const apiUrl = env.VITE_API_URL || 'https://vdra964tzg.execute-api.mx-central-1.amazonaws.com/prod';
   const apiKey = env.VITE_API_KEY;
@@ -23,7 +23,7 @@ const getRepository = (): FinanceRepository => {
     console.log('Using API Gateway Repository:', apiUrl);
     return new ApiGatewayAdapter(apiUrl, apiKey);
   }
-  
+
   console.log('Using LocalStorage Repository');
   return new LocalStorageAdapter();
 };
@@ -42,16 +42,31 @@ export const useFinanceContext = () => {
 
 export const useFinanceData = () => {
   const { language, t } = useLanguage();
-  
+
   // --- State ---
   const [items, setItems] = useState<FinanceItem[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([]));
+  const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const isInitialized = useRef(false);
+  const workerRef = useRef<Worker | null>(null);
 
   // --- Initial Data Loading ---
   useEffect(() => {
+    // Initialize Web Worker
+    workerRef.current = new Worker(new URL('../utils/finance.worker.ts', import.meta.url), { type: 'module' });
+
+    workerRef.current.onmessage = (e) => {
+      const { type, payload } = e.data;
+      if (type === 'TOTALS_CALCULATED') {
+        setTotals(payload);
+      } else if (type === 'CHART_DATA_PREPARED') {
+        setChartData(payload);
+      }
+    };
+
     const loadData = async () => {
       try {
         setLoading(true);
@@ -59,19 +74,22 @@ export const useFinanceData = () => {
           repository.getItems(),
           repository.getHistory()
         ]);
-        
+
         setItems(fetchedItems);
-        
+
         // Sort history by date descending (newest first)
-        const sortedHistory = fetchedHistory.sort((a, b) => 
+        const sortedHistory = fetchedHistory.sort((a, b) =>
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         setHistory(sortedHistory);
-        
+
+        // Trigger initial calculations in worker
+        workerRef.current?.postMessage({ type: 'CALCULATE_TOTALS', payload: fetchedItems });
+        workerRef.current?.postMessage({ type: 'PREPARE_CHART_DATA', payload: sortedHistory });
+
         setError(null);
       } catch (err: any) {
         console.error('Failed to load finance data', err);
-        // Use the specific error message if available, otherwise fallback to translation
         setError(err.message || t('errors.loadFailed') || 'Failed to load data');
       } finally {
         setLoading(false);
@@ -80,7 +98,24 @@ export const useFinanceData = () => {
     };
 
     loadData();
+
+    return () => {
+      workerRef.current?.terminate();
+    };
   }, [t]);
+
+  // --- Background Calculation Effects ---
+  useEffect(() => {
+    if (isInitialized.current && workerRef.current) {
+      workerRef.current.postMessage({ type: 'CALCULATE_TOTALS', payload: items });
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (isInitialized.current && workerRef.current) {
+      workerRef.current.postMessage({ type: 'PREPARE_CHART_DATA', payload: history });
+    }
+  }, [history]);
 
   // --- Persistence Effects ---
   // Only save if data has been initialized to avoid overwriting remote data with empty initial state
@@ -110,11 +145,6 @@ export const useFinanceData = () => {
     }
   }, [history]);
 
-  // --- Domain Logic ---
-  const totals = useMemo(() => FinanceCalculator.calculateTotals(items), [items]);
-  
-  const chartData = useMemo(() => FinanceCalculator.prepareChartData(history), [history]);
-
   // --- Actions (Use Cases) ---
   const actions = {
     updateItem: (id: string, name: string, amount: number) => {
@@ -124,7 +154,7 @@ export const useFinanceData = () => {
     deleteItem: (id: string) => {
       // Optimistic update
       setItems(prev => prev.filter(item => item.id !== id));
-      
+
       // Explicitly call delete on repository
       repository.deleteItem(id).catch(err => {
         console.error('Failed to delete item in repository', err);
@@ -150,13 +180,13 @@ export const useFinanceData = () => {
       return true;
     },
 
-    deleteHistoryItem: (id: string) => {      
-        // Optimistic update
-        setHistory(prev => prev.filter(item => item.id !== id));        
-        // Explicitly call delete on repository
-        repository.deleteHistoryItem(id).catch(err => {
-          console.error('Failed to delete history item in repository', err);
-        });      
+    deleteHistoryItem: (id: string) => {
+      // Optimistic update
+      setHistory(prev => prev.filter(item => item.id !== id));
+      // Explicitly call delete on repository
+      repository.deleteHistoryItem(id).catch(err => {
+        console.error('Failed to delete history item in repository', err);
+      });
     }
   };
 
