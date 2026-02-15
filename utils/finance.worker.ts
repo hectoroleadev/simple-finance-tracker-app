@@ -27,6 +27,7 @@ const prepareChartData = (history: HistoryEntry[]) => {
         const monthShort = isNaN(date.getTime()) ? '---' : date.toLocaleString('default', { month: 'short' });
         return {
             name: monthShort,
+            date: h.date, // Unique identifier (ISO string)
             Balance: h.balance,
             Debt: h.debt,
             Retirement: h.retirement,

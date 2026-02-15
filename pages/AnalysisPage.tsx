@@ -83,9 +83,23 @@ const AnalysisPage: React.FC = () => {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: chartColors.text, fontSize: 12 }} />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.text, fontSize: 12 }}
+                    tickFormatter={(val) => {
+                      const d = new Date(val);
+                      return isNaN(d.getTime()) ? '---' : d.toLocaleString('default', { month: 'short' });
+                    }}
+                    minTickGap={30}
+                  />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: chartColors.text, fontSize: 12 }} />
                   <Tooltip
+                    labelFormatter={(val) => {
+                      const d = new Date(val);
+                      return isNaN(d.getTime()) ? val : d.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+                    }}
                     contentStyle={{
                       backgroundColor: chartColors.tooltipBg,
                       borderRadius: '12px',
@@ -95,8 +109,26 @@ const AnalysisPage: React.FC = () => {
                       fontSize: '12px'
                     }}
                   />
-                  <Area type="monotone" dataKey="Balance" name="Net" stroke="#10b981" fillOpacity={1} fill="url(#colorNeto)" strokeWidth={3} />
-                  <Area type="monotone" dataKey="Debt" name="Debt" stroke="#ef4444" fillOpacity={0} strokeWidth={2} strokeDasharray="5 5" />
+                  <Area
+                    type="monotone"
+                    dataKey="Balance"
+                    name="Net"
+                    stroke="#10b981"
+                    fillOpacity={1}
+                    fill="url(#colorNeto)"
+                    strokeWidth={3}
+                    activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: '#10b981' }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Debt"
+                    name="Debt"
+                    stroke="#ef4444"
+                    fillOpacity={0}
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2, fill: '#ef4444' }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </LazyChart>
@@ -114,9 +146,23 @@ const AnalysisPage: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: chartColors.text, fontSize: 12 }} />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartColors.text, fontSize: 12 }}
+                    tickFormatter={(val) => {
+                      const d = new Date(val);
+                      return isNaN(d.getTime()) ? '---' : d.toLocaleString('default', { month: 'short' });
+                    }}
+                    minTickGap={30}
+                  />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: chartColors.text, fontSize: 12 }} />
                   <Tooltip
+                    labelFormatter={(val) => {
+                      const d = new Date(val);
+                      return isNaN(d.getTime()) ? val : d.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+                    }}
                     contentStyle={{
                       backgroundColor: chartColors.tooltipBg,
                       borderRadius: '12px',
@@ -126,7 +172,15 @@ const AnalysisPage: React.FC = () => {
                       fontSize: '12px'
                     }}
                   />
-                  <Line type="monotone" dataKey="Retirement" name="Retirement" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b' }} />
+                  <Line
+                    type="monotone"
+                    dataKey="Retirement"
+                    name="Retirement"
+                    stroke="#f59e0b"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: '#f59e0b', strokeWidth: 0 }}
+                    activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2, fill: '#f59e0b' }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </LazyChart>
