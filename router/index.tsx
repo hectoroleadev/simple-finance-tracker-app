@@ -2,10 +2,10 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout';
-import DashboardPage from '../pages/DashboardPage';
 import Loading from '../components/Loading';
 
-// Lazy load secondary pages
+// Lazy load all pages
+const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 const HistoryPage = lazy(() => import('../pages/HistoryPage'));
 const AnalysisPage = lazy(() => import('../pages/AnalysisPage'));
 
