@@ -16,7 +16,7 @@ const getRepository = (): FinanceRepository => {
   const env = (import.meta.env || {}) as { VITE_API_URL?: string; VITE_API_KEY?: string };
 
   // Use the provided API Gateway URL as default if env var is not set
-  const apiUrl = env.VITE_API_URL || 'https://vdra964tzg.execute-api.mx-central-1.amazonaws.com/prod';
+  const apiUrl = env.VITE_API_URL;
   const apiKey = env.VITE_API_KEY;
 
   if (apiUrl) {
