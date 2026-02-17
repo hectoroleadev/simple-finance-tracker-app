@@ -6,11 +6,13 @@ import {
   History as HistoryIcon,
   PieChart as PieChartIcon,
   Moon,
-  Sun
+  Sun,
+  LogOut // Import LogOut icon
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 import { formatCurrency } from '../utils/format';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -32,6 +34,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const location = useLocation();
   const animatedNetWorth = useCounterAnimation(netWorth, { duration: 300 });
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+  const { isLoggedIn, logout } = useAuth(); // Destructure isLoggedIn and logout
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -113,6 +116,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             >
               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
+            {isLoggedIn && (
+              <button
+                onClick={logout}
+                className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
+                aria-label="Logout"
+              >
+                <LogOut size={20} />
+              </button>
+            )}
           </div>
         </div>
       </header>

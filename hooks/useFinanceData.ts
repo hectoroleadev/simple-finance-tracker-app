@@ -2,33 +2,13 @@
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
 import { FinanceItem, HistoryEntry, CategoryType, FinanceContextType, FinanceTotals } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 
 // Domain & Infrastructure Imports
 import { FinanceCalculator } from '../domain/finance.logic';
 import { FinanceRepository } from '../domain/ports';
 import { LocalStorageAdapter } from '../infrastructure/LocalStorageAdapter';
 import { ApiGatewayAdapter } from '../infrastructure/ApiGatewayAdapter';
-
-// Determine which repository to use based on environment variables
-const getRepository = (): FinanceRepository => {
-  // Safely access import.meta.env which might be undefined in some environments
-  // @ts-ignore - handling potential missing env property on import.meta
-  const env = (import.meta.env || {}) as { VITE_API_URL?: string; VITE_API_KEY?: string };
-
-  // Use the provided API Gateway URL as default if env var is not set
-  const apiUrl = env.VITE_API_URL;
-  const apiKey = env.VITE_API_KEY;
-
-  if (apiUrl) {
-    console.log('Using API Gateway Repository:', apiUrl);
-    return new ApiGatewayAdapter(apiUrl, apiKey);
-  }
-
-  console.log('Using LocalStorage Repository');
-  return new LocalStorageAdapter();
-};
-
-const repository = getRepository();
 
 export const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
@@ -42,6 +22,21 @@ export const useFinanceContext = () => {
 
 export const useFinanceData = () => {
   const { language, t } = useLanguage();
+  const { getIdToken, isLoggedIn } = useAuth(); // Get getIdToken and isLoggedIn from AuthContext
+
+  // --- Repository Initialization ---
+  const repository = useMemo<FinanceRepository>(() => {
+    const apiUrl = import.meta.env.VITE_API_GATEWAY_URL;
+
+    if (apiUrl && isLoggedIn) { // Only use API Gateway if logged in
+      console.log('Using API Gateway Repository:', apiUrl);
+      return new ApiGatewayAdapter(apiUrl, getIdToken);
+    } else {
+      console.log('Using LocalStorage Repository (or not logged in)');
+      return new LocalStorageAdapter(); // Fallback to LocalStorage or if not logged in
+    }
+  }, [getIdToken, isLoggedIn]); // Re-initialize if token or login status changes
+
 
   // --- State ---
   const [items, setItems] = useState<FinanceItem[]>([]);
@@ -97,12 +92,22 @@ export const useFinanceData = () => {
       }
     };
 
-    loadData();
+    if (isLoggedIn) { // Only load data if logged in
+      loadData();
+    } else { // If not logged in, clear data and set loading to false
+      setItems([]);
+      setHistory([]);
+      setTotals(FinanceCalculator.calculateTotals([]));
+      setChartData([]);
+      setLoading(false);
+      isInitialized.current = true; // Mark as initialized to prevent initial save attempts
+    }
+
 
     return () => {
       workerRef.current?.terminate();
     };
-  }, [t]);
+  }, [t, repository, isLoggedIn]); // Add repository and isLoggedIn to dependencies
 
   // --- Background Calculation Effects ---
   useEffect(() => {
@@ -118,9 +123,9 @@ export const useFinanceData = () => {
   }, [history]);
 
   // --- Persistence Effects ---
-  // Only save if data has been initialized to avoid overwriting remote data with empty initial state
+  // Only save if data has been initialized and user is logged in
   useEffect(() => {
-    if (isInitialized.current) {
+    if (isInitialized.current && isLoggedIn) {
       const save = async () => {
         try {
           await repository.saveItems(items);
@@ -130,10 +135,10 @@ export const useFinanceData = () => {
       };
       save();
     }
-  }, [items]);
+  }, [items, isLoggedIn, repository]);
 
   useEffect(() => {
-    if (isInitialized.current) {
+    if (isInitialized.current && isLoggedIn) {
       const save = async () => {
         try {
           await repository.saveHistory(history);
@@ -143,7 +148,7 @@ export const useFinanceData = () => {
       };
       save();
     }
-  }, [history]);
+  }, [history, isLoggedIn, repository]);
 
   // --- Actions (Use Cases) ---
   const actions = {

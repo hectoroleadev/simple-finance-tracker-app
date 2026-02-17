@@ -4,19 +4,20 @@ import { FinanceItem, HistoryEntry } from '../types';
 
 export class ApiGatewayAdapter implements FinanceRepository {
   private apiUrl: string;
-  private apiKey?: string;
+  private getToken: () => string | null;
 
-  constructor(apiUrl: string, apiKey?: string) {
+  constructor(apiUrl: string, getToken: () => string | null) {
     this.apiUrl = apiUrl.replace(/\/$/, ''); // Remove trailing slash
-    this.apiKey = apiKey;
+    this.getToken = getToken;
   }
 
   private get headers(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    if (this.apiKey) {
-      headers['x-api-key'] = this.apiKey;
+    const token = this.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
     return headers;
   }

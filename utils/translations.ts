@@ -64,7 +64,30 @@ export const translations = {
     darkMode: "Dark Mode",
     language: "Language",
     english: "English",
-    spanish: "Spanish"
+    spanish: "Spanish",
+    auth: {
+      loginTitle: "Login",
+      signupTitle: "Sign Up",
+      usernameLabel: "Username",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      loginButton: "Login",
+      signupButton: "Sign Up",
+      signupSuccess: "Signup successful. Please check your email to confirm your account, then log in.",
+      genericError: "An error occurred.",
+      noAccount: "Don't have an account?",
+      haveAccount: "Already have an account?",
+      signupLink: "Sign Up",
+      loginLink: "Login",
+      loading: "Loading...",
+      confirmSignupTitle: "Confirm Sign Up",
+      confirmationCodeLabel: "Confirmation Code",
+      confirmButton: "Confirm",
+      resendCode: "Resend Code",
+      confirmSignupSuccess: "Account confirmed successfully! You can now log in.",
+      confirmSignupError: "Failed to confirm account. Please check the code.",
+      resendCodeSuccess: "Confirmation code sent. Please check your email."
+    }
   },
   es: {
     appTitle: "Simple Finance",
@@ -130,7 +153,30 @@ export const translations = {
     darkMode: "Modo Oscuro",
     language: "Idioma",
     english: "Inglés",
-    spanish: "Español"
+    spanish: "Español",
+    auth: {
+      loginTitle: "Iniciar Sesión",
+      signupTitle: "Registrarse",
+      usernameLabel: "Usuario",
+      emailLabel: "Correo Electrónico",
+      passwordLabel: "Contraseña",
+      loginButton: "Iniciar Sesión",
+      signupButton: "Registrarse",
+      signupSuccess: "Registro exitoso. Por favor, revisa tu correo electrónico para confirmar tu cuenta, luego inicia sesión.",
+      genericError: "Ocurrió un error.",
+      noAccount: "¿No tienes una cuenta?",
+      haveAccount: "¿Ya tienes una cuenta?",
+      signupLink: "Regístrate",
+      loginLink: "Iniciar Sesión",
+      loading: "Cargando...",
+      confirmSignupTitle: "Confirmar Registro",
+      confirmationCodeLabel: "Código de Confirmación",
+      confirmButton: "Confirmar",
+      resendCode: "Reenviar Código",
+      confirmSignupSuccess: "¡Cuenta confirmada exitosamente! Ahora puedes iniciar sesión.",
+      confirmSignupError: "Fallo al confirmar la cuenta. Por favor, verifica el código.",
+      resendCodeSuccess: "Código de confirmación enviado. Por favor, revisa tu correo electrónico."
+    }
   }
 };
 
