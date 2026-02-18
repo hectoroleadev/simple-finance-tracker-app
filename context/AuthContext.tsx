@@ -1,4 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import {
+  CognitoUserPool,
+  CognitoUser,
+  AuthenticationDetails,
+  CognitoUserAttribute,
+  CognitoUserSession,
+} from 'amazon-cognito-identity-js';
 
 interface AuthTokens {
   idToken: string;
@@ -12,12 +19,21 @@ interface AuthContextType {
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
   signup: (username: string, password: string, email: string) => Promise<void>;
+  confirmSignup: (username: string, code: string) => Promise<void>;
+  resendConfirmationCode: (username: string) => Promise<void>;
   logout: () => void;
   getIdToken: () => string | null;
   refreshAuthTokens: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const poolData = {
+  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
+};
+
+const userPool = new CognitoUserPool(poolData);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -29,106 +45,129 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [tokens, setTokens] = useState<AuthTokens | null>(null);
 
-  const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL;
+  const setAuthData = useCallback((session: CognitoUserSession, username: string) => {
+    const idToken = session.getIdToken().getJwtToken();
+    const accessToken = session.getAccessToken().getJwtToken();
+    const refreshToken = session.getRefreshToken().getToken();
 
-  useEffect(() => {
-    // Attempt to load tokens from localStorage on mount
-    const storedTokens = localStorage.getItem('authTokens');
-    if (storedTokens) {
-      const parsedTokens: AuthTokens = JSON.parse(storedTokens);
-      // Basic check if tokens are still valid (e.g., by checking expiry or just presence)
-      if (parsedTokens.idToken && parsedTokens.accessToken && parsedTokens.refreshToken) {
-        setTokens(parsedTokens);
-        setIsLoggedIn(true);
-        // Optionally decode ID token to get user info if needed
-        const decodedToken = decodeJwt(parsedTokens.idToken);
-        if (decodedToken) {
-          setUser({
-            username: decodedToken['cognito:username'] || decodedToken.username || 'User',
-            email: decodedToken.email,
-          });
-        }
-      }
-    }
-    setLoading(false);
+    setTokens({ idToken, accessToken, refreshToken });
+    setIsLoggedIn(true);
+
+    const payload = session.getIdToken().decodePayload();
+    setUser({
+      username: payload['cognito:username'] || payload.username || username,
+      email: payload.email,
+    });
   }, []);
 
-  const saveTokens = (newTokens: AuthTokens) => {
-    setTokens(newTokens);
-    localStorage.setItem('authTokens', JSON.stringify(newTokens));
-  };
-
-  const clearTokens = () => {
-    setTokens(null);
-    localStorage.removeItem('authTokens');
-  };
+  useEffect(() => {
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+        if (err || !session || !session.isValid()) {
+          setIsLoggedIn(false);
+          setLoading(false);
+          return;
+        }
+        setAuthData(session, cognitoUser.getUsername());
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+  }, [setAuthData]);
 
   const login = useCallback(async (username, password) => {
     setLoading(true);
-    try {
-      const response = await fetch(`${API_GATEWAY_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+    return new Promise<void>((resolve, reject) => {
+      const authDetails = new AuthenticationDetails({
+        Username: username,
+        Password: password,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: userPool,
+      });
 
-      const result = await response.json();
-      const newTokens: AuthTokens = {
-        idToken: result.IdToken,
-        accessToken: result.AccessToken,
-        refreshToken: result.RefreshToken,
-      };
-      saveTokens(newTokens);
-      setIsLoggedIn(true);
-      const decodedToken = decodeJwt(newTokens.idToken);
-      if (decodedToken) {
-        setUser({
-          username: decodedToken['cognito:username'] || decodedToken.username || username,
-          email: decodedToken.email,
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [API_GATEWAY_URL]);
+      cognitoUser.authenticateUser(authDetails, {
+        onSuccess: (session) => {
+          setAuthData(session, username);
+          setLoading(false);
+          resolve();
+        },
+        onFailure: (err) => {
+          setLoading(false);
+          reject(err);
+        },
+      });
+    });
+  }, [setAuthData]);
 
   const signup = useCallback(async (username, password, email) => {
     setLoading(true);
-    try {
-      const response = await fetch(`${API_GATEWAY_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password, email }),
+    return new Promise<void>((resolve, reject) => {
+      const attributeList = [
+        new CognitoUserAttribute({ Name: 'email', Value: email }),
+      ];
+
+      userPool.signUp(username, password, attributeList, [], (err, result) => {
+        setLoading(false);
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
+    });
+  }, []);
+
+  const confirmSignup = useCallback(async (username, code) => {
+    setLoading(true);
+    return new Promise<void>((resolve, reject) => {
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: userPool,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Signup failed');
-      }
+      cognitoUser.confirmRegistration(code, true, (err, result) => {
+        setLoading(false);
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
+    });
+  }, []);
 
-      // Signup usually requires email confirmation, so no tokens are returned yet
-      // User will need to confirm email and then login
-      // For now, just indicate success
-      return await response.json(); // May contain user confirmation info
-    } finally {
-      setLoading(false);
-    }
-  }, [API_GATEWAY_URL]);
+  const resendConfirmationCode = useCallback(async (username) => {
+    setLoading(true);
+    return new Promise<void>((resolve, reject) => {
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: userPool,
+      });
+
+      cognitoUser.resendConfirmationCode((err, result) => {
+        setLoading(false);
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
+    });
+  }, []);
 
   const logout = useCallback(() => {
-    clearTokens();
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.signOut();
+    }
+    setTokens(null);
     setIsLoggedIn(false);
     setUser(null);
-    // Optionally redirect to login page
   }, []);
 
   const getIdToken = useCallback(() => {
@@ -136,53 +175,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [tokens]);
 
   const refreshAuthTokens = useCallback(async (): Promise<boolean> => {
-    if (!tokens?.refreshToken) {
-      console.error("refreshAuthTokens: No refresh token available. Logging out.");
-      logout();
-      return false;
-    }
+    const cognitoUser = userPool.getCurrentUser();
+    if (!cognitoUser) return false;
 
-    try {
-      const response = await fetch(`${API_GATEWAY_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken: tokens.refreshToken }),
+    return new Promise<boolean>((resolve) => {
+      cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+        if (err || !session || !session.isValid()) {
+          logout();
+          resolve(false);
+          return;
+        }
+        setAuthData(session, cognitoUser.getUsername());
+        resolve(true);
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("refreshAuthTokens: Token refresh failed:", errorData.message);
-        logout(); // Refresh token is also invalid or expired
-        return false;
-      }
-
-      const result = await response.json();
-      const newTokens: AuthTokens = {
-        idToken: result.IdToken,
-        accessToken: result.AccessToken,
-        refreshToken: tokens.refreshToken, // Refresh token usually remains the same
-      };
-      saveTokens(newTokens);
-      setIsLoggedIn(true);
-      const decodedToken = decodeJwt(newTokens.idToken);
-      if (decodedToken) {
-        setUser({
-          username: decodedToken['cognito:username'] || decodedToken.username || 'User',
-          email: decodedToken.email,
-        });
-      }
-      return true;
-    } catch (error) {
-      console.error("refreshAuthTokens: Error during token refresh process:", error);
-      logout();
-      return false;
-    }
-  }, [API_GATEWAY_URL, tokens, logout]);
+    });
+  }, [logout, setAuthData]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, loading, login, signup, logout, getIdToken, refreshAuthTokens }}>
+    <AuthContext.Provider value={{
+      isLoggedIn,
+      user,
+      loading,
+      login,
+      signup,
+      confirmSignup,
+      resendConfirmationCode,
+      logout,
+      getIdToken,
+      refreshAuthTokens
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -195,32 +216,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-// Helper function to check if JWT token is expired
-function isTokenExpired(token: string): boolean {
-  if (!token) return true;
-  try {
-    const decoded = decodeJwt(token);
-    if (!decoded || !decoded.exp) return true;
-    const currentTime = Date.now() / 1000; // Convert to seconds
-    return decoded.exp < currentTime;
-  } catch (error) {
-    console.error("Failed to check token expiry:", error);
-    return true;
-  }
-}
-
-// Helper function to decode JWT token
-function decodeJwt(token: string): any {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error("Failed to decode JWT:", error);
-    return null;
-  }
-}

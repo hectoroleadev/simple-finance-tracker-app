@@ -11,10 +11,8 @@ const ConfirmSignupPage: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { loading } = useAuth(); // Only need loading state
+  const { loading, confirmSignup, resendConfirmationCode } = useAuth();
   const { t } = useLanguage();
-
-  const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL;
 
   // Pre-fill username if available from signup page state
   useEffect(() => {
@@ -29,24 +27,13 @@ const ConfirmSignupPage: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await fetch(`${API_GATEWAY_URL}/auth/confirm-signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, code }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || (t('auth.confirmSignupError') || 'Failed to confirm account. Please check the code.'));
-      }
+      await confirmSignup(username, code);
 
       setMessage(t('auth.confirmSignupSuccess') || 'Account confirmed successfully! You can now log in.');
       // Redirect to login page after successful confirmation
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
-      setError(err.message || t('auth.genericError') || 'An error occurred.');
+      setError(err.message || t('auth.confirmSignupError') || 'Failed to confirm account. Please check the code.');
     }
   };
 
@@ -54,15 +41,7 @@ const ConfirmSignupPage: React.FC = () => {
     setError(null);
     setMessage(null);
     try {
-      // In a real app, you would have a resend code endpoint in Lambda
-      // For this example, we'll just simulate it or point to Cognito's resend API
-      // For simplicity, we'll assume the Lambda has a resend code functionality, though not implemented yet.
-      // Or we could trigger it directly from Cognito API if we weren't avoiding AWS SDK on frontend.
-      // For now, this is a placeholder.
-      // Ideally, you'd call a new Lambda endpoint like /auth/resend-confirmation-code
-      // which would use `ResendConfirmationCodeCommand`
-      
-      // Let's just give a success message for now, assuming a backend endpoint would exist
+      await resendConfirmationCode(username);
       setMessage(t('auth.resendCodeSuccess') || 'Confirmation code sent. Please check your email.');
     } catch (err: any) {
       setError(err.message || t('auth.genericError') || 'An error occurred while resending code.');

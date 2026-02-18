@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
     // If we are in test mode, we might want to skip some postcss logic if it's causing issues
     css: isTest ? { postcss: { plugins: [] } } : undefined,
     define: {
+      global: 'globalThis',
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.VITE_API_GATEWAY_URL': JSON.stringify(env.VITE_API_GATEWAY_URL),
