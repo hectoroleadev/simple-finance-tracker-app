@@ -22,7 +22,7 @@ export const useFinanceContext = () => {
 
 export const useFinanceData = () => {
   const { language, t } = useLanguage();
-  const { getIdToken, isLoggedIn } = useAuth(); // Get getIdToken and isLoggedIn from AuthContext
+  const { getIdToken, isLoggedIn, refreshAuthTokens, logout } = useAuth(); // Get getIdToken, isLoggedIn, refreshAuthTokens, and logout from AuthContext
 
   // --- Repository Initialization ---
   const repository = useMemo<FinanceRepository>(() => {
@@ -30,12 +30,12 @@ export const useFinanceData = () => {
 
     if (apiUrl && isLoggedIn) { // Only use API Gateway if logged in
       console.log('Using API Gateway Repository:', apiUrl);
-      return new ApiGatewayAdapter(apiUrl, getIdToken);
+      return new ApiGatewayAdapter(apiUrl, getIdToken, refreshAuthTokens, logout);
     } else {
       console.log('Using LocalStorage Repository (or not logged in)');
       return new LocalStorageAdapter(); // Fallback to LocalStorage or if not logged in
     }
-  }, [getIdToken, isLoggedIn]); // Re-initialize if token or login status changes
+  }, [getIdToken, isLoggedIn, refreshAuthTokens, logout]); // Re-initialize if token, login status, or auth functions change
 
 
   // --- State ---

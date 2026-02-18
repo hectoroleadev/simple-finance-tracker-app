@@ -14,6 +14,7 @@ interface AuthContextType {
   signup: (username: string, password: string, email: string) => Promise<void>;
   logout: () => void;
   getIdToken: () => string | null;
+  refreshAuthTokens: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -134,8 +135,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return tokens?.idToken || null;
   }, [tokens]);
 
+  const refreshAuthTokens = useCallback(async (): Promise<boolean> => {
+    if (!tokens?.refreshToken) {
+      console.error("refreshAuthTokens: No refresh token available. Logging out.");
+      logout();
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_GATEWAY_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: tokens.refreshToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("refreshAuthTokens: Token refresh failed:", errorData.message);
+        logout(); // Refresh token is also invalid or expired
+        return false;
+      }
+
+      const result = await response.json();
+      const newTokens: AuthTokens = {
+        idToken: result.IdToken,
+        accessToken: result.AccessToken,
+        refreshToken: tokens.refreshToken, // Refresh token usually remains the same
+      };
+      saveTokens(newTokens);
+      setIsLoggedIn(true);
+      const decodedToken = decodeJwt(newTokens.idToken);
+      if (decodedToken) {
+        setUser({
+          username: decodedToken['cognito:username'] || decodedToken.username || 'User',
+          email: decodedToken.email,
+        });
+      }
+      return true;
+    } catch (error) {
+      console.error("refreshAuthTokens: Error during token refresh process:", error);
+      logout();
+      return false;
+    }
+  }, [API_GATEWAY_URL, tokens, logout]);
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, user, loading, login, signup, logout, getIdToken }}>
+    <AuthContext.Provider value={{ isLoggedIn, user, loading, login, signup, logout, getIdToken, refreshAuthTokens }}>
       {children}
     </AuthContext.Provider>
   );
@@ -148,6 +195,20 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Helper function to check if JWT token is expired
+function isTokenExpired(token: string): boolean {
+  if (!token) return true;
+  try {
+    const decoded = decodeJwt(token);
+    if (!decoded || !decoded.exp) return true;
+    const currentTime = Date.now() / 1000; // Convert to seconds
+    return decoded.exp < currentTime;
+  } catch (error) {
+    console.error("Failed to check token expiry:", error);
+    return true;
+  }
+}
 
 // Helper function to decode JWT token
 function decodeJwt(token: string): any {

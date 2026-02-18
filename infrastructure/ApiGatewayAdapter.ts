@@ -5,10 +5,19 @@ import { FinanceItem, HistoryEntry } from '../types';
 export class ApiGatewayAdapter implements FinanceRepository {
   private apiUrl: string;
   private getToken: () => string | null;
+  private refreshAuthTokens: () => Promise<boolean>;
+  private logout: () => void;
 
-  constructor(apiUrl: string, getToken: () => string | null) {
+  constructor(
+    apiUrl: string,
+    getToken: () => string | null,
+    refreshAuthTokens: () => Promise<boolean>,
+    logout: () => void
+  ) {
     this.apiUrl = apiUrl.replace(/\/$/, ''); // Remove trailing slash
     this.getToken = getToken;
+    this.refreshAuthTokens = refreshAuthTokens;
+    this.logout = logout;
   }
 
   private get headers(): HeadersInit {
@@ -22,12 +31,69 @@ export class ApiGatewayAdapter implements FinanceRepository {
     return headers;
   }
 
+  private async _makeRequest(
+    url: string,
+    options: RequestInit,
+    action: string,
+    retry: boolean = true
+  ): Promise<Response> {
+    let response: Response;
+
+    try {
+      response = await fetch(url, options);
+    } catch (error) {
+      console.error(`_makeRequest: Network error during initial fetch to ${url}:`, error);
+      // If a network error occurs, we cannot proceed with token refresh logic
+      // Re-throw the error so it can be caught by the calling function (e.g., getItems)
+      throw error;
+    }
+
+    if (response.status === 401 && retry) {
+      const refreshSuccessful = await this.refreshAuthTokens();
+
+      if (refreshSuccessful) {
+        const newToken = this.getToken();
+        if (!newToken) {
+          console.error('_makeRequest: New token is null after refresh. Logging out.');
+          this.logout();
+          await this.handleResponseError(response, action);
+        }
+
+        const newOptions = {
+          ...options,
+          headers: {
+            ...options.headers,
+            'Authorization': `Bearer ${newToken}`,
+          },
+        };
+
+        try {
+          response = await fetch(url, newOptions);
+        } catch (retryError) {
+          console.error(`_makeRequest: Network error during retried fetch to ${url}:`, retryError);
+          throw retryError;
+        }
+
+      } else {
+        console.error('Token refresh failed. Logging out...');
+        this.logout();
+        await this.handleResponseError(response, action);
+      }
+    }
+
+    if (!response.ok) {
+      console.error(`_makeRequest: Request to ${url} failed with status ${response.status}`);
+      await this.handleResponseError(response, action);
+    }
+    return response;
+  }
+
   private async handleResponseError(response: Response, action: string): Promise<never> {
     let errorMessage = `Failed to ${action}`;
 
     try {
       const data = await response.json();
-      
+
       // Check for various common error field names
       const message = data.message || data.error || data.errorMessage;
       const code = data.code || data.errorCode || data.statusCode;
@@ -60,15 +126,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async getItems(): Promise<FinanceItem[]> {
     try {
-      const response = await fetch(`${this.apiUrl}/items`, {
-        method: 'GET',
-        headers: this.headers,
-      });
-      
-      if (!response.ok) {
-        await this.handleResponseError(response, 'fetch items');
-      }
-      
+      const response = await this._makeRequest(
+        `${this.apiUrl}/items`,
+        { method: 'GET', headers: this.headers },
+        'fetch items'
+      );
       const data = await response.json();
       return data.items || [];
     } catch (error) {
@@ -79,15 +141,15 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async saveItems(items: FinanceItem[]): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/items`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({ items }),
-      });
-      
-      if (!response.ok) {
-        await this.handleResponseError(response, 'save items');
-      }
+      await this._makeRequest(
+        `${this.apiUrl}/items`,
+        {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify({ items }),
+        },
+        'save items'
+      );
     } catch (error) {
       console.error('API Gateway Error (saveItems):', error);
       throw error;
@@ -96,14 +158,14 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async deleteItem(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/items/${id}`, {
-        method: 'DELETE',
-        headers: this.headers,
-      });
-      
-      if (!response.ok) {
-        await this.handleResponseError(response, 'delete item');
-      }
+      await this._makeRequest(
+        `${this.apiUrl}/items/${id}`,
+        {
+          method: 'DELETE',
+          headers: this.headers,
+        },
+        'delete item'
+      );
     } catch (error) {
       console.error('API Gateway Error (deleteItem):', error);
       throw error;
@@ -112,15 +174,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async getHistory(): Promise<HistoryEntry[]> {
     try {
-      const response = await fetch(`${this.apiUrl}/history`, {
-        method: 'GET',
-        headers: this.headers,
-      });
-      
-      if (!response.ok) {
-        await this.handleResponseError(response, 'fetch history');
-      }
-      
+      const response = await this._makeRequest(
+        `${this.apiUrl}/history`,
+        { method: 'GET', headers: this.headers },
+        'fetch history'
+      );
       const data = await response.json();
       return data.history || [];
     } catch (error) {
@@ -131,15 +189,15 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async saveHistory(history: HistoryEntry[]): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/history`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({ history }),
-      });
-      
-      if (!response.ok) {
-        await this.handleResponseError(response, 'save history');
-      }
+      await this._makeRequest(
+        `${this.apiUrl}/history`,
+        {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify({ history }),
+        },
+        'save history'
+      );
     } catch (error) {
       console.error('API Gateway Error (saveHistory):', error);
       throw error;
@@ -148,14 +206,14 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async deleteHistoryItem(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/history/${id}`, {
-        method: 'DELETE',
-        headers: this.headers,
-      });
-      
-      if (!response.ok) {
-        await this.handleResponseError(response, 'delete history item');
-      }
+      await this._makeRequest(
+        `${this.apiUrl}/history/${id}`,
+        {
+          method: 'DELETE',
+          headers: this.headers,
+        },
+        'delete history item'
+      );
     } catch (error) {
       console.error('API Gateway Error (deleteHistoryItem):', error);
       throw error;
