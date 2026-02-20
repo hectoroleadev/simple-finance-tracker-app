@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LayoutDashboard, History, BarChart3, Sun, Moon, Globe, Wallet, ChevronRight } from 'lucide-react';
+import { Menu, X, LayoutDashboard, History, BarChart3, Sun, Moon, Globe, Wallet, ChevronRight, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 const MobileNav: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ const MobileNav: React.FC = () => {
     const location = useLocation();
     const { state: { theme }, dispatch } = useTheme();
     const { language, setLanguage, t } = useLanguage();
+    const { isLoggedIn, logout } = useAuth();
 
     const toggleMenu = () => setIsOpen(!isOpen);
     const closeMenu = () => setIsOpen(false);
@@ -148,6 +150,20 @@ const MobileNav: React.FC = () => {
                                 {language === 'en' ? 'ES' : 'EN'}
                             </div>
                         </button>
+
+                        {/* Logout Button */}
+                        {isLoggedIn && (
+                            <button
+                                onClick={() => {
+                                    logout();
+                                    closeMenu();
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/20 transition-all shadow-sm active:scale-[0.98] mt-4"
+                            >
+                                <LogOut size={20} />
+                                <span className="font-semibold text-sm">{t('logout')}</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
