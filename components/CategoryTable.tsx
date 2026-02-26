@@ -23,6 +23,7 @@ const CategoryRow = React.memo(({
   editingId,
   editName,
   editAmount,
+  isNewItem,
   startEditing,
   saveEdit,
   handleNameChange,
@@ -35,6 +36,7 @@ const CategoryRow = React.memo(({
   editingId: string | null;
   editName: string;
   editAmount: string;
+  isNewItem: boolean;
   startEditing: (item: FinanceItem) => void;
   saveEdit: () => void;
   handleNameChange: (val: string) => void;
@@ -49,7 +51,7 @@ const CategoryRow = React.memo(({
     <div className="flex-1 overflow-hidden">
       {editingId === item.id ? (
         <input
-          autoFocus
+          autoFocus={isNewItem}
           className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
           value={editName}
           onChange={(e) => handleNameChange(e.target.value)}
@@ -64,10 +66,12 @@ const CategoryRow = React.memo(({
       {editingId === item.id ? (
         <input
           type="number"
+          autoFocus={!isNewItem}
           className="w-full text-right bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
           value={editAmount}
           onChange={(e) => handleAmountChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={(e) => e.target.select()}
         />
       ) : (
         <span className="text-sm text-slate-900 dark:text-white font-semibold tabular-nums">{formatCurrency(item.amount)}</span>
@@ -101,6 +105,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
     editingId,
     editName,
     editAmount,
+    isNewItem,
     startEditing,
     saveEdit,
     handleNameChange,
@@ -119,7 +124,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
 
   const handleAddItem = () => {
     const newItem = onAddItem(type);
-    startEditing(newItem);
+    startEditing(newItem, true);
   };
 
   const handleDeleteClick = (id: string) => {
@@ -159,6 +164,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                 editingId={editingId}
                 editName={editName}
                 editAmount={editAmount}
+                isNewItem={isNewItem}
                 startEditing={startEditing}
                 saveEdit={saveEdit}
                 handleNameChange={handleNameChange}

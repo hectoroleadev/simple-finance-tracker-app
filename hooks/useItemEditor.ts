@@ -10,11 +10,13 @@ export const useItemEditor = ({ onUpdate }: UseItemEditorProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editAmount, setEditAmount] = useState<number>(0);
+  const [isNewItem, setIsNewItem] = useState(false);
 
-  const startEditing = (item: FinanceItem) => {
+  const startEditing = (item: FinanceItem, newItem = false) => {
     setEditingId(item.id);
     setEditName(item.name);
     setEditAmount(item.amount);
+    setIsNewItem(newItem);
   };
 
   const saveEdit = () => {
@@ -30,7 +32,7 @@ export const useItemEditor = ({ onUpdate }: UseItemEditorProps) => {
 
   const handleNameChange = (val: string) => setEditName(val);
   const handleAmountChange = (val: string) => setEditAmount(parseFloat(val) || 0);
-  
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') saveEdit();
     if (e.key === 'Escape') cancelEdit();
@@ -40,6 +42,7 @@ export const useItemEditor = ({ onUpdate }: UseItemEditorProps) => {
     editingId,
     editName,
     editAmount,
+    isNewItem,
     startEditing,
     saveEdit,
     handleNameChange,
