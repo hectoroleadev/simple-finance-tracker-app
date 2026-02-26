@@ -33,6 +33,16 @@ export interface HistoryEntry {
   retirement: number;
 }
 
+export interface ItemRevision {
+  itemId: string;
+  timestamp: string;
+  type: 'create' | 'update' | 'delete';
+  name: string;
+  amount: number;
+  category: CategoryType;
+  raw?: any;
+}
+
 export type TabType = 'dashboard' | 'history' | 'charts';
 
 export interface FinanceContextType {
@@ -48,6 +58,7 @@ export interface FinanceContextType {
     addItem: (category: CategoryType) => FinanceItem;
     snapshotHistory: () => boolean;
     deleteHistoryItem: (id: string) => void;
+    getItemHistory: (id: string) => Promise<ItemRevision[]>;
   };
   onSnapshot: () => void;
 }

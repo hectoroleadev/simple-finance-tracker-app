@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
-import { FinanceItem, HistoryEntry, CategoryType, FinanceContextType, FinanceTotals } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, CategoryType, FinanceContextType, FinanceTotals } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext'; // Import useAuth
 
@@ -192,6 +192,15 @@ export const useFinanceData = () => {
       repository.deleteHistoryItem(id).catch(err => {
         console.error('Failed to delete history item in repository', err);
       });
+    },
+
+    getItemHistory: async (id: string) => {
+      try {
+        return await repository.getItemHistory(id);
+      } catch (err) {
+        console.error('Failed to load item history', err);
+        throw err;
+      }
     }
   };
 

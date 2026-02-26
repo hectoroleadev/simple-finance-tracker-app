@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
 import { FinanceItem, CategoryType } from '../types';
-import { Plus, Trash2, Edit2, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, Clock } from 'lucide-react';
 import { useItemEditor } from '../hooks/useItemEditor';
 import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
 import ConfirmDialog from './ConfirmDialog';
+import ItemHistoryModal from './ItemHistoryModal';
 
 interface CategoryTableProps {
   title: string;
@@ -30,6 +31,7 @@ const CategoryRow = React.memo(({
   handleAmountChange,
   handleKeyDown,
   handleDeleteClick,
+  openHistory,
   t
 }: {
   item: FinanceItem;
@@ -43,6 +45,7 @@ const CategoryRow = React.memo(({
   handleAmountChange: (val: string) => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;
   handleDeleteClick: (id: string) => void;
+  openHistory: (item: FinanceItem) => void;
   t: (key: string) => string;
 }) => (
   <div
@@ -82,8 +85,9 @@ const CategoryRow = React.memo(({
         <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"><Check size={16} /></button>
       ) : (
         <>
-          <button onClick={() => startEditing(item)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-110 transition-transform"><Edit2 size={14} /></button>
-          <button onClick={() => handleDeleteClick(item.id)} className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"><Trash2 size={14} /></button>
+          <button onClick={() => openHistory(item)} className="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:scale-110 transition-transform" title={t('history')}><Clock size={14} /></button>
+          <button onClick={() => startEditing(item)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-110 transition-transform" title={t('edit')}><Edit2 size={14} /></button>
+          <button onClick={() => handleDeleteClick(item.id)} className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform" title={t('delete')}><Trash2 size={14} /></button>
         </>
       )}
     </div>
@@ -101,6 +105,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
 }) => {
   const { t } = useLanguage();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [historyItem, setHistoryItem] = useState<FinanceItem | null>(null);
   const {
     editingId,
     editName,
@@ -171,6 +176,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                 handleAmountChange={handleAmountChange}
                 handleKeyDown={handleKeyDown}
                 handleDeleteClick={handleDeleteClick}
+                openHistory={(item) => setHistoryItem(item)}
                 t={t}
               />
             ))
@@ -198,6 +204,14 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
         variant="danger"
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+
+      <ItemHistoryModal
+        isOpen={historyItem !== null}
+        onClose={() => setHistoryItem(null)}
+        itemId={historyItem?.id || null}
+        itemName={historyItem?.name || ''}
+        currentAmount={historyItem?.amount || 0}
       />
     </>
   );

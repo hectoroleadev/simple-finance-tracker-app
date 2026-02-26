@@ -1,6 +1,6 @@
 
 import { FinanceRepository } from '../domain/ports';
-import { FinanceItem, HistoryEntry } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision } from '../types';
 
 export class ApiGatewayAdapter implements FinanceRepository {
   private apiUrl: string;
@@ -168,6 +168,21 @@ export class ApiGatewayAdapter implements FinanceRepository {
       );
     } catch (error) {
       console.error('API Gateway Error (deleteItem):', error);
+      throw error;
+    }
+  }
+
+  async getItemHistory(id: string): Promise<ItemRevision[]> {
+    try {
+      const response = await this._makeRequest(
+        `${this.apiUrl}/items/${id}/history`,
+        { method: 'GET', headers: this.headers },
+        'fetch item history'
+      );
+      const data = await response.json();
+      return data.history || [];
+    } catch (error) {
+      console.error('API Gateway Error (getItemHistory):', error);
       throw error;
     }
   }

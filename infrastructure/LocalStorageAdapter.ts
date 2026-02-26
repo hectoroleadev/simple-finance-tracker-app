@@ -1,6 +1,6 @@
 
 import { FinanceRepository } from '../domain/ports';
-import { FinanceItem, HistoryEntry } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision } from '../types';
 import { INITIAL_ITEMS, INITIAL_HISTORY } from '../constants';
 
 const KEYS = {
@@ -38,13 +38,17 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
+  async getItemHistory(id: string): Promise<ItemRevision[]> {
+    return []; // Local storage doesn't track per-item history in this version
+  }
+
   async getHistory(): Promise<HistoryEntry[]> {
     try {
       const saved = localStorage.getItem(KEYS.HISTORY);
       if (!saved) return INITIAL_HISTORY;
 
       const parsed = JSON.parse(saved);
-      
+
       // Migration: If legacy data (missing date field), add a synthetic date based on month/year if available, or current date
       return parsed.map((item: any) => {
         if (!item.date && item.year && item.month) {
