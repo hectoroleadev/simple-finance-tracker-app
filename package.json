@@ -10,6 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "@testing-library/react": "^16.3.2",
     "amazon-cognito-identity-js": "^6.3.16",
     "lucide-react": "^0.564.0",

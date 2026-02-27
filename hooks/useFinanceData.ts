@@ -1,8 +1,8 @@
-
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FinanceItem, HistoryEntry, ItemRevision, CategoryType, FinanceContextType, FinanceTotals } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/AuthContext';
 
 // Domain & Infrastructure Imports
 import { FinanceCalculator } from '../domain/finance.logic';
@@ -22,35 +22,28 @@ export const useFinanceContext = () => {
 
 export const useFinanceData = () => {
   const { language, t } = useLanguage();
-  const { getIdToken, isLoggedIn, refreshAuthTokens, logout } = useAuth(); // Get getIdToken, isLoggedIn, refreshAuthTokens, and logout from AuthContext
+  const { getIdToken, isLoggedIn, refreshAuthTokens, logout } = useAuth();
+  const queryClient = useQueryClient();
 
   // --- Repository Initialization ---
   const repository = useMemo<FinanceRepository>(() => {
     const apiUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
-    if (apiUrl && isLoggedIn) { // Only use API Gateway if logged in
+    if (apiUrl && isLoggedIn) {
       console.log('Using API Gateway Repository:', apiUrl);
       return new ApiGatewayAdapter(apiUrl, getIdToken, refreshAuthTokens, logout);
     } else {
       console.log('Using LocalStorage Repository (or not logged in)');
-      return new LocalStorageAdapter(); // Fallback to LocalStorage or if not logged in
+      return new LocalStorageAdapter();
     }
-  }, [getIdToken, isLoggedIn, refreshAuthTokens, logout]); // Re-initialize if token, login status, or auth functions change
+  }, [getIdToken, isLoggedIn, refreshAuthTokens, logout]);
 
-
-  // --- State ---
-  const [items, setItems] = useState<FinanceItem[]>([]);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  // --- Web Worker Setup ---
   const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([]));
   const [chartData, setChartData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const isInitialized = useRef(false);
   const workerRef = useRef<Worker | null>(null);
 
-  // --- Initial Data Loading ---
   useEffect(() => {
-    // Initialize Web Worker
     workerRef.current = new Worker(new URL('../utils/finance.worker.ts', import.meta.url), { type: 'module' });
 
     workerRef.current.onmessage = (e) => {
@@ -62,141 +55,210 @@ export const useFinanceData = () => {
       }
     };
 
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [fetchedItems, fetchedHistory] = await Promise.all([
-          repository.getItems(),
-          repository.getHistory()
-        ]);
-
-        setItems(fetchedItems);
-
-        // Sort history by date descending (newest first)
-        const sortedHistory = fetchedHistory.sort((a, b) =>
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        setHistory(sortedHistory);
-
-        // Trigger initial calculations in worker
-        workerRef.current?.postMessage({ type: 'CALCULATE_TOTALS', payload: fetchedItems });
-        workerRef.current?.postMessage({ type: 'PREPARE_CHART_DATA', payload: sortedHistory });
-
-        setError(null);
-      } catch (err: any) {
-        console.error('Failed to load finance data', err);
-        setError(err.message || t('errors.loadFailed') || 'Failed to load data');
-      } finally {
-        setLoading(false);
-        isInitialized.current = true;
-      }
-    };
-
-    if (isLoggedIn) { // Only load data if logged in
-      loadData();
-    } else { // If not logged in, clear data and set loading to false
-      setItems([]);
-      setHistory([]);
-      setTotals(FinanceCalculator.calculateTotals([]));
-      setChartData([]);
-      setLoading(false);
-      isInitialized.current = true; // Mark as initialized to prevent initial save attempts
-    }
-
-
     return () => {
       workerRef.current?.terminate();
     };
-  }, [t, repository, isLoggedIn]); // Add repository and isLoggedIn to dependencies
+  }, []);
 
-  // --- Background Calculation Effects ---
+  // --- Queries (TanStack Query) ---
+
+  const {
+    data: items = [],
+    isLoading: isLoadingItems,
+    error: itemsError
+  } = useQuery({
+    queryKey: ['items', isLoggedIn],
+    queryFn: async () => {
+      const fetchedItems = await repository.getItems();
+      return fetchedItems.map(item => ({
+        ...item,
+        amount: Number(item.amount) || 0
+      }));
+    },
+    enabled: isLoggedIn, // Only run query if the user is authenticated
+  });
+
+  const {
+    data: history = [],
+    isLoading: isLoadingHistory,
+    error: historyError
+  } = useQuery({
+    queryKey: ['history', isLoggedIn],
+    queryFn: async () => {
+      const fetchedHistory = await repository.getHistory();
+      // Ensure all numeric fields are actually numbers, and sort history by date descending
+      return fetchedHistory
+        .map(entry => ({
+          ...entry,
+          debt: Number(entry.debt) || 0,
+          investments: Number(entry.investments) || 0,
+          liquid: Number(entry.liquid) || 0,
+          pending: Number(entry.pending) || 0,
+          retirement: Number(entry.retirement) || 0,
+          savings: Number(entry.savings) || 0,
+          balance: Number(entry.balance) || 0,
+        }))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+    },
+    enabled: isLoggedIn,
+  });
+
+  // Derived state loading/error
+  const loading = (isLoadingItems || isLoadingHistory) && isLoggedIn;
+  const errorObj = itemsError || historyError;
+  const error = errorObj ? (errorObj.message || t('errors.loadFailed') || 'Failed to load data') : null;
+
+  // --- Trigger Worker on Data Changes ---
   useEffect(() => {
-    if (isInitialized.current && workerRef.current) {
+    if (workerRef.current && items.length > 0) {
       workerRef.current.postMessage({ type: 'CALCULATE_TOTALS', payload: items });
+    } else if (items.length === 0) {
+      setTotals(FinanceCalculator.calculateTotals([]));
     }
   }, [items]);
 
   useEffect(() => {
-    if (isInitialized.current && workerRef.current) {
+    if (workerRef.current && history.length > 0) {
       workerRef.current.postMessage({ type: 'PREPARE_CHART_DATA', payload: history });
+    } else if (history.length === 0) {
+      setChartData([]);
     }
   }, [history]);
 
-  // --- Persistence Effects ---
-  // Only save if data has been initialized and user is logged in
-  useEffect(() => {
-    if (isInitialized.current && isLoggedIn) {
-      const save = async () => {
-        try {
-          await repository.saveItems(items);
-        } catch (err) {
-          console.error('Failed to save items', err);
-        }
-      };
-      save();
-    }
-  }, [items, isLoggedIn, repository]);
+  // --- Mutations (TanStack Query Optimistic Updates) ---
 
-  useEffect(() => {
-    if (isInitialized.current && isLoggedIn) {
-      const save = async () => {
-        try {
-          await repository.saveHistory(history);
-        } catch (err) {
-          console.error('Failed to save history', err);
-        }
-      };
-      save();
+  // Update Items directly in the backend
+  const saveItemsMutation = useMutation({
+    mutationFn: (newItems: FinanceItem[]) => repository.saveItems(newItems),
+    onMutate: async (newItems) => {
+      await queryClient.cancelQueries({ queryKey: ['items'] });
+      const previousItems = queryClient.getQueryData(['items']);
+      queryClient.setQueryData(['items', isLoggedIn], newItems);
+      return { previousItems };
+    },
+    onError: (err, newItems, context: any) => {
+      console.error('Failed to save items', err);
+      if (context?.previousItems) {
+        queryClient.setQueryData(['items', isLoggedIn], context.previousItems);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+
+  // Delete single item (combining local change with batch save behavior of the API)
+  const deleteItemMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // The current API Gateway Adapter assumes /items/{id} for delete
+      await repository.deleteItem(id);
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['items'] });
+      const previousItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]);
+
+      if (previousItems) {
+        queryClient.setQueryData(['items', isLoggedIn], previousItems.filter(i => i.id !== id));
+      }
+      return { previousItems };
+    },
+    onError: (err, id, context: any) => {
+      console.error('Failed to delete item', err);
+      if (context?.previousItems) {
+        queryClient.setQueryData(['items', isLoggedIn], context.previousItems);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
     }
-  }, [history, isLoggedIn, repository]);
+  });
+
+  const saveHistoryMutation = useMutation({
+    mutationFn: (newHistory: HistoryEntry[]) => repository.saveHistory(newHistory),
+    onMutate: async (newHistory) => {
+      await queryClient.cancelQueries({ queryKey: ['history'] });
+      const previousHistory = queryClient.getQueryData(['history']);
+      queryClient.setQueryData(['history', isLoggedIn], newHistory);
+      return { previousHistory };
+    },
+    onError: (err, newHistory, context: any) => {
+      console.error('Failed to save history', err);
+      if (context?.previousHistory) {
+        queryClient.setQueryData(['history', isLoggedIn], context.previousHistory);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['history'] });
+    },
+  });
+
+  const deleteHistoryItemMutation = useMutation({
+    mutationFn: (id: string) => repository.deleteHistoryItem(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['history'] });
+      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn]);
+
+      if (previousHistory) {
+        queryClient.setQueryData(['history', isLoggedIn], previousHistory.filter(i => i.id !== id));
+      }
+      return { previousHistory };
+    },
+    onError: (err, id, context: any) => {
+      console.error('Failed to delete history item', err);
+      if (context?.previousHistory) {
+        queryClient.setQueryData(['history', isLoggedIn], context.previousHistory);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['history'] });
+    }
+  });
+
 
   // --- Actions (Use Cases) ---
   const actions = {
     updateItem: (id: string, name: string, amount: number) => {
-      setItems(prev => prev.map(item => item.id === id ? { ...item, name, amount } : item));
+      const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]) || [];
+      const newItems = prevItems.map(item => item.id === id ? { ...item, name, amount } : item);
+      saveItemsMutation.mutate(newItems);
     },
 
     deleteItem: (id: string) => {
-      // Optimistic update
-      setItems(prev => prev.filter(item => item.id !== id));
-
-      // Explicitly call delete on repository
-      repository.deleteItem(id).catch(err => {
-        console.error('Failed to delete item in repository', err);
-        // Note: In a production app, we might want to revert the state change or show a toast error here
-      });
+      deleteItemMutation.mutate(id);
     },
 
     addItem: (category: CategoryType) => {
+      const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]) || [];
       const newItem: FinanceItem = {
         id: crypto.randomUUID(),
         name: 'New Item',
         amount: 0,
         category,
       };
-      setItems(prev => [...prev, newItem]);
+      saveItemsMutation.mutate([...prevItems, newItem]);
       return newItem;
     },
 
     snapshotHistory: () => {
+      const prevHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn]) || [];
       const newEntry = FinanceCalculator.createSnapshot(totals);
-      // Prepend new entry (which is the newest date) to maintain desc order
-      setHistory(prev => [newEntry, ...prev]);
+      saveHistoryMutation.mutate([newEntry, ...prevHistory]);
       return true;
     },
 
     deleteHistoryItem: (id: string) => {
-      // Optimistic update
-      setHistory(prev => prev.filter(item => item.id !== id));
-      // Explicitly call delete on repository
-      repository.deleteHistoryItem(id).catch(err => {
-        console.error('Failed to delete history item in repository', err);
-      });
+      deleteHistoryItemMutation.mutate(id);
     },
 
     getItemHistory: async (id: string) => {
+      // Direct query for item history as it's typically fetched on-demand per item in a modal
       try {
-        return await repository.getItemHistory(id);
+        return await queryClient.fetchQuery({
+          queryKey: ['itemHistory', id],
+          queryFn: () => repository.getItemHistory(id),
+          staleTime: 1000 * 60, // 1 minute stale time for individual histories
+        });
       } catch (err) {
         console.error('Failed to load item history', err);
         throw err;
