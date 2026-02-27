@@ -5,6 +5,9 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+// Register PWA Service Worker (handled by ReloadPrompt component now)
+// We just leave the import to ensure Vite bundles it appropriately if needed elsewhere
+// The actual registration UI logic is inside Components/ReloadPrompt.tsx
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

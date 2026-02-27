@@ -1,7 +1,7 @@
 
 export const translations = {
   en: {
-    appTitle: "Simple Finance",
+    appTitle: "Simple Finances",
     appTitleCore: " Tracker",
     netWorth: "Net Worth",
     summary: "Summary",
@@ -87,6 +87,15 @@ export const translations = {
       confirmSignupSuccess: "Account confirmed successfully! You can now log in.",
       confirmSignupError: "Failed to confirm account. Please check the code.",
       resendCodeSuccess: "Confirmation code sent. Please check your email."
+    },
+    pwa: {
+      offlineMode: "Offline Mode",
+      updateAvailable: "New update available",
+      offlineReady: "App ready to work offline",
+      updateDesc: "New content available. Please reload to update.",
+      offlineDesc: "The application has been installed and will work without internet.",
+      reload: "Reload now",
+      close: "Close"
     }
   },
   es: {
@@ -176,6 +185,15 @@ export const translations = {
       confirmSignupSuccess: "¡Cuenta confirmada exitosamente! Ahora puedes iniciar sesión.",
       confirmSignupError: "Fallo al confirmar la cuenta. Por favor, verifica el código.",
       resendCodeSuccess: "Código de confirmación enviado. Por favor, revisa tu correo electrónico."
+    },
+    pwa: {
+      offlineMode: "Modo sin conexión",
+      updateAvailable: "Nueva actualización disponible",
+      offlineReady: "App lista para trabajar offline",
+      updateDesc: "Nuevo contenido disponible. Por favor recarga para actualizar.",
+      offlineDesc: "La aplicación ha sido instalada y funcionará sin internet.",
+      reload: "Recargar ahora",
+      close: "Cerrar"
     }
   }
 };
