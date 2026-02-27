@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LayoutDashboard, History, BarChart3, Sun, Moon, Globe, Wallet, ChevronRight, LogOut } from 'lucide-react';
+import { Menu, X, LayoutDashboard, History, BarChart3, Sun, Moon, Globe, Wallet, ChevronRight, LogOut, HelpCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 
-const MobileNav: React.FC = () => {
+interface MobileNavProps {
+    onHelpClick?: () => void;
+}
+
+const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick }) => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -100,8 +104,8 @@ const MobileNav: React.FC = () => {
                                 key={item.path}
                                 onClick={() => handleNavigation(item.path)}
                                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all group ${isActive
-                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg shadow-slate-200 dark:shadow-none'
-                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg shadow-slate-200 dark:shadow-none'
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                                     }`}
                             >
                                 <div className={`p-1.5 rounded-lg transition-colors ${isActive ? 'bg-white/20 dark:bg-slate-900/10' : 'bg-slate-100 dark:bg-slate-800'}`}>
@@ -123,6 +127,18 @@ const MobileNav: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
+                        {/* Help Button */}
+                        <button
+                            onClick={() => {
+                                closeMenu();
+                                if (onHelpClick) onHelpClick();
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm active:scale-[0.98]"
+                        >
+                            <HelpCircle size={20} className="text-indigo-500" />
+                            <span className="font-semibold text-sm">{t('help')} - {t('shortcuts')}</span>
+                        </button>
+
                         {/* Theme Toggle */}
                         <button
                             onClick={() => dispatch({ type: 'TOGGLE_THEME' })}

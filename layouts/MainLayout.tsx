@@ -7,7 +7,8 @@ import {
   PieChart as PieChartIcon,
   Moon,
   Sun,
-  LogOut // Import LogOut icon
+  LogOut, // Import LogOut icon
+  HelpCircle
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
@@ -57,7 +58,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 lg:pb-0 transition-colors duration-300">
-      <MobileNav />
+      <MobileNav onHelpClick={() => setShowShortcutsHelp(true)} />
 
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -108,6 +109,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 ES
               </button>
             </div>
+
+            <button
+              onClick={() => setShowShortcutsHelp(true)}
+              className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
+              aria-label="Help"
+              title={t('shortcuts')}
+            >
+              <HelpCircle size={20} />
+            </button>
 
             <button
               onClick={() => dispatch({ type: 'TOGGLE_THEME' })}

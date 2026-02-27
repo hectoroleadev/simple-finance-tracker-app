@@ -59,6 +59,8 @@ export const translations = {
     dashboard: "Summary",
     charts: "Analysis",
     settings: "Settings",
+    help: "Help",
+    shortcuts: "Keyboard Shortcuts",
     theme: "Theme",
     lightMode: "Light Mode",
     darkMode: "Dark Mode",
@@ -96,6 +98,27 @@ export const translations = {
       offlineDesc: "The application has been installed and will work without internet.",
       reload: "Reload now",
       close: "Close"
+    },
+    helpModal: {
+      title: "Keyboard Shortcuts",
+      closeHelp: "Press Esc or click outside to close",
+      categories: {
+        general: "General",
+        navigation: "Navigation",
+        actions: "Actions",
+        theme: "Theme"
+      },
+      shortcuts: {
+        showHelp: "Show keyboard shortcuts",
+        closeModal: "Close modal/dialog",
+        goDashboard: "Go to Dashboard",
+        goHistory: "Go to History",
+        goCharts: "Go to Charts",
+        takeSnapshot: "Take snapshot",
+        exportData: "Export data (coming soon)",
+        toggleTheme: "Toggle dark/light theme",
+        mobileNote: "Some shortcuts may only be available on desktop."
+      }
     }
   },
   es: {
@@ -157,6 +180,8 @@ export const translations = {
     dashboard: "Resumen",
     charts: "Análisis",
     settings: "Ajustes",
+    help: "Ayuda",
+    shortcuts: "Atajos de teclado",
     theme: "Tema",
     lightMode: "Modo Claro",
     darkMode: "Modo Oscuro",
@@ -194,6 +219,27 @@ export const translations = {
       offlineDesc: "La aplicación ha sido instalada y funcionará sin internet.",
       reload: "Recargar ahora",
       close: "Cerrar"
+    },
+    helpModal: {
+      title: "Atajos de Teclado y Ayuda",
+      closeHelp: "Presiona Esc o haz clic fuera para cerrar",
+      categories: {
+        general: "General",
+        navigation: "Navegación",
+        actions: "Acciones",
+        theme: "Tema"
+      },
+      shortcuts: {
+        showHelp: "Mostrar atajos de teclado",
+        closeModal: "Cerrar ventana emergente",
+        goDashboard: "Ir al Resumen",
+        goHistory: "Ir al Historial",
+        goCharts: "Ir al Análisis",
+        takeSnapshot: "Tomar instantánea (snapshot)",
+        exportData: "Exportar datos (pronto)",
+        toggleTheme: "Alternar tema claro/oscuro",
+        mobileNote: "Algunos atajos solo están disponibles en teclado físico."
+      }
     }
   }
 };
