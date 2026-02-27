@@ -80,7 +80,7 @@ const CategoryRow = React.memo(({
         <span className="text-sm text-slate-900 dark:text-white font-semibold tabular-nums">{formatCurrency(item.amount)}</span>
       )}
     </div>
-    <div className="w-14 flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+    <div className="w-14 flex justify-end gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-2">
       {editingId === item.id ? (
         <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"><Check size={16} /></button>
       ) : (
