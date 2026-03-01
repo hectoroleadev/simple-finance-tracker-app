@@ -12,14 +12,15 @@ interface RootLayoutProps {
 
 const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
-  const { 
-    items, 
-    history: financeHistory, 
-    totals, 
-    chartData, 
+  const {
+    items,
+    categories,
+    history: financeHistory,
+    totals,
+    chartData,
     loading,
     error,
-    actions 
+    actions
   } = useFinanceData();
 
   const handleSnapshot = () => {
@@ -29,6 +30,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
 
   const contextValue: FinanceContextType = {
     items,
+    categories,
     totals,
     history: financeHistory,
     chartData,

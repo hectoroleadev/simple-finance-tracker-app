@@ -4,7 +4,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFinanceData } from './useFinanceData';
-import { CategoryType, FinanceItem } from '../types';
+import { FinanceItem, DEFAULT_CATEGORIES } from '../types';
 import { LanguageProvider } from '../context/LanguageContext';
 
 // Mock the adapter to isolate hook testing
@@ -12,6 +12,8 @@ const mockGetItems = vi.fn();
 const mockSaveItems = vi.fn();
 const mockGetHistory = vi.fn();
 const mockSaveHistory = vi.fn();
+const mockGetCategories = vi.fn().mockResolvedValue(DEFAULT_CATEGORIES);
+const mockSaveCategories = vi.fn();
 
 vi.mock('../infrastructure/LocalStorageAdapter', () => {
   return {
@@ -20,6 +22,8 @@ vi.mock('../infrastructure/LocalStorageAdapter', () => {
       saveItems: mockSaveItems,
       getHistory: mockGetHistory,
       saveHistory: mockSaveHistory,
+      getCategories: mockGetCategories,
+      saveCategories: mockSaveCategories,
       deleteItem: vi.fn().mockResolvedValue(true),
       deleteHistoryItem: vi.fn().mockResolvedValue(true),
     }))
@@ -33,7 +37,7 @@ class MockWorker {
     // Simulate worker responses
     if (data.type === 'CALCULATE_TOTALS') {
       setTimeout(() => {
-        this.onmessage?.({ data: { type: 'TOTALS_CALCULATED', payload: { balance: 1000, debt: 0 } } } as MessageEvent);
+        this.onmessage?.({ data: { type: 'TOTALS_CALCULATED', payload: { income: 1000, expenses: 0, balance: 1000 } } } as MessageEvent);
       }, 0);
     }
   });
@@ -49,6 +53,7 @@ beforeEach(() => {
   // Default mocks
   mockGetItems.mockResolvedValue([]);
   mockGetHistory.mockResolvedValue([]);
+  mockGetCategories.mockResolvedValue(DEFAULT_CATEGORIES);
 
   Object.defineProperty(globalThis, 'crypto', {
     value: { randomUUID: () => 'uuid-test' },
@@ -67,7 +72,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('useFinanceData Hook', () => {
   it('initializes state by loading data from repository', async () => {
     const initialItems: FinanceItem[] = [
-      { id: '1', name: 'Test', amount: 100, category: CategoryType.DEBT }
+      { id: '1', name: 'Test', amount: 100, category: 'debt' }
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
@@ -85,17 +90,17 @@ describe('useFinanceData Hook', () => {
     const { result } = renderHook(() => useFinanceData(), { wrapper });
 
     await act(async () => {
-      await result.current.actions.addItem(CategoryType.INVESTMENTS);
+      await result.current.actions.addItem('investments');
     });
 
     expect(result.current.items).toHaveLength(1);
-    expect(result.current.items[0].category).toBe(CategoryType.INVESTMENTS);
+    expect(result.current.items[0].category).toBe('investments');
     expect(result.current.items[0].name).toBe('New Item');
   });
 
   it('updates an existing item', async () => {
     const initialItems: FinanceItem[] = [
-      { id: 'uuid-test', name: 'Original', amount: 100, category: CategoryType.DEBT }
+      { id: 'uuid-test', name: 'Original', amount: 100, category: 'debt' }
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
@@ -112,7 +117,7 @@ describe('useFinanceData Hook', () => {
 
   it('deletes an item', async () => {
     const initialItems: FinanceItem[] = [
-      { id: '1', name: 'Delete Me', amount: 100, category: CategoryType.DEBT }
+      { id: '1', name: 'Delete Me', amount: 100, category: 'debt' }
     ];
     mockGetItems.mockResolvedValue(initialItems);
 

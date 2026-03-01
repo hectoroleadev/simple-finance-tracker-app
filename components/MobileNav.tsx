@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LayoutDashboard, History, BarChart3, Sun, Moon, Globe, Wallet, ChevronRight, LogOut, HelpCircle } from 'lucide-react';
+import { Menu, X, LayoutDashboard, History, BarChart3, Sun, Moon, Globe, Wallet, ChevronRight, LogOut, HelpCircle, Tags } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -7,9 +7,10 @@ import { useAuth } from '../context/AuthContext';
 
 interface MobileNavProps {
     onHelpClick?: () => void;
+    onCategoriesClick?: () => void;
 }
 
-const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick }) => {
+const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick }) => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -137,6 +138,18 @@ const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick }) => {
                         >
                             <HelpCircle size={20} className="text-indigo-500" />
                             <span className="font-semibold text-sm">{t('help')} - {t('shortcuts')}</span>
+                        </button>
+
+                        {/* Categories Manager */}
+                        <button
+                            onClick={() => {
+                                closeMenu();
+                                if (onCategoriesClick) onCategoriesClick();
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 transition-all shadow-sm active:scale-[0.98]"
+                        >
+                            <Tags size={20} className="text-amber-500" />
+                            <span className="font-semibold text-sm">{t('categoriesManager.title')}</span>
                         </button>
 
                         {/* Theme Toggle */}

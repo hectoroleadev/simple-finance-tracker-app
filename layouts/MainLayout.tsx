@@ -7,18 +7,20 @@ import {
   PieChart as PieChartIcon,
   Moon,
   Sun,
-  LogOut, // Import LogOut icon
-  HelpCircle
+  LogOut,
+  HelpCircle,
+  Tags
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../utils/format';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import MobileNav from '../components/MobileNav';
 import ShortcutsHelpModal from '../components/ShortcutsHelpModal';
+import CategoriesManagerModal from '../components/CategoriesManagerModal';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -35,7 +37,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const location = useLocation();
   const animatedNetWorth = useCounterAnimation(netWorth, { duration: 300 });
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
-  const { isLoggedIn, logout } = useAuth(); // Destructure isLoggedIn and logout
+  const [showCategoriesManager, setShowCategoriesManager] = useState(false);
+  const { isLoggedIn, logout } = useAuth();
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -58,7 +61,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 lg:pb-0 transition-colors duration-300">
-      <MobileNav onHelpClick={() => setShowShortcutsHelp(true)} />
+      <MobileNav
+        onHelpClick={() => setShowShortcutsHelp(true)}
+        onCategoriesClick={() => setShowCategoriesManager(true)}
+      />
 
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -109,6 +115,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 ES
               </button>
             </div>
+
+            <button
+              onClick={() => setShowCategoriesManager(true)}
+              className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
+              aria-label="Manage categories"
+              title={t('categoriesManager.title')}
+            >
+              <Tags size={20} />
+            </button>
 
             <button
               onClick={() => setShowShortcutsHelp(true)}
@@ -165,6 +180,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <ShortcutsHelpModal
         isOpen={showShortcutsHelp}
         onClose={() => setShowShortcutsHelp(false)}
+      />
+      <CategoriesManagerModal
+        isOpen={showCategoriesManager}
+        onClose={() => setShowCategoriesManager(false)}
       />
     </div>
   );

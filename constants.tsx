@@ -1,24 +1,24 @@
 
-import { CategoryType, FinanceItem, HistoryEntry } from './types';
+import { FinanceItem, HistoryEntry } from './types';
 
 export const INITIAL_ITEMS: FinanceItem[] = [
   // Debts
-  { id: '1', name: 'Bank Loan', amount: 300, category: CategoryType.DEBT },
-  { id: '2', name: 'Credit Card', amount: 11625, category: CategoryType.DEBT },
-  { id: '3', name: 'Store Credit', amount: 8452, category: CategoryType.DEBT },
+  { id: '1', name: 'Bank Loan', amount: 300, category: 'debt' },
+  { id: '2', name: 'Credit Card', amount: 11625, category: 'debt' },
+  { id: '3', name: 'Store Credit', amount: 8452, category: 'debt' },
   // Investments
-  { id: '4', name: 'Nu Account', amount: 192258, category: CategoryType.INVESTMENTS },
-  { id: '5', name: 'Stock Market', amount: 24620.41, category: CategoryType.INVESTMENTS },
-  { id: '6', name: 'Crypto', amount: 71835.48, category: CategoryType.INVESTMENTS },
-  { id: '7', name: 'Bonds', amount: 5271.96, category: CategoryType.INVESTMENTS },
-  { id: '8', name: 'Brokerage', amount: 12289, category: CategoryType.INVESTMENTS },
+  { id: '4', name: 'Nu Account', amount: 192258, category: 'investments' },
+  { id: '5', name: 'Stock Market', amount: 24620.41, category: 'investments' },
+  { id: '6', name: 'Crypto', amount: 71835.48, category: 'investments' },
+  { id: '7', name: 'Bonds', amount: 5271.96, category: 'investments' },
+  { id: '8', name: 'Brokerage', amount: 12289, category: 'investments' },
   // Liquid Cash
-  { id: '9', name: 'Main Bank', amount: 0, category: CategoryType.LIQUID_CASH },
-  { id: '10', name: 'Wallet', amount: 550, category: CategoryType.LIQUID_CASH },
-  { id: '11', name: 'Vouchers', amount: 657, category: CategoryType.LIQUID_CASH },
+  { id: '9', name: 'Main Bank', amount: 0, category: 'liquid_cash' },
+  { id: '10', name: 'Wallet', amount: 550, category: 'liquid_cash' },
+  { id: '11', name: 'Vouchers', amount: 657, category: 'liquid_cash' },
   // Retirement
-  { id: '12', name: '401k / PPR', amount: 4142, category: CategoryType.RETIREMENT },
-  { id: '13', name: 'Pension Fund', amount: 751852.36, category: CategoryType.RETIREMENT },
+  { id: '12', name: '401k / PPR', amount: 4142, category: 'retirement' },
+  { id: '13', name: 'Pension Fund', amount: 751852.36, category: 'retirement' },
 ];
 
 // Ordered Newest to Oldest for correct display in table and chart logic

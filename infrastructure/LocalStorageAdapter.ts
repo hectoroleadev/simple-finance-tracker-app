@@ -1,18 +1,18 @@
 
 import { FinanceRepository } from '../domain/ports';
-import { FinanceItem, HistoryEntry, ItemRevision } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES } from '../types';
 import { INITIAL_ITEMS, INITIAL_HISTORY } from '../constants';
 
 const KEYS = {
   ITEMS: 'finance_items_v3',
-  HISTORY: 'finance_history_v3'
+  HISTORY: 'finance_history_v3',
+  CATEGORIES: 'finance_categories_v1',
 };
 
 export class LocalStorageAdapter implements FinanceRepository {
   async getItems(): Promise<FinanceItem[]> {
     try {
       const saved = localStorage.getItem(KEYS.ITEMS);
-      // Simulate network delay for realism if needed, but keeping it fast for local
       return saved ? JSON.parse(saved) : INITIAL_ITEMS;
     } catch (error) {
       console.error('Error loading items from local storage', error);
@@ -38,8 +38,8 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
-  async getItemHistory(id: string): Promise<ItemRevision[]> {
-    return []; // Local storage doesn't track per-item history in this version
+  async getItemHistory(_id: string): Promise<ItemRevision[]> {
+    return []; // Local storage doesn't track per-item history
   }
 
   async getHistory(): Promise<HistoryEntry[]> {
@@ -49,21 +49,12 @@ export class LocalStorageAdapter implements FinanceRepository {
 
       const parsed = JSON.parse(saved);
 
-      // Migration: If legacy data (missing date field), add a synthetic date based on month/year if available, or current date
       return parsed.map((item: any) => {
         if (!item.date && item.year && item.month) {
-          // Attempt to convert "MonthName" to month index
           const monthIndex = new Date(`${item.month} 1, 2000`).getMonth();
           const month = isNaN(monthIndex) ? 0 : monthIndex;
-          // Default to the 1st of the month
           const date = new Date(item.year, month, 1);
-          return {
-            ...item,
-            date: date.toISOString(),
-            // Clean up old fields
-            year: undefined,
-            month: undefined
-          };
+          return { ...item, date: date.toISOString(), year: undefined, month: undefined };
         }
         return item;
       });
@@ -88,6 +79,24 @@ export class LocalStorageAdapter implements FinanceRepository {
       await this.saveHistory(newHistory);
     } catch (error) {
       console.error('Error deleting history item from local storage', error);
+    }
+  }
+
+  async getCategories(): Promise<Category[]> {
+    try {
+      const saved = localStorage.getItem(KEYS.CATEGORIES);
+      return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+    } catch (error) {
+      console.error('Error loading categories from local storage', error);
+      return DEFAULT_CATEGORIES;
+    }
+  }
+
+  async saveCategories(categories: Category[]): Promise<void> {
+    try {
+      localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(categories));
+    } catch (error) {
+      console.error('Error saving categories to local storage', error);
     }
   }
 }

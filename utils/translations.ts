@@ -8,7 +8,8 @@ export const translations = {
     history: "History",
     analysis: "Analysis",
     savings: "Savings",
-    totalDebt: "Total Debt",
+    totalIncome: "Total Income",
+    totalDebt: "Total Expenses",
     retirementCapital: "Retirement Capital",
     netBalance: "Net Balance",
     periodClose: "Period Close",
@@ -119,6 +120,21 @@ export const translations = {
         toggleTheme: "Toggle dark/light theme",
         mobileNote: "Some shortcuts may only be available on desktop."
       }
+    },
+    categoriesManager: {
+      title: "Manage Categories",
+      addCategory: "New Category",
+      editCategory: "Edit Category",
+      categoryName: "Name",
+      categoryEffect: "Balance Effect",
+      effectPositive: "➕ Positive (Income)",
+      effectNegative: "➖ Negative (Expense)",
+      effectInformative: "ℹ️ Informative (no effect)",
+      save: "Save",
+      saving: "Saving...",
+      deleteCategoryTitle: "Delete Category",
+      deleteCategoryMessage: "Are you sure you want to delete this category? Items in this category will remain but won't appear in the dashboard.",
+      confirmDeleteCategory: "Delete Category"
     }
   },
   es: {
@@ -129,7 +145,8 @@ export const translations = {
     history: "Historial",
     analysis: "Análisis",
     savings: "Ahorro Patrimonio",
-    totalDebt: "Deuda Total",
+    totalIncome: "Total Ingresos",
+    totalDebt: "Gastos Totales",
     retirementCapital: "Capital Retiro",
     netBalance: "Balance Neto",
     periodClose: "Cierre de Período",
@@ -240,6 +257,21 @@ export const translations = {
         toggleTheme: "Alternar tema claro/oscuro",
         mobileNote: "Algunos atajos solo están disponibles en teclado físico."
       }
+    },
+    categoriesManager: {
+      title: "Administrar Categorías",
+      addCategory: "Nueva Categoría",
+      editCategory: "Editar Categoría",
+      categoryName: "Nombre",
+      categoryEffect: "Efecto en el balance",
+      effectPositive: "➕ Positivo (Ingreso)",
+      effectNegative: "➖ Negativo (Gasto)",
+      effectInformative: "ℹ️ Informativo (sin efecto)",
+      save: "Guardar",
+      saving: "Guardando...",
+      deleteCategoryTitle: "Eliminar Categoría",
+      deleteCategoryMessage: "¿Estás seguro de que deseas eliminar esta categoría? Los elementos de esta categoría permanecerán pero no aparecerán en el resumen.",
+      confirmDeleteCategory: "Eliminar Categoría"
     }
   }
 };

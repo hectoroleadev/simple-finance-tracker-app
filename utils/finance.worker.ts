@@ -1,24 +1,27 @@
 
-import { FinanceItem, CategoryType, HistoryEntry, FinanceTotals } from '../types';
+import { FinanceItem, Category, BalanceEffect, HistoryEntry, FinanceTotals } from '../types';
 
-// Logic from finance.logic.ts moved to worker for background processing
-const calculateTotals = (items: FinanceItem[]): FinanceTotals => {
-    const getCategorySum = (items: FinanceItem[], cat: CategoryType) => {
-        return items
-            .filter(i => i.category === cat)
-            .reduce((sum, item) => sum + item.amount, 0);
-    };
+// Inline dynamic totals calculation for the worker context
+const calculateTotals = (items: FinanceItem[], categories: Category[]): FinanceTotals => {
+    const categoryMap = new Map(categories.map((c: Category) => [c.id, c]));
 
-    const debt = getCategorySum(items, CategoryType.DEBT);
-    const investments = getCategorySum(items, CategoryType.INVESTMENTS);
-    const liquid = getCategorySum(items, CategoryType.LIQUID_CASH);
-    const pending = getCategorySum(items, CategoryType.PENDING_PAYMENTS);
-    const retirement = getCategorySum(items, CategoryType.RETIREMENT);
+    let income = 0;
+    let expenses = 0;
+    let informative = 0;
 
-    const savings = investments + liquid + pending;
-    const balance = savings - debt;
+    for (const item of items) {
+        const cat = categoryMap.get(item.category);
+        if (!cat) continue;
+        if (cat.effect === BalanceEffect.POSITIVE) {
+            income += item.amount;
+        } else if (cat.effect === BalanceEffect.NEGATIVE) {
+            expenses += item.amount;
+        } else if (cat.effect === BalanceEffect.INFORMATIVE) {
+            informative += item.amount;
+        }
+    }
 
-    return { debt, investments, liquid, pending, retirement, savings, balance };
+    return { income, expenses, balance: income - expenses, informative };
 };
 
 const prepareChartData = (history: HistoryEntry[]) => {
@@ -27,7 +30,7 @@ const prepareChartData = (history: HistoryEntry[]) => {
         const monthShort = isNaN(date.getTime()) ? '---' : date.toLocaleString('default', { month: 'short' });
         return {
             name: monthShort,
-            date: h.date, // Unique identifier (ISO string)
+            date: h.date,
             Balance: h.balance,
             Debt: h.debt,
             Retirement: h.retirement,
@@ -39,7 +42,8 @@ self.onmessage = (e: MessageEvent) => {
     const { type, payload } = e.data;
 
     if (type === 'CALCULATE_TOTALS') {
-        const totals = calculateTotals(payload);
+        const { items, categories } = payload;
+        const totals = calculateTotals(items, categories);
         self.postMessage({ type: 'TOTALS_CALCULATED', payload: totals });
     } else if (type === 'PREPARE_CHART_DATA') {
         const chartData = prepareChartData(payload);

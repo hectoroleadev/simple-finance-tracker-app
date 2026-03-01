@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FinanceItem, CategoryType } from '../types';
+import { FinanceItem } from '../types';
 import { Plus, Trash2, Edit2, Check, Clock } from 'lucide-react';
 import { useItemEditor } from '../hooks/useItemEditor';
 import { formatCurrency } from '../utils/format';
@@ -11,12 +11,12 @@ import ItemHistoryModal from './ItemHistoryModal';
 
 interface CategoryTableProps {
   title: string;
-  type: CategoryType;
+  categoryId: string;
   items: FinanceItem[];
   color: 'green' | 'red' | 'yellow';
   onUpdateItem: (id: string, name: string, amount: number) => void;
   onDeleteItem: (id: string) => void;
-  onAddItem: (category: CategoryType) => FinanceItem;
+  onAddItem: (categoryId: string) => FinanceItem;
 }
 
 const CategoryRow = React.memo(({
@@ -96,7 +96,7 @@ const CategoryRow = React.memo(({
 
 const CategoryTable: React.FC<CategoryTableProps> = ({
   title,
-  type,
+  categoryId,
   items,
   color,
   onUpdateItem,
@@ -128,7 +128,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   }[color];
 
   const handleAddItem = () => {
-    const newItem = onAddItem(type);
+    const newItem = onAddItem(categoryId);
     startEditing(newItem, true);
   };
 

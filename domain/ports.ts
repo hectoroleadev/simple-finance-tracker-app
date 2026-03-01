@@ -1,5 +1,5 @@
 
-import { FinanceItem, HistoryEntry, ItemRevision } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category } from '../types';
 
 export interface FinanceRepository {
   getItems(): Promise<FinanceItem[]>;
@@ -9,4 +9,7 @@ export interface FinanceRepository {
   getHistory(): Promise<HistoryEntry[]>;
   saveHistory(history: HistoryEntry[]): Promise<void>;
   deleteHistoryItem(id: string): Promise<void>;
+  getCategories(): Promise<Category[]>;
+  saveCategories(categories: Category[]): Promise<void>;
 }
+

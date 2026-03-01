@@ -1,27 +1,38 @@
 
-export enum CategoryType {
-  INVESTMENTS = 'investments',
-  LIQUID_CASH = 'liquid_cash',
-  PENDING_PAYMENTS = 'pending_payments',
-  RETIREMENT = 'retirement',
-  DEBT = 'debt'
+export enum BalanceEffect {
+  POSITIVE = 'POSITIVE',     // Increases balance (income/assets)
+  NEGATIVE = 'NEGATIVE',     // Decreases balance (debts/expenses)
+  INFORMATIVE = 'INFORMATIVE' // Doesn't affect balance (e.g. retirement/pension)
 }
+
+export interface Category {
+  id: string;
+  name: string;
+  effect: BalanceEffect;
+  color?: string;
+}
+
+// Default categories (used as seeds for existing data compatibility)
+export const DEFAULT_CATEGORIES: Category[] = [
+  { id: 'investments', name: 'Investments', effect: BalanceEffect.POSITIVE, color: 'green' },
+  { id: 'liquid_cash', name: 'Liquid Cash', effect: BalanceEffect.POSITIVE, color: 'blue' },
+  { id: 'pending_payments', name: 'Pending Payments', effect: BalanceEffect.POSITIVE, color: 'yellow' },
+  { id: 'debt', name: 'Debt', effect: BalanceEffect.NEGATIVE, color: 'red' },
+  { id: 'retirement', name: 'Retirement', effect: BalanceEffect.INFORMATIVE, color: 'purple' },
+];
 
 export interface FinanceItem {
   id: string;
   name: string;
   amount: number;
-  category: CategoryType;
+  category: string; // references Category.id
 }
 
 export interface FinanceTotals {
-  debt: number;
-  investments: number;
-  liquid: number;
-  pending: number;
-  retirement: number;
-  savings: number;
-  balance: number;
+  income: number;      // Sum of POSITIVE categories
+  expenses: number;    // Sum of NEGATIVE categories
+  balance: number;     // income - expenses
+  informative: number; // Sum of INFORMATIVE categories
 }
 
 export interface HistoryEntry {
@@ -39,7 +50,7 @@ export interface ItemRevision {
   type: 'create' | 'update' | 'delete';
   name: string;
   amount: number;
-  category: CategoryType;
+  category: string;
   raw?: any;
 }
 
@@ -47,6 +58,7 @@ export type TabType = 'dashboard' | 'history' | 'charts';
 
 export interface FinanceContextType {
   items: FinanceItem[];
+  categories: Category[];
   totals: FinanceTotals;
   history: HistoryEntry[];
   chartData: any[];
@@ -55,10 +67,13 @@ export interface FinanceContextType {
   actions: {
     updateItem: (id: string, name: string, amount: number) => void;
     deleteItem: (id: string) => void;
-    addItem: (category: CategoryType) => FinanceItem;
+    addItem: (categoryId: string) => FinanceItem;
     snapshotHistory: () => boolean;
     deleteHistoryItem: (id: string) => void;
     getItemHistory: (id: string) => Promise<ItemRevision[]>;
+    addCategory: (category: Category) => Promise<void>;
+    updateCategory: (category: Category) => Promise<void>;
+    deleteCategory: (id: string) => Promise<void>;
   };
   onSnapshot: () => void;
 }

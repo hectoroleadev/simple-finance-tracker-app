@@ -6,16 +6,12 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import DashboardPage from '../pages/DashboardPage';
 import { FinanceContext } from '../hooks/useFinanceData';
 import { LanguageProvider } from '../context/LanguageContext';
-import { CategoryType } from '../types';
+import { DEFAULT_CATEGORIES } from '../types';
 
 // Mock context values
 const mockTotals = {
-    liquid: 1000,
-    investments: 5000,
-    pending: 500,
-    debt: 200,
-    retirement: 10000,
-    savings: 6500,
+    income: 6500,
+    expenses: 200,
     balance: 6300
 };
 
@@ -24,16 +20,22 @@ const mockActions = {
     updateItem: vi.fn(),
     deleteItem: vi.fn(),
     snapshotHistory: vi.fn(),
+    addCategory: vi.fn(),
+    updateCategory: vi.fn(),
+    deleteCategory: vi.fn(),
+    getItemHistory: vi.fn().mockResolvedValue([]),
 };
 
 const mockContextValue = {
     items: [],
+    categories: DEFAULT_CATEGORIES,
     history: [],
     totals: mockTotals,
     chartData: [],
     loading: false,
     error: null,
-    actions: mockActions
+    actions: mockActions,
+    onSnapshot: vi.fn()
 };
 
 const renderWithContext = (ui: React.ReactElement) => {
@@ -54,7 +56,7 @@ describe('DashboardPage Integration', () => {
     it('renders stats cards with correct totals', () => {
         renderWithContext(<DashboardPage />);
 
-        // Check if balance and savings are visible (formatted)
+        // Check if balance and income are visible (formatted)
         expect(screen.getByText(/6,300/)).toBeDefined();
         expect(screen.getByText(/6,500/)).toBeDefined();
     });
@@ -64,8 +66,6 @@ describe('DashboardPage Integration', () => {
 
         // Get all "add" buttons (plus icons)
         const addButtons = screen.getAllByRole('button');
-        // Usually the ones with plus icons. Let's filter by those that have plus icon or just click the first one if we can't distinguish easily in test
-        // Better: Filter by those that are in a category section.
         fireEvent.click(addButtons[0]);
 
         expect(mockActions.addItem).toHaveBeenCalled();
@@ -74,7 +74,7 @@ describe('DashboardPage Integration', () => {
     it('triggers snapshotHistory when "Save state" button is clicked', () => {
         renderWithContext(<DashboardPage />);
 
-        const snapshotButton = screen.getByText(/Guardar estado actual/i) || screen.getByText(/Save current state/i);
+        const snapshotButton = screen.getByText(/Guardar estado actual/i) || screen.getByText(/Snapshot/i);
         fireEvent.click(snapshotButton);
 
         expect(mockActions.snapshotHistory).toHaveBeenCalled();

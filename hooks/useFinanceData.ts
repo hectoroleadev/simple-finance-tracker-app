@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FinanceItem, HistoryEntry, ItemRevision, CategoryType, FinanceContextType, FinanceTotals } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, FinanceContextType, FinanceTotals, DEFAULT_CATEGORIES } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -39,7 +39,7 @@ export const useFinanceData = () => {
   }, [getIdToken, isLoggedIn, refreshAuthTokens, logout]);
 
   // --- Web Worker Setup ---
-  const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([]));
+  const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([], DEFAULT_CATEGORIES));
   const [chartData, setChartData] = useState<any[]>([]);
   const workerRef = useRef<Worker | null>(null);
 
@@ -75,7 +75,19 @@ export const useFinanceData = () => {
         amount: Number(item.amount) || 0
       }));
     },
-    enabled: isLoggedIn, // Only run query if the user is authenticated
+    enabled: isLoggedIn,
+  });
+
+  const {
+    data: categories = DEFAULT_CATEGORIES,
+    isLoading: isLoadingCategories,
+    error: categoriesError
+  } = useQuery({
+    queryKey: ['categories', isLoggedIn],
+    queryFn: async () => {
+      return await repository.getCategories();
+    },
+    enabled: isLoggedIn,
   });
 
   const {
@@ -86,37 +98,32 @@ export const useFinanceData = () => {
     queryKey: ['history', isLoggedIn],
     queryFn: async () => {
       const fetchedHistory = await repository.getHistory();
-      // Ensure all numeric fields are actually numbers, and sort history by date descending
       return fetchedHistory
         .map(entry => ({
           ...entry,
           debt: Number(entry.debt) || 0,
-          investments: Number(entry.investments) || 0,
-          liquid: Number(entry.liquid) || 0,
-          pending: Number(entry.pending) || 0,
-          retirement: Number(entry.retirement) || 0,
           savings: Number(entry.savings) || 0,
           balance: Number(entry.balance) || 0,
+          retirement: Number(entry.retirement) || 0,
         }))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     },
     enabled: isLoggedIn,
   });
 
   // Derived state loading/error
-  const loading = (isLoadingItems || isLoadingHistory) && isLoggedIn;
-  const errorObj = itemsError || historyError;
+  const loading = (isLoadingItems || isLoadingHistory || isLoadingCategories) && isLoggedIn;
+  const errorObj = itemsError || historyError || categoriesError;
   const error = errorObj ? (errorObj.message || t('errors.loadFailed') || 'Failed to load data') : null;
 
   // --- Trigger Worker on Data Changes ---
   useEffect(() => {
-    if (workerRef.current && items.length > 0) {
-      workerRef.current.postMessage({ type: 'CALCULATE_TOTALS', payload: items });
+    if (workerRef.current && items.length > 0 && categories.length > 0) {
+      workerRef.current.postMessage({ type: 'CALCULATE_TOTALS', payload: { items, categories } });
     } else if (items.length === 0) {
-      setTotals(FinanceCalculator.calculateTotals([]));
+      setTotals(FinanceCalculator.calculateTotals([], categories.length > 0 ? categories : DEFAULT_CATEGORIES));
     }
-  }, [items]);
+  }, [items, categories]);
 
   useEffect(() => {
     if (workerRef.current && history.length > 0) {
@@ -128,7 +135,6 @@ export const useFinanceData = () => {
 
   // --- Mutations (TanStack Query Optimistic Updates) ---
 
-  // Update Items directly in the backend
   const saveItemsMutation = useMutation({
     mutationFn: (newItems: FinanceItem[]) => repository.saveItems(newItems),
     onMutate: async (newItems) => {
@@ -148,16 +154,13 @@ export const useFinanceData = () => {
     },
   });
 
-  // Delete single item (combining local change with batch save behavior of the API)
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
-      // The current API Gateway Adapter assumes /items/{id} for delete
       await repository.deleteItem(id);
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ['items'] });
       const previousItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]);
-
       if (previousItems) {
         queryClient.setQueryData(['items', isLoggedIn], previousItems.filter(i => i.id !== id));
       }
@@ -198,7 +201,6 @@ export const useFinanceData = () => {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: ['history'] });
       const previousHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn]);
-
       if (previousHistory) {
         queryClient.setQueryData(['history', isLoggedIn], previousHistory.filter(i => i.id !== id));
       }
@@ -215,6 +217,21 @@ export const useFinanceData = () => {
     }
   });
 
+  const saveCategoriesMutation = useMutation({
+    mutationFn: (cats: Category[]) => repository.saveCategories(cats),
+    onMutate: async (newCats) => {
+      console.log('[useFinanceData] Mutating categories:', newCats);
+      await queryClient.cancelQueries({ queryKey: ['categories', isLoggedIn] });
+      const prev = queryClient.getQueryData<Category[]>(['categories', isLoggedIn]);
+      queryClient.setQueryData(['categories', isLoggedIn], newCats);
+      return { prev };
+    },
+    onError: (err, newCats, context: any) => {
+      console.error('Failed to save categories', err);
+      if (context?.prev) queryClient.setQueryData(['categories', isLoggedIn], context.prev);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['categories', isLoggedIn] }),
+  });
 
   // --- Actions (Use Cases) ---
   const actions = {
@@ -228,13 +245,13 @@ export const useFinanceData = () => {
       deleteItemMutation.mutate(id);
     },
 
-    addItem: (category: CategoryType) => {
+    addItem: (categoryId: string) => {
       const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]) || [];
       const newItem: FinanceItem = {
         id: crypto.randomUUID(),
         name: 'New Item',
         amount: 0,
-        category,
+        category: categoryId,
       };
       saveItemsMutation.mutate([...prevItems, newItem]);
       return newItem;
@@ -252,22 +269,45 @@ export const useFinanceData = () => {
     },
 
     getItemHistory: async (id: string) => {
-      // Direct query for item history as it's typically fetched on-demand per item in a modal
       try {
         return await queryClient.fetchQuery({
           queryKey: ['itemHistory', id],
           queryFn: () => repository.getItemHistory(id),
-          staleTime: 1000 * 60, // 1 minute stale time for individual histories
+          staleTime: 1000 * 60,
         });
       } catch (err) {
         console.error('Failed to load item history', err);
         throw err;
       }
-    }
+    },
+
+    addCategory: async (category: Category): Promise<void> => {
+      // Merge safety: Ensure missing default categories used by items are included on the first save
+      const usedIds = new Set(items.map(i => i.category));
+      const nextBatch = [...categories];
+      DEFAULT_CATEGORIES.forEach(def => {
+        if (usedIds.has(def.id) && !nextBatch.some(c => c.id === def.id)) {
+          nextBatch.push(def);
+        }
+      });
+
+      const newCat = { ...category, id: category.id || (window.crypto?.randomUUID?.() || Date.now().toString()) };
+      await saveCategoriesMutation.mutateAsync([...nextBatch, newCat]);
+    },
+
+    updateCategory: async (category: Category): Promise<void> => {
+      const next = categories.map(c => c.id === category.id ? category : c);
+      await saveCategoriesMutation.mutateAsync(next);
+    },
+
+    deleteCategory: async (id: string): Promise<void> => {
+      await saveCategoriesMutation.mutateAsync(categories.filter(c => c.id !== id));
+    },
   };
 
   return {
     items,
+    categories,
     history,
     totals,
     chartData,

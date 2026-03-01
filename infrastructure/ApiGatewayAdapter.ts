@@ -1,6 +1,6 @@
 
 import { FinanceRepository } from '../domain/ports';
-import { FinanceItem, HistoryEntry, ItemRevision } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES } from '../types';
 
 export class ApiGatewayAdapter implements FinanceRepository {
   private apiUrl: string;
@@ -234,4 +234,39 @@ export class ApiGatewayAdapter implements FinanceRepository {
       throw error;
     }
   }
+
+  async getCategories(): Promise<Category[]> {
+    try {
+      const response = await this._makeRequest(
+        `${this.apiUrl}/categories`,
+        { method: 'GET', headers: this.headers },
+        'fetch categories'
+      );
+      const data = await response.json();
+      const cats: Category[] = data.categories || [];
+      // If the table is empty on first use, seed defaults so the UI has something to show
+      return cats.length > 0 ? cats : DEFAULT_CATEGORIES;
+    } catch (error) {
+      console.error('API Gateway Error (getCategories):', error);
+      throw error;
+    }
+  }
+
+  async saveCategories(categories: Category[]): Promise<void> {
+    try {
+      await this._makeRequest(
+        `${this.apiUrl}/categories`,
+        {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify({ categories }),
+        },
+        'save categories'
+      );
+    } catch (error) {
+      console.error('API Gateway Error (saveCategories):', error);
+      throw error;
+    }
+  }
 }
+
