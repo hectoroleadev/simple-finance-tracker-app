@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FinanceItem, HistoryEntry, ItemRevision, Category, FinanceContextType, FinanceTotals, DEFAULT_CATEGORIES } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, BalanceEffect, FinanceContextType, FinanceTotals, DEFAULT_CATEGORIES } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -79,7 +79,7 @@ export const useFinanceData = () => {
   });
 
   const {
-    data: categories = DEFAULT_CATEGORIES,
+    data: rawCategories = DEFAULT_CATEGORIES,
     isLoading: isLoadingCategories,
     error: categoriesError
   } = useQuery({
@@ -89,6 +89,8 @@ export const useFinanceData = () => {
     },
     enabled: isLoggedIn,
   });
+
+  const categories = useMemo(() => rawCategories, [rawCategories]);
 
   const {
     data: history = [],

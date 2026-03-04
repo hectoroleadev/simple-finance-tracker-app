@@ -12,7 +12,8 @@ import { DEFAULT_CATEGORIES } from '../types';
 const mockTotals = {
     income: 6500,
     expenses: 200,
-    balance: 6300
+    balance: 6300,
+    informative: 1500
 };
 
 const mockActions = {
@@ -56,9 +57,10 @@ describe('DashboardPage Integration', () => {
     it('renders stats cards with correct totals', () => {
         renderWithContext(<DashboardPage />);
 
-        // Check if balance and income are visible (formatted)
+        // Check if balance, income and retirement are visible (formatted)
         expect(screen.getByText(/6,300/)).toBeDefined();
         expect(screen.getByText(/6,500/)).toBeDefined();
+        expect(screen.getByText(/1,500/)).toBeDefined();
     });
 
     it('triggers addItem action when "+" button is clicked', () => {

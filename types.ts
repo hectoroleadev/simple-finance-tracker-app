@@ -2,7 +2,8 @@
 export enum BalanceEffect {
   POSITIVE = 'POSITIVE',     // Increases balance (income/assets)
   NEGATIVE = 'NEGATIVE',     // Decreases balance (debts/expenses)
-  INFORMATIVE = 'INFORMATIVE' // Doesn't affect balance (e.g. retirement/pension)
+  INFORMATIVE = 'INFORMATIVE', // Doesn't affect balance (hidden from dashboard)
+  INFORMATIVE_STAT = 'INFORMATIVE_STAT' // Doesn't affect balance but shows in dashboard (e.g. retirement)
 }
 
 export interface Category {
@@ -18,7 +19,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'liquid_cash', name: 'Liquid Cash', effect: BalanceEffect.POSITIVE, color: 'blue' },
   { id: 'pending_payments', name: 'Pending Payments', effect: BalanceEffect.POSITIVE, color: 'yellow' },
   { id: 'debt', name: 'Debt', effect: BalanceEffect.NEGATIVE, color: 'red' },
-  { id: 'retirement', name: 'Retirement', effect: BalanceEffect.INFORMATIVE, color: 'purple' },
+  { id: 'retirement', name: 'Retirement', effect: BalanceEffect.INFORMATIVE_STAT, color: 'purple' },
 ];
 
 export interface FinanceItem {

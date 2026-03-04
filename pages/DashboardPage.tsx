@@ -3,6 +3,7 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
+  PiggyBank,
 } from 'lucide-react';
 import { BalanceEffect } from '../types';
 import StatCard from '../components/StatCard';
@@ -34,10 +35,11 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard label={t('totalIncome')} value={totals.income} color="green" icon={<TrendingUp size={18} />} />
         <StatCard label={t('totalDebt')} value={totals.expenses} color="red" icon={<TrendingDown size={18} />} />
         <StatCard label={t('netBalance')} value={totals.balance} color="blue" icon={<Wallet size={18} />} />
+        <StatCard label={t('retirementCapital')} value={totals.informative} color="yellow" icon={<PiggyBank size={18} />} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 items-start">

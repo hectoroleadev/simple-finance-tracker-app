@@ -16,7 +16,7 @@ export const FinanceCalculator = {
         income += item.amount;
       } else if (cat.effect === BalanceEffect.NEGATIVE) {
         expenses += item.amount;
-      } else if (cat.effect === BalanceEffect.INFORMATIVE) {
+      } else if (cat.effect === BalanceEffect.INFORMATIVE_STAT) {
         informative += item.amount;
       }
     }

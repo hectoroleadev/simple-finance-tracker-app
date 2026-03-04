@@ -15,12 +15,14 @@ const EFFECT_OPTIONS = [
     { value: BalanceEffect.POSITIVE, labelKey: 'effectPositive' },
     { value: BalanceEffect.NEGATIVE, labelKey: 'effectNegative' },
     { value: BalanceEffect.INFORMATIVE, labelKey: 'effectInformative' },
+    { value: BalanceEffect.INFORMATIVE_STAT, labelKey: 'effectInformativeStat' },
 ];
 
 const EFFECT_COLORS = {
     [BalanceEffect.POSITIVE]: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
     [BalanceEffect.NEGATIVE]: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
-    [BalanceEffect.INFORMATIVE]: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+    [BalanceEffect.INFORMATIVE]: 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800',
+    [BalanceEffect.INFORMATIVE_STAT]: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
 };
 
 const EMPTY_FORM: Omit<Category, 'id'> = { name: '', effect: BalanceEffect.POSITIVE };
@@ -105,7 +107,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                     {categories.map(cat => (
                         <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[cat.effect]}`}>
-                                {cat.effect === BalanceEffect.POSITIVE ? '➕' : cat.effect === BalanceEffect.NEGATIVE ? '➖' : 'ℹ️'}
+                                {cat.effect === BalanceEffect.POSITIVE ? '➕' : cat.effect === BalanceEffect.NEGATIVE ? '➖' : cat.effect === BalanceEffect.INFORMATIVE_STAT ? '📊' : 'ℹ️'}
                             </span>
                             <span className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-200">{cat.name}</span>
                             <div className="flex gap-2">
