@@ -36,8 +36,10 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     chartData,
     loading,
     error,
-    actions,
-    onSnapshot: handleSnapshot
+    actions: {
+      ...actions,
+      snapshot: handleSnapshot
+    }
   };
 
   if (loading) {

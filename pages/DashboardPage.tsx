@@ -14,7 +14,7 @@ import { useFinanceContext } from '../hooks/useFinanceData';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 const DashboardPage: React.FC = () => {
-  const { items, categories, totals, actions, onSnapshot } = useFinanceContext();
+  const { items, categories, totals, actions } = useFinanceContext();
   const { t } = useLanguage();
 
   const getItemsByCategory = (catId: string) => items.filter(i => i.category === catId);
@@ -22,7 +22,7 @@ const DashboardPage: React.FC = () => {
   // Page-specific keyboard shortcuts
   useKeyboardShortcuts({
     shortcuts: [
-      { key: 's', description: 'Take snapshot', action: onSnapshot },
+      { key: 's', description: 'Take snapshot', action: actions.snapshot },
     ],
   });
 
@@ -74,7 +74,7 @@ const DashboardPage: React.FC = () => {
           </div>
 
           <button
-            onClick={onSnapshot}
+            onClick={actions.snapshot}
             className="w-full bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
           >
             {t('snapshot')}

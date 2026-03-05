@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, createContext, useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FinanceItem, HistoryEntry, ItemRevision, Category, BalanceEffect, FinanceContextType, FinanceTotals, DEFAULT_CATEGORIES } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, BalanceEffect, FinanceContextType, FinanceTotals, ChartDataPoint, DEFAULT_CATEGORIES } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -40,7 +40,7 @@ export const useFinanceData = () => {
 
   // --- Web Worker Setup ---
   const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([], DEFAULT_CATEGORIES));
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
@@ -151,7 +151,7 @@ export const useFinanceData = () => {
       queryClient.setQueryData(['items', isLoggedIn], newItems);
       return { previousItems };
     },
-    onError: (err, newItems, context: any) => {
+    onError: (err, newItems, context: { previousItems: FinanceItem[] | undefined } | undefined) => {
       console.error('Failed to save items', err);
       if (context?.previousItems) {
         queryClient.setQueryData(['items', isLoggedIn], context.previousItems);
@@ -174,7 +174,7 @@ export const useFinanceData = () => {
       }
       return { previousItems };
     },
-    onError: (err, id, context: any) => {
+    onError: (err, id, context: { previousItems: FinanceItem[] | undefined } | undefined) => {
       console.error('Failed to delete item', err);
       if (context?.previousItems) {
         queryClient.setQueryData(['items', isLoggedIn], context.previousItems);
@@ -193,7 +193,7 @@ export const useFinanceData = () => {
       queryClient.setQueryData(['history', isLoggedIn], newHistory);
       return { previousHistory };
     },
-    onError: (err, newHistory, context: any) => {
+    onError: (err, newHistory, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
       console.error('Failed to save history', err);
       if (context?.previousHistory) {
         queryClient.setQueryData(['history', isLoggedIn], context.previousHistory);
@@ -214,7 +214,7 @@ export const useFinanceData = () => {
       }
       return { previousHistory };
     },
-    onError: (err, id, context: any) => {
+    onError: (err, id, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
       console.error('Failed to delete history item', err);
       if (context?.previousHistory) {
         queryClient.setQueryData(['history', isLoggedIn], context.previousHistory);
@@ -234,7 +234,7 @@ export const useFinanceData = () => {
       queryClient.setQueryData(['categories', isLoggedIn], newCats);
       return { prev };
     },
-    onError: (err, newCats, context: any) => {
+    onError: (err, newCats, context: { prev: Category[] | undefined } | undefined) => {
       console.error('Failed to save categories', err);
       if (context?.prev) queryClient.setQueryData(['categories', isLoggedIn], context.prev);
     },

@@ -37,6 +37,14 @@ export interface FinanceTotals {
   informative: number; // Sum of INFORMATIVE categories
 }
 
+export interface ChartDataPoint {
+  name: string;        // Short month label (e.g. "Jan")
+  date: string;        // ISO date string
+  Balance: number;
+  Debt: number;
+  Retirement: number;
+}
+
 export interface HistoryEntry {
   id: string;
   date: string; // ISO Date string
@@ -77,6 +85,6 @@ export interface FinanceContextType {
     updateCategory: (category: Category) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
     reorderCategories: (categories: Category[]) => Promise<void>;
+    snapshot: () => void;
   };
-  onSnapshot: () => void;
 }

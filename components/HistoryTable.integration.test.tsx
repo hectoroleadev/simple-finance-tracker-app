@@ -4,7 +4,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import HistoryTable from './HistoryTable';
-import { CategoryType, HistoryEntry } from '../types';
+import { Category, HistoryEntry } from '../types';
 import { LanguageProvider } from '../context/LanguageContext';
 
 const mockHistory: HistoryEntry[] = [

@@ -140,4 +140,54 @@ describe('useFinanceData Hook', () => {
 
     expect(result.current.history).toHaveLength(1);
   });
+
+  // --- Category Tests ---
+
+  it('adds a new category', async () => {
+    const { result } = renderHook(() => useFinanceData(), { wrapper });
+
+    await act(async () => {
+      await result.current.actions.addCategory({ id: 'cat-new', name: 'New Cat', effect: 'NEGATIVE' as any });
+    });
+
+    expect(result.current.categories).toContainEqual(expect.objectContaining({ id: 'cat-new', name: 'New Cat' }));
+  });
+
+  it('updates an existing category', async () => {
+    const { result } = renderHook(() => useFinanceData(), { wrapper });
+
+    // Default categories loaded... let's update 'housing'
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for initial load
+      await result.current.actions.updateCategory({ id: 'housing', name: 'Housing Updated', effect: 'NEGATIVE' as any });
+    });
+
+    const updatedCat = result.current.categories.find(c => c.id === 'housing');
+    expect(updatedCat?.name).toBe('Housing Updated');
+  });
+
+  it('deletes a category', async () => {
+    const { result } = renderHook(() => useFinanceData(), { wrapper });
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for initial load
+      await result.current.actions.deleteCategory('housing');
+    });
+
+    const deletedCat = result.current.categories.find(c => c.id === 'housing');
+    expect(deletedCat).toBeUndefined();
+  });
+
+  it('reorders categories', async () => {
+    const { result } = renderHook(() => useFinanceData(), { wrapper });
+
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for initial load
+      const reversed = [...result.current.categories].reverse();
+      await result.current.actions.reorderCategories(reversed);
+    });
+
+    // The order should be reflected and the save function should have been called
+    expect(mockSaveCategories).toHaveBeenCalled();
+  });
 });

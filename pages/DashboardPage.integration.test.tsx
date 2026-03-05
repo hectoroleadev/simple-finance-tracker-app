@@ -25,6 +25,7 @@ const mockActions = {
     updateCategory: vi.fn(),
     deleteCategory: vi.fn(),
     reorderCategories: vi.fn(),
+    snapshot: vi.fn(),
     getItemHistory: vi.fn().mockResolvedValue([]),
 };
 
@@ -36,8 +37,7 @@ const mockContextValue = {
     chartData: [],
     loading: false,
     error: null,
-    actions: mockActions,
-    onSnapshot: vi.fn()
+    actions: mockActions
 };
 
 const renderWithContext = (ui: React.ReactElement) => {
