@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, Edit2, Save, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Save, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
 import { Category, BalanceEffect } from '../types';
 import { useFinanceContext } from '../hooks/useFinanceData';
 import { useLanguage } from '../context/LanguageContext';
@@ -36,30 +36,71 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
     const [isAddNew, setIsAddNew] = useState(false);
     const [saving, setSaving] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    // Local order state — updated instantly on move, persisted only on close
+    const [localCategories, setLocalCategories] = useState<Category[]>([]);
+
+    // Sync local order whenever the source-of-truth changes (e.g. after external update)
+    useEffect(() => {
+        setLocalCategories(categories);
+    }, [categories]);
 
     if (!isOpen) return null;
 
+    const cm = (key: string) => t(`categoriesManager.${key}`);
+
+    // ── Reorder ──────────────────────────────────────────────────────────────
+    const moveCategory = (index: number, direction: 'up' | 'down') => {
+        setErrorMsg(null);
+        setLocalCategories(prev => {
+            const next = [...prev];
+            const targetIdx = direction === 'up' ? index - 1 : index + 1;
+            [next[index], next[targetIdx]] = [next[targetIdx], next[index]];
+            return next;
+        });
+    };
+
+    // ── Close: persist order only if it changed ───────────────────────────────
+    const handleClose = async () => {
+        const orderChanged = localCategories.some((cat, idx) => cat.id !== categories[idx]?.id);
+        if (orderChanged) {
+            try {
+                await actions.reorderCategories(localCategories);
+            } catch (err: any) {
+                setErrorMsg(err.message || 'Error saving order');
+                return; // keep modal open so the user can retry
+            }
+        }
+        onClose();
+    };
+
+    // ── Add / Edit form ───────────────────────────────────────────────────────
     const openNew = () => {
         setForm(EMPTY_FORM);
         setEditingId(null);
         setIsAddNew(true);
+        setErrorMsg(null);
     };
 
     const openEdit = (cat: Category) => {
         setForm({ name: cat.name, effect: cat.effect, color: cat.color });
         setEditingId(cat.id);
         setIsAddNew(false);
+        setErrorMsg(null);
     };
 
     const cancelForm = () => {
         setIsAddNew(false);
         setEditingId(null);
         setForm(EMPTY_FORM);
+        setErrorMsg(null);
     };
 
     const handleSave = async () => {
         if (!form.name.trim()) return;
         setSaving(true);
+        setErrorMsg(null);
         try {
             const id = isAddNew ? (window.crypto?.randomUUID?.() || Date.now().toString()) : editingId!;
             if (isAddNew) {
@@ -70,7 +111,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
             cancelForm();
         } catch (err: any) {
             console.error('handleSave error:', err);
-            alert(err.message || 'Error saving category');
+            setErrorMsg(err.message || 'Error saving category');
         } finally {
             setSaving(false);
         }
@@ -83,40 +124,35 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                 setDeletingId(null);
             } catch (err: any) {
                 console.error('handleDelete error:', err);
-                alert(err.message || 'Error deleting category');
+                setErrorMsg(err.message || 'Error deleting category');
+                setDeletingId(null);
             }
-        }
-    };
-
-    const cm = (key: string) => t(`categoriesManager.${key}`);
-
-    const moveCategory = async (index: number, direction: 'up' | 'down') => {
-        const newOrder = [...categories];
-        const targetIdx = direction === 'up' ? index - 1 : index + 1;
-        [newOrder[index], newOrder[targetIdx]] = [newOrder[targetIdx], newOrder[index]];
-        try {
-            await actions.reorderCategories(newOrder);
-        } catch (err: any) {
-            console.error('reorderCategories error:', err);
-            alert(err.message || 'Error reordering categories');
         }
     };
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleClose} />
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white">{cm('title')}</h2>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                    <button onClick={handleClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
+                {/* Inline error banner */}
+                {errorMsg && (
+                    <div className="mx-6 mt-3 flex items-start gap-2 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-sm text-rose-700 dark:text-rose-400">
+                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                        <span>{errorMsg}</span>
+                    </div>
+                )}
+
                 {/* Category List */}
                 <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
-                    {categories.map((cat, idx) => (
+                    {localCategories.map((cat, idx) => (
                         <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group">
                             {/* Reorder buttons */}
                             <div className="flex flex-col gap-0.5">
@@ -130,7 +166,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                                 </button>
                                 <button
                                     onClick={() => moveCategory(idx, 'down')}
-                                    disabled={idx === categories.length - 1}
+                                    disabled={idx === localCategories.length - 1}
                                     title={cm('moveDown')}
                                     className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
                                 >

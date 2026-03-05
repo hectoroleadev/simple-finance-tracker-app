@@ -24,6 +24,7 @@ const mockActions = {
     addCategory: vi.fn(),
     updateCategory: vi.fn(),
     deleteCategory: vi.fn(),
+    reorderCategories: vi.fn(),
     getItemHistory: vi.fn().mockResolvedValue([]),
 };
 

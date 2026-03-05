@@ -30,10 +30,10 @@ export const useFinanceData = () => {
     const apiUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
     if (apiUrl && isLoggedIn) {
-      console.log('Using API Gateway Repository:', apiUrl);
+      if (import.meta.env.DEV) console.log('Using API Gateway Repository:', apiUrl);
       return new ApiGatewayAdapter(apiUrl, getIdToken, refreshAuthTokens, logout);
     } else {
-      console.log('Using LocalStorage Repository (or not logged in)');
+      if (import.meta.env.DEV) console.log('Using LocalStorage Repository (or not logged in)');
       return new LocalStorageAdapter();
     }
   }, [getIdToken, isLoggedIn, refreshAuthTokens, logout]);
@@ -228,7 +228,7 @@ export const useFinanceData = () => {
   const saveCategoriesMutation = useMutation({
     mutationFn: (cats: Category[]) => repository.saveCategories(cats),
     onMutate: async (newCats) => {
-      console.log('[useFinanceData] Mutating categories:', newCats);
+      if (import.meta.env.DEV) console.log('[useFinanceData] Mutating categories:', newCats);
       await queryClient.cancelQueries({ queryKey: ['categories', isLoggedIn] });
       const prev = queryClient.getQueryData<Category[]>(['categories', isLoggedIn]);
       queryClient.setQueryData(['categories', isLoggedIn], newCats);
