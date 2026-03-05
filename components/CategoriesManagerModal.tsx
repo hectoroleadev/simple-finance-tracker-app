@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, Edit2, Save } from 'lucide-react';
+import { X, Plus, Trash2, Edit2, Save, ChevronUp, ChevronDown } from 'lucide-react';
 import { Category, BalanceEffect } from '../types';
 import { useFinanceContext } from '../hooks/useFinanceData';
 import { useLanguage } from '../context/LanguageContext';
@@ -90,6 +90,18 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
 
     const cm = (key: string) => t(`categoriesManager.${key}`);
 
+    const moveCategory = async (index: number, direction: 'up' | 'down') => {
+        const newOrder = [...categories];
+        const targetIdx = direction === 'up' ? index - 1 : index + 1;
+        [newOrder[index], newOrder[targetIdx]] = [newOrder[targetIdx], newOrder[index]];
+        try {
+            await actions.reorderCategories(newOrder);
+        } catch (err: any) {
+            console.error('reorderCategories error:', err);
+            alert(err.message || 'Error reordering categories');
+        }
+    };
+
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
@@ -104,8 +116,27 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
 
                 {/* Category List */}
                 <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
-                    {categories.map(cat => (
-                        <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
+                    {categories.map((cat, idx) => (
+                        <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group">
+                            {/* Reorder buttons */}
+                            <div className="flex flex-col gap-0.5">
+                                <button
+                                    onClick={() => moveCategory(idx, 'up')}
+                                    disabled={idx === 0}
+                                    title={cm('moveUp')}
+                                    className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
+                                >
+                                    <ChevronUp size={14} />
+                                </button>
+                                <button
+                                    onClick={() => moveCategory(idx, 'down')}
+                                    disabled={idx === categories.length - 1}
+                                    title={cm('moveDown')}
+                                    className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
+                                >
+                                    <ChevronDown size={14} />
+                                </button>
+                            </div>
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[cat.effect]}`}>
                                 {cat.effect === BalanceEffect.POSITIVE ? '➕' : cat.effect === BalanceEffect.NEGATIVE ? '➖' : cat.effect === BalanceEffect.INFORMATIVE_STAT ? '📊' : 'ℹ️'}
                             </span>

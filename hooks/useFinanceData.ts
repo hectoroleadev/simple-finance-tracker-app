@@ -90,7 +90,13 @@ export const useFinanceData = () => {
     enabled: isLoggedIn,
   });
 
-  const categories = useMemo(() => rawCategories, [rawCategories]);
+  const categories = useMemo(() => {
+    const cats = rawCategories.map((cat, idx) => ({
+      ...cat,
+      order: cat.order ?? idx,
+    }));
+    return cats.sort((a, b) => a.order! - b.order!);
+  }, [rawCategories]);
 
   const {
     data: history = [],
@@ -293,7 +299,12 @@ export const useFinanceData = () => {
         }
       });
 
-      const newCat = { ...category, id: category.id || (window.crypto?.randomUUID?.() || Date.now().toString()) };
+      const maxOrder = nextBatch.reduce((max, c) => Math.max(max, c.order ?? 0), -1);
+      const newCat = {
+        ...category,
+        id: category.id || (window.crypto?.randomUUID?.() || Date.now().toString()),
+        order: maxOrder + 1,
+      };
       await saveCategoriesMutation.mutateAsync([...nextBatch, newCat]);
     },
 
@@ -304,6 +315,11 @@ export const useFinanceData = () => {
 
     deleteCategory: async (id: string): Promise<void> => {
       await saveCategoriesMutation.mutateAsync(categories.filter(c => c.id !== id));
+    },
+
+    reorderCategories: async (reordered: Category[]): Promise<void> => {
+      const withOrder = reordered.map((cat, idx) => ({ ...cat, order: idx }));
+      await saveCategoriesMutation.mutateAsync(withOrder);
     },
   };
 

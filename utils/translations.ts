@@ -135,7 +135,9 @@ export const translations = {
       saving: "Saving...",
       deleteCategoryTitle: "Delete Category",
       deleteCategoryMessage: "Are you sure you want to delete this category? Items in this category will remain but won't appear in the dashboard.",
-      confirmDeleteCategory: "Delete Category"
+      confirmDeleteCategory: "Delete Category",
+      moveUp: "Move up",
+      moveDown: "Move down"
     }
   },
   es: {
@@ -273,7 +275,9 @@ export const translations = {
       saving: "Guardando...",
       deleteCategoryTitle: "Eliminar Categoría",
       deleteCategoryMessage: "¿Estás seguro de que deseas eliminar esta categoría? Los elementos de esta categoría permanecerán pero no aparecerán en el resumen.",
-      confirmDeleteCategory: "Eliminar Categoría"
+      confirmDeleteCategory: "Eliminar Categoría",
+      moveUp: "Subir",
+      moveDown: "Bajar"
     }
   }
 };
