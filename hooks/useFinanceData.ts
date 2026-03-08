@@ -159,6 +159,7 @@ export const useFinanceData = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['itemHistory'] });
     },
   });
 
