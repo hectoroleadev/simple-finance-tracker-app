@@ -12,6 +12,8 @@ import { ApiGatewayAdapter } from '../infrastructure/ApiGatewayAdapter';
 
 export const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
+const STABLE_EMPTY_ARRAY: any[] = [];
+
 export const useFinanceContext = () => {
   const context = useContext(FinanceContext);
   if (!context) {
@@ -63,7 +65,7 @@ export const useFinanceData = () => {
   // --- Queries (TanStack Query) ---
 
   const {
-    data: items = [],
+    data: items = STABLE_EMPTY_ARRAY,
     isLoading: isLoadingItems,
     error: itemsError
   } = useQuery({
@@ -99,7 +101,7 @@ export const useFinanceData = () => {
   }, [rawCategories]);
 
   const {
-    data: history = [],
+    data: history = STABLE_EMPTY_ARRAY,
     isLoading: isLoadingHistory,
     error: historyError
   } = useQuery({

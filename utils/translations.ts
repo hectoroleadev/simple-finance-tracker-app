@@ -138,6 +138,16 @@ export const translations = {
       confirmDeleteCategory: "Delete Category",
       moveUp: "Move up",
       moveDown: "Move down"
+    },
+    itemHistory: {
+      title: "History",
+      currentValue: "Current Value",
+      empty: "No history available for this entry.",
+      created: "Created",
+      updated: "Updated",
+      deleted: "Deleted",
+      amount: "Amount",
+      name: "Name"
     }
   },
   es: {
@@ -278,6 +288,16 @@ export const translations = {
       confirmDeleteCategory: "Eliminar Categoría",
       moveUp: "Subir",
       moveDown: "Bajar"
+    },
+    itemHistory: {
+      title: "Historial",
+      currentValue: "Valor Actual",
+      empty: "No hay historial disponible para esta entrada.",
+      created: "Creado",
+      updated: "Actualizado",
+      deleted: "Eliminado",
+      amount: "Monto",
+      name: "Nombre"
     }
   }
 };
