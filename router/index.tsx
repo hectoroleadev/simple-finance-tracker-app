@@ -1,6 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout';
 import Loading from '../components/Loading';
 import { useAuth } from '../context/AuthContext'; // Import useAuth
@@ -20,28 +20,24 @@ export const AppRoutes = () => {
   }
 
   return (
-    <RootLayout>
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/confirm-signup" element={<ConfirmSignupPage />} />
-          
-          {isLoggedIn ? (
-            <>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/history" element={<HistoryPage />} />
-              <Route path="/charts" element={<AnalysisPage />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </>
-          ) : (
-            <>
-              {/* Redirect any protected route access to login */}
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </>
-          )}
-        </Routes>
-      </Suspense>
-    </RootLayout>
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        {!isLoggedIn ? (
+          <>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/confirm-signup" element={<ConfirmSignupPage />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </>
+        ) : (
+          <Route element={<RootLayout><Outlet /></RootLayout>}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/charts" element={<AnalysisPage />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Route>
+        )}
+      </Routes>
+    </Suspense>
   );
 };

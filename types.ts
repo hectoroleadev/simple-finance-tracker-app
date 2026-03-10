@@ -12,6 +12,7 @@ export interface Category {
   effect: BalanceEffect;
   color?: string;
   order?: number;
+  userId?: string;
 }
 
 // Default categories (used as seeds for existing data compatibility)
@@ -28,6 +29,7 @@ export interface FinanceItem {
   name: string;
   amount: number;
   category: string; // references Category.id
+  userId?: string;
 }
 
 export interface FinanceTotals {
@@ -52,6 +54,7 @@ export interface HistoryEntry {
   debt: number;
   balance: number;
   retirement: number;
+  userId?: string;
 }
 
 export interface ItemRevision {
