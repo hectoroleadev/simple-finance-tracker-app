@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
 
   const navigate = useNavigate();
   const { login, signup, loading } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { state: { theme }, dispatch } = useTheme();
 
   const toggleTheme = () => {
@@ -51,8 +51,18 @@ const LoginPage: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4 transition-colors duration-300">
       <div className="absolute top-4 right-4 flex gap-2">
         <button
+          onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+          className="px-3 py-2 rounded-xl bg-white dark:bg-gray-800 shadow-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700 text-xs font-bold flex items-center gap-2"
+          title={language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 11.37 9.188 16.544 5 20" />
+          </svg>
+          {language.toUpperCase()}
+        </button>
+        <button
           onClick={toggleTheme}
-          className="p-2 rounded-full bg-white dark:bg-gray-800 shadow-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700"
+          className="p-2 rounded-xl bg-white dark:bg-gray-800 shadow-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700"
           title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
           {theme === 'dark' ? (

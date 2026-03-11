@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 
 const ConfirmSignupPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -12,7 +13,12 @@ const ConfirmSignupPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { loading, confirmSignup, resendConfirmationCode } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+  const { state: { theme }, dispatch } = useTheme();
+
+  const toggleTheme = () => {
+    dispatch({ type: 'TOGGLE_THEME' });
+  };
 
   // Pre-fill username if available from signup page state
   useEffect(() => {
@@ -50,6 +56,33 @@ const ConfirmSignupPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4 transition-colors duration-300">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+          className="px-3 py-2 rounded-xl bg-white dark:bg-gray-800 shadow-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700 text-xs font-bold flex items-center gap-2"
+          title={language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 11.37 9.188 16.544 5 20" />
+          </svg>
+          {language.toUpperCase()}
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-xl bg-white dark:bg-gray-800 shadow-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-200 dark:border-gray-700"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          )}
+        </button>
+      </div>
       {/* App Branding */}
       <div className="flex flex-col items-center mb-6 text-center animate-fade-in mt-4">
         <div className="bg-slate-900 dark:bg-slate-700 p-2.5 rounded-2xl shadow-xl mb-4 ring-4 ring-slate-100 dark:ring-slate-800/50">
