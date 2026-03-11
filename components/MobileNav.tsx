@@ -21,6 +21,8 @@ const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick, o
     const { isLoggedIn, logout } = useAuth();
     const { sharedWithMe, viewAs, actions } = useFinanceContext();
 
+    const sh = (key: string) => t(`sharing.${key}`);
+
     const toggleMenu = () => setIsOpen(!isOpen);
     const closeMenu = () => setIsOpen(false);
 
@@ -183,21 +185,25 @@ const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick, o
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
-                            <button
-                                onClick={() => { closeMenu(); if (onCategoriesClick) onCategoriesClick(); }}
-                                className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                            >
-                                <Tags size={20} className="text-amber-500 mb-2" />
-                                <span className="text-[10px] font-bold uppercase tracking-tight text-center">{t('categories.debt').replace('s', '')}</span>
-                            </button>
+                            {!viewAs && (
+                                <>
+                                    <button
+                                        onClick={() => { closeMenu(); if (onCategoriesClick) onCategoriesClick(); }}
+                                        className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                                    >
+                                        <Tags size={20} className="text-amber-500 mb-2" />
+                                        <span className="text-[10px] font-bold uppercase tracking-tight text-center">{t('categories.debt').replace('s', '')}</span>
+                                    </button>
 
-                            <button
-                                onClick={() => { closeMenu(); if (onSharingClick) onSharingClick(); }}
-                                className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                            >
-                                <Users size={20} className="text-blue-500 mb-2" />
-                                <span className="text-[10px] font-bold uppercase tracking-tight text-center">{t('sharing.title').split(' ')[0]}</span>
-                            </button>
+                                    <button
+                                        onClick={() => { closeMenu(); if (onSharingClick) onSharingClick(); }}
+                                        className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                                    >
+                                        <Users size={20} className="text-blue-500 mb-2" />
+                                        <span className="text-[10px] font-bold uppercase tracking-tight text-center">{sh('title').split(' ')[0]}</span>
+                                    </button>
+                                </>
+                            )}
 
                             <button
                                 onClick={() => dispatch({ type: 'TOGGLE_THEME' })}

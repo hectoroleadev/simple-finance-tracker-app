@@ -128,28 +128,32 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
                             );
                         })}
 
-                        <div className="h-px bg-slate-100 dark:bg-slate-700 my-2 mx-2" />
+                        {!viewAs && (
+                            <>
+                                <div className="h-px bg-slate-100 dark:bg-slate-700 my-2 mx-2" />
 
-                        {/* Management Section */}
-                        <div className="px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                            {t('settings') || 'Management'}
-                        </div>
+                                {/* Management Section */}
+                                <div className="px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                    {t('settings') || 'Management'}
+                                </div>
 
-                        <button
-                            onClick={() => { onManageCategories(); setIsOpen(false); }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all"
-                        >
-                            <Tags size={18} className="text-slate-400" />
-                            <span>{t('categoriesManager.title')}</span>
-                        </button>
+                                <button
+                                    onClick={() => { onManageCategories(); setIsOpen(false); }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all"
+                                >
+                                    <Tags size={18} className="text-slate-400" />
+                                    <span>{t('categoriesManager.title')}</span>
+                                </button>
 
-                        <button
-                            onClick={() => { onManageSharing(); setIsOpen(false); }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all"
-                        >
-                            <Users size={18} className="text-slate-400" />
-                            <span>{sh('title')}</span>
-                        </button>
+                                <button
+                                    onClick={() => { onManageSharing(); setIsOpen(false); }}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all"
+                                >
+                                    <Users size={18} className="text-slate-400" />
+                                    <span>{sh('title')}</span>
+                                </button>
+                            </>
+                        )}
 
                         <div className="h-px bg-slate-100 dark:bg-slate-700 my-2 mx-2" />
 

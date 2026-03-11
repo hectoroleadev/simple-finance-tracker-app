@@ -11,7 +11,7 @@ interface SharingManagerModalProps {
 }
 
 const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClose }) => {
-    const { shares, actions } = useFinanceContext();
+    const { shares, actions, isReadOnly } = useFinanceContext();
     const { t } = useLanguage();
 
     const [inviteId, setInviteId] = useState('');
@@ -73,27 +73,29 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
                 )}
 
                 {/* Invite Form */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{sh('inviteUser')}</h3>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={sh('username')}
-                            value={inviteId}
-                            onChange={(e) => setInviteId(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-                        />
-                        <button
-                            onClick={handleInvite}
-                            disabled={isInviting || !inviteId.trim()}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            <UserPlus size={16} />
-                            {isInviting ? sh('inviting') : sh('invite')}
-                        </button>
+                {!isReadOnly && (
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{sh('inviteUser')}</h3>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder={sh('username')}
+                                value={inviteId}
+                                onChange={(e) => setInviteId(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                            />
+                            <button
+                                onClick={handleInvite}
+                                disabled={isInviting || !inviteId.trim()}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                <UserPlus size={16} />
+                                {isInviting ? sh('inviting') : sh('invite')}
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* My Shares List */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -108,13 +110,15 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
                                         <span className="text-sm font-medium text-slate-900 dark:text-white">{share.sharedWithId}</span>
                                         <span className="text-xs text-slate-500 dark:text-slate-400">{new Date(share.createdAt).toLocaleDateString()}</span>
                                     </div>
-                                    <button
-                                        onClick={() => setRevokingId(share.sharedWithId)}
-                                        className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
-                                        title={sh('revoke')}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    {!isReadOnly && (
+                                        <button
+                                            onClick={() => setRevokingId(share.sharedWithId)}
+                                            className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
+                                            title={sh('revoke')}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>

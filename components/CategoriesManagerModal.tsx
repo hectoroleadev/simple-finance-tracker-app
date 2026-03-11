@@ -28,7 +28,7 @@ const EFFECT_COLORS = {
 const EMPTY_FORM: Omit<Category, 'id'> = { name: '', effect: BalanceEffect.POSITIVE };
 
 const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen, onClose }) => {
-    const { categories, actions } = useFinanceContext();
+    const { categories, actions, isReadOnly } = useFinanceContext();
     const { t } = useLanguage();
 
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -64,7 +64,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
     // ── Close: persist order only if it changed ───────────────────────────────
     const handleClose = async () => {
         const orderChanged = localCategories.some((cat, idx) => cat.id !== categories[idx]?.id);
-        if (orderChanged) {
+        if (orderChanged && !isReadOnly) {
             try {
                 await actions.reorderCategories(localCategories);
             } catch (err: any) {
@@ -155,44 +155,48 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                     {localCategories.map((cat, idx) => (
                         <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group">
                             {/* Reorder buttons */}
-                            <div className="flex flex-col gap-0.5">
-                                <button
-                                    onClick={() => moveCategory(idx, 'up')}
-                                    disabled={idx === 0}
-                                    title={cm('moveUp')}
-                                    className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
-                                >
-                                    <ChevronUp size={14} />
-                                </button>
-                                <button
-                                    onClick={() => moveCategory(idx, 'down')}
-                                    disabled={idx === localCategories.length - 1}
-                                    title={cm('moveDown')}
-                                    className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
-                                >
-                                    <ChevronDown size={14} />
-                                </button>
-                            </div>
+                            {!isReadOnly && (
+                                <div className="flex flex-col gap-0.5">
+                                    <button
+                                        onClick={() => moveCategory(idx, 'up')}
+                                        disabled={idx === 0}
+                                        title={cm('moveUp')}
+                                        className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
+                                    >
+                                        <ChevronUp size={14} />
+                                    </button>
+                                    <button
+                                        onClick={() => moveCategory(idx, 'down')}
+                                        disabled={idx === localCategories.length - 1}
+                                        title={cm('moveDown')}
+                                        className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
+                                    >
+                                        <ChevronDown size={14} />
+                                    </button>
+                                </div>
+                            )}
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[cat.effect]}`}>
                                 {cat.effect === BalanceEffect.POSITIVE ? '➕' : cat.effect === BalanceEffect.NEGATIVE ? '➖' : cat.effect === BalanceEffect.INFORMATIVE_STAT ? '📊' : 'ℹ️'}
                             </span>
                             <span className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-200">{cat.name}</span>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => openEdit(cat)}
-                                    className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-110 transition-transform"
-                                    title={cm('editCategory')}
-                                >
-                                    <Edit2 size={14} />
-                                </button>
-                                <button
-                                    onClick={() => setDeletingId(cat.id)}
-                                    className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"
-                                    title={cm('deleteCategoryTitle')}
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                            </div>
+                            {!isReadOnly && (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => openEdit(cat)}
+                                        className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-110 transition-transform"
+                                        title={cm('editCategory')}
+                                    >
+                                        <Edit2 size={14} />
+                                    </button>
+                                    <button
+                                        onClick={() => setDeletingId(cat.id)}
+                                        className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"
+                                        title={cm('deleteCategoryTitle')}
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -258,7 +262,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                 )}
 
                 {/* Footer */}
-                {!isAddNew && !editingId && (
+                {!isAddNew && !editingId && !isReadOnly && (
                     <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700">
                         <button
                             onClick={openNew}
