@@ -13,9 +13,9 @@ const LoginPage = lazy(() => import('../pages/LoginPage')); // Lazy load LoginPa
 const ConfirmSignupPage = lazy(() => import('../pages/ConfirmSignupPage')); // Lazy load ConfirmSignupPage
 
 export const AppRoutes = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const { isLoggedIn, isInitializing } = useAuth();
 
-  if (loading) {
+  if (isInitializing) {
     return <RootLayout><Loading /></RootLayout>; // Show loading while auth state is being determined
   }
 

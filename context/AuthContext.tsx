@@ -17,6 +17,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   user: { username: string; email?: string } | null;
   loading: boolean;
+  isInitializing: boolean;
   login: (username: string, password: string) => Promise<void>;
   signup: (username: string, password: string, email: string) => Promise<void>;
   confirmSignup: (username: string, code: string) => Promise<void>;
@@ -44,7 +45,8 @@ export const
   AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [user, setUser] = useState<{ username: string; email?: string } | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isInitializing, setIsInitializing] = useState<boolean>(true);
     const [tokens, setTokens] = useState<AuthTokens | null>(null);
 
     const setAuthData = useCallback((session: CognitoUserSession, username: string) => {
@@ -73,9 +75,11 @@ export const
           }
           setAuthData(session, cognitoUser.getUsername());
           setLoading(false);
+          setIsInitializing(false);
         });
       } else {
         setLoading(false);
+        setIsInitializing(false);
       }
     }, [setAuthData]);
 
@@ -198,6 +202,7 @@ export const
         isLoggedIn,
         user,
         loading,
+        isInitializing,
         login,
         signup,
         confirmSignup,
