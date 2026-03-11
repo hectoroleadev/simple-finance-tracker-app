@@ -43,7 +43,10 @@ export const useFinanceData = () => {
   // --- Web Worker Setup ---
   const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([], DEFAULT_CATEGORIES));
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [viewAs, setViewAs] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
+
+  const isReadOnly = useMemo(() => viewAs !== null, [viewAs]);
 
   useEffect(() => {
     workerRef.current = new Worker(new URL('../utils/finance.worker.ts', import.meta.url), { type: 'module' });
@@ -69,9 +72,9 @@ export const useFinanceData = () => {
     isLoading: isLoadingItems,
     error: itemsError
   } = useQuery({
-    queryKey: ['items', isLoggedIn],
+    queryKey: ['items', isLoggedIn, viewAs],
     queryFn: async () => {
-      const fetchedItems = await repository.getItems();
+      const fetchedItems = await repository.getItems(viewAs || undefined);
       return fetchedItems.map(item => ({
         ...item,
         amount: Number(item.amount) || 0
@@ -85,9 +88,9 @@ export const useFinanceData = () => {
     isLoading: isLoadingCategories,
     error: categoriesError
   } = useQuery({
-    queryKey: ['categories', isLoggedIn],
+    queryKey: ['categories', isLoggedIn, viewAs],
     queryFn: async () => {
-      return await repository.getCategories();
+      return await repository.getCategories(viewAs || undefined);
     },
     enabled: isLoggedIn,
   });
@@ -105,9 +108,9 @@ export const useFinanceData = () => {
     isLoading: isLoadingHistory,
     error: historyError
   } = useQuery({
-    queryKey: ['history', isLoggedIn],
+    queryKey: ['history', isLoggedIn, viewAs],
     queryFn: async () => {
-      const fetchedHistory = await repository.getHistory();
+      const fetchedHistory = await repository.getHistory(viewAs || undefined);
       return fetchedHistory
         .map(entry => ({
           ...entry,
@@ -118,6 +121,19 @@ export const useFinanceData = () => {
         }))
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     },
+    enabled: isLoggedIn,
+  });
+
+  // Sharing Queries
+  const { data: shares = STABLE_EMPTY_ARRAY } = useQuery({
+    queryKey: ['shares', isLoggedIn],
+    queryFn: () => repository.getMyShares(),
+    enabled: isLoggedIn,
+  });
+
+  const { data: sharedWithMe = STABLE_EMPTY_ARRAY } = useQuery({
+    queryKey: ['sharedWithMe', isLoggedIn],
+    queryFn: () => repository.getSharedWithMe(),
     enabled: isLoggedIn,
   });
 
@@ -160,7 +176,7 @@ export const useFinanceData = () => {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['items', isLoggedIn, viewAs] });
       queryClient.invalidateQueries({ queryKey: ['itemHistory'] });
     },
   });
@@ -203,45 +219,55 @@ export const useFinanceData = () => {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['history'] });
+      queryClient.invalidateQueries({ queryKey: ['history', isLoggedIn, viewAs] });
     },
-  });
-
-  const deleteHistoryItemMutation = useMutation({
-    mutationFn: (id: string) => repository.deleteHistoryItem(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ['history'] });
-      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn]);
-      if (previousHistory) {
-        queryClient.setQueryData(['history', isLoggedIn], previousHistory.filter(i => i.id !== id));
-      }
-      return { previousHistory };
-    },
-    onError: (err, id, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
-      console.error('Failed to delete history item', err);
-      if (context?.previousHistory) {
-        queryClient.setQueryData(['history', isLoggedIn], context.previousHistory);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['history'] });
-    }
   });
 
   const saveCategoriesMutation = useMutation({
     mutationFn: (cats: Category[]) => repository.saveCategories(cats),
     onMutate: async (newCats) => {
       if (import.meta.env.DEV) console.log('[useFinanceData] Mutating categories:', newCats);
-      await queryClient.cancelQueries({ queryKey: ['categories', isLoggedIn] });
-      const prev = queryClient.getQueryData<Category[]>(['categories', isLoggedIn]);
-      queryClient.setQueryData(['categories', isLoggedIn], newCats);
+      await queryClient.cancelQueries({ queryKey: ['categories', isLoggedIn, viewAs] });
+      const prev = queryClient.getQueryData<Category[]>(['categories', isLoggedIn, viewAs]);
+      queryClient.setQueryData(['categories', isLoggedIn, viewAs], newCats);
       return { prev };
     },
     onError: (err, newCats, context: { prev: Category[] | undefined } | undefined) => {
-      console.error('Failed to save categories', err);
-      if (context?.prev) queryClient.setQueryData(['categories', isLoggedIn], context.prev);
+      console.error('Failed to save categories', err, newCats);
+      if (context?.prev) queryClient.setQueryData(['categories', isLoggedIn, viewAs], context.prev);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['categories', isLoggedIn] }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['categories', isLoggedIn, viewAs] }),
+  });
+
+  const deleteHistoryItemMutation = useMutation({
+    mutationFn: (id: string) => repository.deleteHistoryItem(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['history', isLoggedIn, viewAs] });
+      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn, viewAs]);
+      if (previousHistory) {
+        queryClient.setQueryData(['history', isLoggedIn, viewAs], previousHistory.filter(i => i.id !== id));
+      }
+      return { previousHistory };
+    },
+    onError: (err, id, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
+      console.error('Failed to delete history item', err);
+      if (context?.previousHistory) {
+        queryClient.setQueryData(['history', isLoggedIn, viewAs], context.previousHistory);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['history', isLoggedIn, viewAs] });
+    }
+  });
+
+  const inviteUserMutation = useMutation({
+    mutationFn: (sharedWithId: string) => repository.createShare(sharedWithId),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['shares'] }),
+  });
+
+  const revokeShareMutation = useMutation({
+    mutationFn: (sharedWithId: string) => repository.deleteShare(sharedWithId),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['shares'] }),
   });
 
   // --- Actions (Use Cases) ---
@@ -324,6 +350,10 @@ export const useFinanceData = () => {
       const withOrder = reordered.map((cat, idx) => ({ ...cat, order: idx }));
       await saveCategoriesMutation.mutateAsync(withOrder);
     },
+
+    setViewAs: (userId: string | null) => setViewAs(userId),
+    inviteUser: async (sharedWithId: string) => { await inviteUserMutation.mutateAsync(sharedWithId); },
+    revokeShare: async (sharedWithId: string) => { await revokeShareMutation.mutateAsync(sharedWithId); },
   };
 
   return {
@@ -334,6 +364,10 @@ export const useFinanceData = () => {
     chartData,
     loading,
     error,
+    viewAs,
+    isReadOnly,
+    shares,
+    sharedWithMe,
     actions
   };
 };

@@ -20,6 +20,10 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     chartData,
     loading,
     error,
+    viewAs,
+    isReadOnly,
+    shares,
+    sharedWithMe,
     actions
   } = useFinanceData();
 
@@ -36,6 +40,10 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     chartData,
     loading,
     error,
+    viewAs,
+    isReadOnly,
+    shares,
+    sharedWithMe,
     actions: {
       ...actions,
       snapshot: handleSnapshot

@@ -14,7 +14,7 @@ import { useFinanceContext } from '../hooks/useFinanceData';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 const DashboardPage: React.FC = () => {
-  const { items, categories, totals, actions } = useFinanceContext();
+  const { items, categories, totals, isReadOnly, actions } = useFinanceContext();
   const { t } = useLanguage();
 
   const getItemsByCategory = (catId: string) => items.filter(i => i.category === catId);
@@ -53,6 +53,7 @@ const DashboardPage: React.FC = () => {
             onUpdateItem={actions.updateItem}
             onDeleteItem={actions.deleteItem}
             onAddItem={actions.addItem}
+            isReadOnly={isReadOnly}
           />
         ))}
 
@@ -73,12 +74,18 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={actions.snapshot}
-            className="w-full bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
-          >
-            {t('snapshot')}
-          </button>
+          {!isReadOnly ? (
+            <button
+              onClick={actions.snapshot}
+              className="w-full bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
+            >
+              {t('snapshot')}
+            </button>
+          ) : (
+            <div className="w-full bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-semibold py-3 rounded-lg text-sm text-center italic cursor-not-allowed">
+              {t('sharing.viewAs')} {t('sharing.sharedAccount')}
+            </div>
+          )}
         </div>
       </div>
     </div>

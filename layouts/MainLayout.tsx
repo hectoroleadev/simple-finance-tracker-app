@@ -4,12 +4,7 @@ import {
   Wallet,
   LayoutDashboard,
   History as HistoryIcon,
-  PieChart as PieChartIcon,
-  Moon,
-  Sun,
-  LogOut,
-  HelpCircle,
-  Tags
+  PieChart as PieChartIcon
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
@@ -21,6 +16,8 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import MobileNav from '../components/MobileNav';
 import ShortcutsHelpModal from '../components/ShortcutsHelpModal';
 import CategoriesManagerModal from '../components/CategoriesManagerModal';
+import SharingManagerModal from '../components/SharingManagerModal';
+import AccountMenu from '../components/AccountMenu';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -38,6 +35,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const animatedNetWorth = useCounterAnimation(netWorth, { duration: 300 });
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
+  const [showSharingManager, setShowSharingManager] = useState(false);
   const { isLoggedIn, logout } = useAuth();
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
@@ -64,6 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <MobileNav
         onHelpClick={() => setShowShortcutsHelp(true)}
         onCategoriesClick={() => setShowCategoriesManager(true)}
+        onSharingClick={() => setShowSharingManager(true)}
       />
 
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-300">
@@ -77,79 +76,44 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             </h1>
           </div>
 
-          <nav className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => navigate(tab.path)}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentPath === tab.id
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <tab.icon size={16} />
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+          <div className="flex-1 flex items-center justify-end gap-6 sm:gap-8 ml-4">
+            <nav className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => navigate(tab.path)}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentPath === tab.id
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                >
+                  <tab.icon size={16} />
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="text-right hidden sm:block mr-2">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('netWorth')}</span>
-              <span className={`text-lg sm:text-xl font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+            <div className="hidden lg:flex items-center gap-4 sm:gap-6 border-l border-slate-200 dark:border-slate-700 pl-4 sm:pl-6 h-10">
+              <AccountMenu
+                onShowHelp={() => setShowShortcutsHelp(true)}
+                onManageCategories={() => setShowCategoriesManager(true)}
+                onManageSharing={() => setShowSharingManager(true)}
+              />
+
+              <div className="text-right">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('netWorth')}</span>
+                <span className={`text-lg sm:text-xl font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {formatCurrency(animatedNetWorth)}
+                </span>
+              </div>
+            </div>
+
+            {/* Always show net worth on mobile, but simply */}
+            <div className="text-right lg:hidden mr-12">
+              <span className={`text-lg font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                 {formatCurrency(animatedNetWorth)}
               </span>
             </div>
-
-            <div className="hidden sm:flex items-center gap-2 bg-slate-100 dark:bg-slate-700 p-1 rounded-full">
-              <button
-                onClick={() => setLanguage('en')}
-                className={`text-xs font-bold px-2 py-1 rounded-full transition-colors ${language === 'en' ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400'}`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLanguage('es')}
-                className={`text-xs font-bold px-2 py-1 rounded-full transition-colors ${language === 'es' ? 'bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400'}`}
-              >
-                ES
-              </button>
-            </div>
-
-            <button
-              onClick={() => setShowCategoriesManager(true)}
-              className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
-              aria-label="Manage categories"
-              title={t('categoriesManager.title')}
-            >
-              <Tags size={20} />
-            </button>
-
-            <button
-              onClick={() => setShowShortcutsHelp(true)}
-              className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
-              aria-label="Help"
-              title={t('shortcuts')}
-            >
-              <HelpCircle size={20} />
-            </button>
-
-            <button
-              onClick={() => dispatch({ type: 'TOGGLE_THEME' })}
-              className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            {isLoggedIn && (
-              <button
-                onClick={logout}
-                className="hidden sm:block p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
-                aria-label="Logout"
-              >
-                <LogOut size={20} />
-              </button>
-            )}
           </div>
         </div>
       </header>
@@ -184,6 +148,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <CategoriesManagerModal
         isOpen={showCategoriesManager}
         onClose={() => setShowCategoriesManager(false)}
+      />
+      <SharingManagerModal
+        isOpen={showSharingManager}
+        onClose={() => setShowSharingManager(false)}
       />
     </div>
   );

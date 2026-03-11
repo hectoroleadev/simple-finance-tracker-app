@@ -59,6 +59,21 @@ const LoginPage: React.FC = () => {
         </button>
       </div>
 
+      {/* App Branding */}
+      <div className="flex flex-col items-center mb-6 text-center animate-fade-in mt-4">
+        <div className="bg-slate-900 dark:bg-slate-700 p-2.5 rounded-2xl shadow-xl mb-4 ring-4 ring-slate-100 dark:ring-slate-800/50">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        </div>
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-1">
+          {t('appTitle')}<span className="text-slate-400 font-medium">{t('appTitleCore')}</span>
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-[0.2em] text-[10px]">
+          {t('appDescription')}
+        </p>
+      </div>
+
       <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-700 transition-all">
         <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-8 text-center">
           {isLoginMode ? (t('auth.loginTitle') || 'Login') : (t('auth.signupTitle') || 'Sign Up')}

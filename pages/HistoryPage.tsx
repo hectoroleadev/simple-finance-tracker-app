@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useFinanceContext } from '../hooks/useFinanceData';
 
 const HistoryPage: React.FC = () => {
-  const { history, actions } = useFinanceContext();
+  const { history, isReadOnly, actions } = useFinanceContext();
   const { t } = useLanguage();
 
   return (
@@ -16,8 +16,12 @@ const HistoryPage: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 text-sm">{t('historyDesc')}</p>
         </div>
       </div>
-      
-      <HistoryTable history={history} onDelete={actions.deleteHistoryItem} />
+
+      <HistoryTable
+        history={history}
+        onDelete={actions.deleteHistoryItem}
+        isReadOnly={isReadOnly}
+      />
     </div>
   );
 };

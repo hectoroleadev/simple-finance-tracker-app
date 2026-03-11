@@ -9,6 +9,7 @@ import ConfirmDialog from './ConfirmDialog';
 interface HistoryTableProps {
   history: HistoryEntry[];
   onDelete: (id: string) => void;
+  isReadOnly?: boolean;
 }
 
 const HistoryRow = React.memo(({
@@ -20,7 +21,8 @@ const HistoryRow = React.memo(({
   formatYear,
   formatDate,
   dataKeys,
-  style
+  style,
+  isReadOnly
 }: {
   entry: HistoryEntry;
   onDelete: (id: string, e?: React.MouseEvent) => void;
@@ -31,6 +33,7 @@ const HistoryRow = React.memo(({
   formatDate: (isoDate: string) => string;
   dataKeys: ('savings' | 'debt' | 'balance' | 'retirement')[];
   style: React.CSSProperties;
+  isReadOnly?: boolean;
 }) => (
   <div
     style={style}
@@ -47,12 +50,14 @@ const HistoryRow = React.memo(({
             {formatDate(entry.date)}
           </span>
         </div>
-        <button
-          onClick={(e) => onDelete(entry.id, e)}
-          className="p-2 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 transition-colors rounded-lg bg-slate-50 dark:bg-slate-700/50"
-        >
-          <Trash2 size={18} />
-        </button>
+        {!isReadOnly && (
+          <button
+            onClick={(e) => onDelete(entry.id, e)}
+            className="p-2 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 transition-colors rounded-lg bg-slate-50 dark:bg-slate-700/50"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
       </div>
 
       {/* Desktop: Year & Date Columns */}
@@ -82,20 +87,21 @@ const HistoryRow = React.memo(({
         ))}
       </div>
 
-      {/* Desktop Delete Button */}
-      <div className="hidden md:flex w-10 justify-end">
-        <button
-          onClick={(e) => onDelete(entry.id, e)}
-          className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
+      {!isReadOnly && (
+        <div className="hidden md:flex w-10 justify-end">
+          <button
+            onClick={(e) => onDelete(entry.id, e)}
+            className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      )}
     </div>
   </div>
 ));
 
-const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
+const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOnly }) => {
   const { t, language } = useLanguage();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
@@ -193,6 +199,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete }) => {
                   formatYear={formatYear}
                   formatDate={formatDate}
                   dataKeys={dataKeys}
+                  isReadOnly={isReadOnly}
                 />
               )}
             </List>

@@ -10,7 +10,7 @@ const KEYS = {
 };
 
 export class LocalStorageAdapter implements FinanceRepository {
-  async getItems(): Promise<FinanceItem[]> {
+  async getItems(_userId?: string): Promise<FinanceItem[]> {
     try {
       const saved = localStorage.getItem(KEYS.ITEMS);
       return saved ? JSON.parse(saved) : INITIAL_ITEMS;
@@ -42,7 +42,7 @@ export class LocalStorageAdapter implements FinanceRepository {
     return []; // Local storage doesn't track per-item history
   }
 
-  async getHistory(): Promise<HistoryEntry[]> {
+  async getHistory(_userId?: string): Promise<HistoryEntry[]> {
     try {
       const saved = localStorage.getItem(KEYS.HISTORY);
       if (!saved) return INITIAL_HISTORY;
@@ -82,7 +82,7 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
-  async getCategories(): Promise<Category[]> {
+  async getCategories(_userId?: string): Promise<Category[]> {
     try {
       const saved = localStorage.getItem(KEYS.CATEGORIES);
       return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
@@ -99,4 +99,10 @@ export class LocalStorageAdapter implements FinanceRepository {
       console.error('Error saving categories to local storage', error);
     }
   }
+
+  // --- Sharing (Not supported in Local Storage) ---
+  async getMyShares(): Promise<any[]> { return []; }
+  async createShare(_sharedWithId: string): Promise<void> { }
+  async deleteShare(_sharedWithId: string): Promise<void> { }
+  async getSharedWithMe(): Promise<any[]> { return []; }
 }

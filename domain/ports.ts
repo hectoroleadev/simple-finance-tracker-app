@@ -1,15 +1,20 @@
-
-import { FinanceItem, HistoryEntry, ItemRevision, Category } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, ShareInvite } from '../types';
 
 export interface FinanceRepository {
-  getItems(): Promise<FinanceItem[]>;
+  getItems(userId?: string): Promise<FinanceItem[]>;
   saveItems(items: FinanceItem[]): Promise<void>;
   deleteItem(id: string): Promise<void>;
   getItemHistory(id: string): Promise<ItemRevision[]>;
-  getHistory(): Promise<HistoryEntry[]>;
+  getHistory(userId?: string): Promise<HistoryEntry[]>;
   saveHistory(history: HistoryEntry[]): Promise<void>;
   deleteHistoryItem(id: string): Promise<void>;
-  getCategories(): Promise<Category[]>;
+  getCategories(userId?: string): Promise<Category[]>;
   saveCategories(categories: Category[]): Promise<void>;
+
+  // Sharing
+  getMyShares(): Promise<ShareInvite[]>;
+  createShare(sharedWithId: string): Promise<void>;
+  deleteShare(sharedWithId: string): Promise<void>;
+  getSharedWithMe(): Promise<ShareInvite[]>;
 }
 

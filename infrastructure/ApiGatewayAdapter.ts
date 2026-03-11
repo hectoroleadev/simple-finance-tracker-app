@@ -1,6 +1,6 @@
 
 import { FinanceRepository } from '../domain/ports';
-import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES } from '../types';
+import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES, ShareInvite } from '../types';
 
 export class ApiGatewayAdapter implements FinanceRepository {
   private apiUrl: string;
@@ -124,10 +124,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
     throw new Error(errorMessage);
   }
 
-  async getItems(): Promise<FinanceItem[]> {
+  async getItems(userId?: string): Promise<FinanceItem[]> {
     try {
+      const url = userId ? `${this.apiUrl}/items?viewAs=${userId}` : `${this.apiUrl}/items`;
       const response = await this._makeRequest(
-        `${this.apiUrl}/items`,
+        url,
         { method: 'GET', headers: this.headers },
         'fetch items'
       );
@@ -174,6 +175,8 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async getItemHistory(id: string): Promise<ItemRevision[]> {
     try {
+      // NOTE: For now history is fetched directly by itemId, 
+      // the backend checkAccess logic handles permission.
       const response = await this._makeRequest(
         `${this.apiUrl}/items/${id}/history`,
         { method: 'GET', headers: this.headers },
@@ -187,10 +190,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async getHistory(): Promise<HistoryEntry[]> {
+  async getHistory(userId?: string): Promise<HistoryEntry[]> {
     try {
+      const url = userId ? `${this.apiUrl}/history?viewAs=${userId}` : `${this.apiUrl}/history`;
       const response = await this._makeRequest(
-        `${this.apiUrl}/history`,
+        url,
         { method: 'GET', headers: this.headers },
         'fetch history'
       );
@@ -235,10 +239,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async getCategories(): Promise<Category[]> {
+  async getCategories(userId?: string): Promise<Category[]> {
     try {
+      const url = userId ? `${this.apiUrl}/categories?viewAs=${userId}` : `${this.apiUrl}/categories`;
       const response = await this._makeRequest(
-        `${this.apiUrl}/categories`,
+        url,
         { method: 'GET', headers: this.headers },
         'fetch categories'
       );
@@ -265,6 +270,68 @@ export class ApiGatewayAdapter implements FinanceRepository {
       );
     } catch (error) {
       console.error('API Gateway Error (saveCategories):', error);
+      throw error;
+    }
+  }
+
+  // --- Sharing Management ---
+
+  async getMyShares(): Promise<ShareInvite[]> {
+    try {
+      const response = await this._makeRequest(
+        `${this.apiUrl}/shares`,
+        { method: 'GET', headers: this.headers },
+        'fetch my shares'
+      );
+      const data = await response.json();
+      return data.shares || [];
+    } catch (error) {
+      console.error('API Gateway Error (getMyShares):', error);
+      throw error;
+    }
+  }
+
+  async createShare(sharedWithId: string): Promise<void> {
+    try {
+      await this._makeRequest(
+        `${this.apiUrl}/shares`,
+        {
+          method: 'POST',
+          headers: this.headers,
+          body: JSON.stringify({ sharedWithId }),
+        },
+        'create share'
+      );
+    } catch (error) {
+      console.error('API Gateway Error (createShare):', error);
+      throw error;
+    }
+  }
+
+  async deleteShare(sharedWithId: string): Promise<void> {
+    try {
+      await this._makeRequest(
+        `${this.apiUrl}/shares/${sharedWithId}`,
+        { method: 'DELETE', headers: this.headers },
+        'delete share'
+      );
+    } catch (error) {
+      console.error('API Gateway Error (deleteShare):', error);
+      throw error;
+    }
+  }
+
+  async getSharedWithMe(): Promise<ShareInvite[]> {
+    try {
+      const response = await this._makeRequest(
+        `${this.apiUrl}/shared-with-me`,
+        { method: 'GET', headers: this.headers },
+        'fetch shared with me'
+      );
+      const data = await response.json();
+      return data.sharedWithMe || [];
+    } catch (error) {
+      console.error('API Gateway Error (getSharedWithMe):', error);
       throw error;
     }
   }

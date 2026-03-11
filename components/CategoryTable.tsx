@@ -17,6 +17,7 @@ interface CategoryTableProps {
   onUpdateItem: (id: string, name: string, amount: number) => void;
   onDeleteItem: (id: string) => void;
   onAddItem: (categoryId: string) => FinanceItem;
+  isReadOnly?: boolean;
 }
 
 const CategoryRow = React.memo(({
@@ -32,7 +33,8 @@ const CategoryRow = React.memo(({
   handleKeyDown,
   handleDeleteClick,
   openHistory,
-  t
+  t,
+  isReadOnly
 }: {
   item: FinanceItem;
   editingId: string | null;
@@ -47,6 +49,7 @@ const CategoryRow = React.memo(({
   handleDeleteClick: (id: string) => void;
   openHistory: (item: FinanceItem) => void;
   t: (key: string) => string;
+  isReadOnly?: boolean;
 }) => (
   <div
     className="border-b border-slate-50 dark:border-slate-700/50 flex items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all px-5 py-3.5 group animate-fade-in"
@@ -80,7 +83,7 @@ const CategoryRow = React.memo(({
         <span className="text-sm text-slate-900 dark:text-white font-semibold tabular-nums">{formatCurrency(item.amount)}</span>
       )}
     </div>
-    <div className="w-14 flex justify-end gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity ml-2">
+    <div className={`w-14 flex justify-end gap-1.5 transition-opacity ml-2 ${isReadOnly ? 'hidden' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}>
       {editingId === item.id ? (
         <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"><Check size={16} /></button>
       ) : (
@@ -102,6 +105,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   onUpdateItem,
   onDeleteItem,
   onAddItem,
+  isReadOnly
 }) => {
   const { t } = useLanguage();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
@@ -152,12 +156,14 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-[450px] overflow-hidden transition-colors">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
-          <button
-            onClick={handleAddItem}
-            className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors p-1 hover:scale-110 transition-transform"
-          >
-            <Plus size={18} />
-          </button>
+          {!isReadOnly && (
+            <button
+              onClick={handleAddItem}
+              className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors p-1 hover:scale-110 transition-transform"
+            >
+              <Plus size={18} />
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto virtual-list">
@@ -178,6 +184,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                 handleDeleteClick={handleDeleteClick}
                 openHistory={(item) => setHistoryItem(item)}
                 t={t}
+                isReadOnly={isReadOnly}
               />
             ))
           ) : (

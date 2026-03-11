@@ -67,6 +67,14 @@ export interface ItemRevision {
   raw?: any;
 }
 
+export interface ShareInvite {
+  ownerId: string;
+  sharedWithId: string;
+  permissions: 'READ';
+  status: 'ACTIVE';
+  createdAt: string;
+}
+
 export type TabType = 'dashboard' | 'history' | 'charts';
 
 export interface FinanceContextType {
@@ -77,17 +85,24 @@ export interface FinanceContextType {
   chartData: any[];
   loading: boolean;
   error: string | null;
+  viewAs: string | null;
+  isReadOnly: boolean;
+  shares: ShareInvite[];
+  sharedWithMe: ShareInvite[];
   actions: {
     updateItem: (id: string, name: string, amount: number) => void;
     deleteItem: (id: string) => void;
     addItem: (categoryId: string) => FinanceItem;
     snapshotHistory: () => boolean;
+    snapshot: () => void;
     deleteHistoryItem: (id: string) => void;
     getItemHistory: (id: string) => Promise<ItemRevision[]>;
     addCategory: (category: Category) => Promise<void>;
     updateCategory: (category: Category) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
     reorderCategories: (categories: Category[]) => Promise<void>;
-    snapshot: () => void;
+    setViewAs: (userId: string | null) => void;
+    inviteUser: (sharedWithId: string) => Promise<void>;
+    revokeShare: (sharedWithId: string) => Promise<void>;
   };
 }

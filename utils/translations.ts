@@ -89,7 +89,8 @@ export const translations = {
       resendCode: "Resend Code",
       confirmSignupSuccess: "Account confirmed successfully! You can now log in.",
       confirmSignupError: "Failed to confirm account. Please check the code.",
-      resendCodeSuccess: "Confirmation code sent. Please check your email."
+      resendCodeSuccess: "Confirmation code sent. Please check your email.",
+      logout: "Logout"
     },
     pwa: {
       offlineMode: "Offline Mode",
@@ -148,6 +149,22 @@ export const translations = {
       deleted: "Deleted",
       amount: "Amount",
       name: "Name"
+    },
+    sharing: {
+      title: "Shared Accounts",
+      inviteUser: "Invite User",
+      username: "Username / ID",
+      invite: "Invite",
+      inviting: "Inviting...",
+      myShares: "Accounts I share with",
+      sharedWithMe: "Accounts shared with me",
+      revoke: "Revoke",
+      noShares: "You are not sharing your data with anyone.",
+      noSharedWithMe: "No one has shared their data with you yet.",
+      viewAs: "Viewing account as",
+      myAccount: "My Account",
+      sharedAccount: "Shared",
+      errorInvite: "Failed to invite user. Make sure the ID is correct."
     }
   },
   es: {
@@ -239,7 +256,8 @@ export const translations = {
       resendCode: "Reenviar Código",
       confirmSignupSuccess: "¡Cuenta confirmada exitosamente! Ahora puedes iniciar sesión.",
       confirmSignupError: "Fallo al confirmar la cuenta. Por favor, verifica el código.",
-      resendCodeSuccess: "Código de confirmación enviado. Por favor, revisa tu correo electrónico."
+      resendCodeSuccess: "Código de confirmación enviado. Por favor, revisa tu correo electrónico.",
+      logout: "Cerrar Sesión"
     },
     pwa: {
       offlineMode: "Modo sin conexión",
@@ -298,6 +316,22 @@ export const translations = {
       deleted: "Eliminado",
       amount: "Monto",
       name: "Nombre"
+    },
+    sharing: {
+      title: "Cuentas Compartidas",
+      inviteUser: "Invitar Usuario",
+      username: "Usuario / ID",
+      invite: "Invitar",
+      inviting: "Invitando...",
+      myShares: "Cuentas con las que comparto",
+      sharedWithMe: "Cuentas compartidas conmigo",
+      revoke: "Revocar",
+      noShares: "No estás compartiendo tus datos con nadie.",
+      noSharedWithMe: "Nadie ha compartido sus datos contigo aún.",
+      viewAs: "Viendo cuenta de",
+      myAccount: "Mi Cuenta",
+      sharedAccount: "Compartida",
+      errorInvite: "Error al invitar al usuario. Verifica que el ID sea correcto."
     }
   }
 };
