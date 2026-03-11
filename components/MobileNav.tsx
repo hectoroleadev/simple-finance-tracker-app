@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { useFinanceData } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../hooks/useFinanceData';
 
 interface MobileNavProps {
     onHelpClick?: () => void;
@@ -19,7 +19,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick, o
     const { state: { theme }, dispatch } = useTheme();
     const { language, setLanguage, t } = useLanguage();
     const { isLoggedIn, logout } = useAuth();
-    const { sharedWithMe, viewAs, actions } = useFinanceData();
+    const { sharedWithMe, viewAs, actions } = useFinanceContext();
 
     const toggleMenu = () => setIsOpen(!isOpen);
     const closeMenu = () => setIsOpen(false);
