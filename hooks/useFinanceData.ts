@@ -164,15 +164,15 @@ export const useFinanceData = () => {
   const saveItemsMutation = useMutation({
     mutationFn: (newItems: FinanceItem[]) => repository.saveItems(newItems),
     onMutate: async (newItems) => {
-      await queryClient.cancelQueries({ queryKey: ['items'] });
-      const previousItems = queryClient.getQueryData(['items']);
-      queryClient.setQueryData(['items', isLoggedIn], newItems);
+      await queryClient.cancelQueries({ queryKey: ['items', isLoggedIn, viewAs] });
+      const previousItems = queryClient.getQueryData(['items', isLoggedIn, viewAs]);
+      queryClient.setQueryData(['items', isLoggedIn, viewAs], newItems);
       return { previousItems };
     },
     onError: (err, newItems, context: { previousItems: FinanceItem[] | undefined } | undefined) => {
       console.error('Failed to save items', err);
       if (context?.previousItems) {
-        queryClient.setQueryData(['items', isLoggedIn], context.previousItems);
+        queryClient.setQueryData(['items', isLoggedIn, viewAs], context.previousItems);
       }
     },
     onSettled: () => {
@@ -186,36 +186,36 @@ export const useFinanceData = () => {
       await repository.deleteItem(id);
     },
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ['items'] });
-      const previousItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]);
+      await queryClient.cancelQueries({ queryKey: ['items', isLoggedIn, viewAs] });
+      const previousItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn, viewAs]);
       if (previousItems) {
-        queryClient.setQueryData(['items', isLoggedIn], previousItems.filter(i => i.id !== id));
+        queryClient.setQueryData(['items', isLoggedIn, viewAs], previousItems.filter(i => i.id !== id));
       }
       return { previousItems };
     },
     onError: (err, id, context: { previousItems: FinanceItem[] | undefined } | undefined) => {
       console.error('Failed to delete item', err);
       if (context?.previousItems) {
-        queryClient.setQueryData(['items', isLoggedIn], context.previousItems);
+        queryClient.setQueryData(['items', isLoggedIn, viewAs], context.previousItems);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['items', isLoggedIn, viewAs] });
     }
   });
 
   const saveHistoryMutation = useMutation({
     mutationFn: (newHistory: HistoryEntry[]) => repository.saveHistory(newHistory),
     onMutate: async (newHistory) => {
-      await queryClient.cancelQueries({ queryKey: ['history'] });
-      const previousHistory = queryClient.getQueryData(['history']);
-      queryClient.setQueryData(['history', isLoggedIn], newHistory);
+      await queryClient.cancelQueries({ queryKey: ['history', isLoggedIn, viewAs] });
+      const previousHistory = queryClient.getQueryData(['history', isLoggedIn, viewAs]);
+      queryClient.setQueryData(['history', isLoggedIn, viewAs], newHistory);
       return { previousHistory };
     },
     onError: (err, newHistory, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
       console.error('Failed to save history', err);
       if (context?.previousHistory) {
-        queryClient.setQueryData(['history', isLoggedIn], context.previousHistory);
+        queryClient.setQueryData(['history', isLoggedIn, viewAs], context.previousHistory);
       }
     },
     onSettled: () => {
@@ -273,7 +273,7 @@ export const useFinanceData = () => {
   // --- Actions (Use Cases) ---
   const actions = {
     updateItem: (id: string, name: string, amount: number) => {
-      const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]) || [];
+      const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn, viewAs]) || [];
       const newItems = prevItems.map(item => item.id === id ? { ...item, name, amount } : item);
       saveItemsMutation.mutate(newItems);
     },
@@ -283,7 +283,7 @@ export const useFinanceData = () => {
     },
 
     addItem: (categoryId: string) => {
-      const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn]) || [];
+      const prevItems = queryClient.getQueryData<FinanceItem[]>(['items', isLoggedIn, viewAs]) || [];
       const newItem: FinanceItem = {
         id: crypto.randomUUID(),
         name: 'New Item',
@@ -295,7 +295,7 @@ export const useFinanceData = () => {
     },
 
     snapshotHistory: () => {
-      const prevHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn]) || [];
+      const prevHistory = queryClient.getQueryData<HistoryEntry[]>(['history', isLoggedIn, viewAs]) || [];
       const newEntry = FinanceCalculator.createSnapshot(totals);
       saveHistoryMutation.mutate([newEntry, ...prevHistory]);
       return true;

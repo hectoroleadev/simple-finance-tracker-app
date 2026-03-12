@@ -40,13 +40,18 @@ export default defineConfig(({ mode }) => {
           navigateFallbackDenylist: [/^\/api/],
           runtimeCaching: [
             {
-              urlPattern: /^https:\/\/.*\.execute-api\..*\.amazonaws\.com\/.*/i,
+              urlPattern: ({ url }) => {
+                const isCustomDomain = url.hostname === 'api-test.hectorolea.dev';
+                const isAwsDomain = url.hostname.endsWith('.execute-api.us-east-1.amazonaws.com') ||
+                                   url.hostname.endsWith('.execute-api.mx-central-1.amazonaws.com');
+                return isCustomDomain || isAwsDomain;
+              },
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'api-cache',
                 expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                 },
                 cacheableResponse: {
                   statuses: [0, 200]
