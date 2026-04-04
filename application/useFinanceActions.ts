@@ -12,6 +12,7 @@ interface UseFinanceActionsParams {
   repository: FinanceRepository;
   isLoggedIn: boolean;
   viewAs: string | null;
+  userId: string | null;
   items: FinanceItem[];
   categories: Category[];
   totals: FinanceTotals;
@@ -34,6 +35,7 @@ export const useFinanceActions = ({
   repository,
   isLoggedIn,
   viewAs,
+  userId,
   items,
   categories,
   totals,
@@ -49,7 +51,7 @@ export const useFinanceActions = ({
 
   return {
     updateItem: (id: string, name: string, amount: number) => {
-      const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs)) || [];
+      const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) || [];
       saveItemsMutation.mutate(FinanceService.updateItem(current, id, name, amount));
     },
 
@@ -58,14 +60,14 @@ export const useFinanceActions = ({
     },
 
     addItem: (categoryId: string): FinanceItem => {
-      const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs)) || [];
+      const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) || [];
       const { items: newItems, newItem } = FinanceService.addItem(current, categoryId);
       saveItemsMutation.mutate(newItems);
       return newItem;
     },
 
     snapshotHistory: (): boolean => {
-      const current = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs)) || [];
+      const current = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId)) || [];
       saveHistoryMutation.mutate(FinanceService.createSnapshot(totals, current));
       return true;
     },

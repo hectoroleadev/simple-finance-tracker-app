@@ -20,7 +20,7 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
-  async saveItems(items: FinanceItem[]): Promise<void> {
+  async saveItems(items: FinanceItem[], _userId?: string): Promise<void> {
     try {
       localStorage.setItem(KEYS.ITEMS, JSON.stringify(items));
     } catch (error) {
@@ -64,7 +64,7 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
-  async saveHistory(history: HistoryEntry[]): Promise<void> {
+  async saveHistory(history: HistoryEntry[], _userId?: string): Promise<void> {
     try {
       localStorage.setItem(KEYS.HISTORY, JSON.stringify(history));
     } catch (error) {
@@ -85,14 +85,14 @@ export class LocalStorageAdapter implements FinanceRepository {
   async getCategories(_userId?: string): Promise<Category[]> {
     try {
       const saved = localStorage.getItem(KEYS.CATEGORIES);
-      return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+      return saved ? JSON.parse(saved) : [];
     } catch (error) {
       console.error('Error loading categories from local storage', error);
       return DEFAULT_CATEGORIES;
     }
   }
 
-  async saveCategories(categories: Category[]): Promise<void> {
+  async saveCategories(categories: Category[], _userId?: string): Promise<void> {
     try {
       localStorage.setItem(KEYS.CATEGORIES, JSON.stringify(categories));
     } catch (error) {

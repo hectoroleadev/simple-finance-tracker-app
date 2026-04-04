@@ -11,6 +11,7 @@ import { FinanceRepository } from '../domain/ports';
 import { createRepository } from '../infrastructure/createRepository';
 
 // Application layer
+import { FinanceService } from '../domain/finance.service';
 import { useFinanceQueries } from '../application/useFinanceQueries';
 import { useFinanceActions } from '../application/useFinanceActions';
 
@@ -26,21 +27,21 @@ export { FinanceContext, useFinanceContext } from '../context/FinanceContext';
  *   application/useFinanceQueries   →  reads + mutations
  *   application/useFinanceActions   →  use cases
  */
-export const useFinanceData = () => {
+export const useFinanceData = (externalRepository?: FinanceRepository) => {
   const { t } = useLanguage();
-  const { getIdToken, isLoggedIn, refreshAuthTokens, logout } = useAuth();
+  const { user, getIdToken, isLoggedIn, refreshAuthTokens, logout } = useAuth();
 
   const [viewAs, setViewAs] = useState<string | null>(null);
-  const [totals, setTotals] = useState<FinanceTotals>(FinanceCalculator.calculateTotals([], DEFAULT_CATEGORIES));
+  const [totals, setTotals] = useState<FinanceTotals>({ income: 0, expenses: 0, balance: 0, informative: 0 });
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const workerRef = useRef<Worker | null>(null);
 
   const isReadOnly = useMemo(() => viewAs !== null, [viewAs]);
 
-  // Infrastructure: choose the right adapter
+  // Infrastructure: choose the right adapter or use the injected one
   const repository = useMemo<FinanceRepository>(
-    () => createRepository(isLoggedIn, { getToken: getIdToken, refreshAuthTokens, logout }),
-    [getIdToken, isLoggedIn, refreshAuthTokens, logout]
+    () => externalRepository || createRepository(isLoggedIn, { getToken: getIdToken, refreshAuthTokens, logout }),
+    [externalRepository, getIdToken, isLoggedIn, refreshAuthTokens, logout]
   );
 
   // Application: queries + mutations
@@ -54,7 +55,7 @@ export const useFinanceData = () => {
 
   // Application: use cases
   const actions = useFinanceActions({
-    repository, isLoggedIn, viewAs,
+    repository, isLoggedIn, viewAs, userId: user?.username || null,
     items, categories, totals,
     saveItemsMutation, deleteItemMutation, saveHistoryMutation,
     saveCategoriesMutation, deleteHistoryItemMutation,
@@ -73,10 +74,18 @@ export const useFinanceData = () => {
   }, []);
 
   useEffect(() => {
+    // Auto-seed unique default categories if empty (and not in read-only mode)
+    if (isLoggedIn && !isReadOnly && categories.length === 0 && !loading) {
+      console.log('[useFinanceData] Seeding unique default categories...');
+      saveCategoriesMutation.mutate(FinanceService.seedDefaultCategories());
+    }
+  }, [isLoggedIn, isReadOnly, categories.length, loading]);
+
+  useEffect(() => {
     if (workerRef.current && items.length > 0 && categories.length > 0) {
       workerRef.current.postMessage({ type: 'CALCULATE_TOTALS', payload: { items, categories } });
     } else if (items.length === 0) {
-      setTotals(FinanceCalculator.calculateTotals([], categories.length > 0 ? categories : DEFAULT_CATEGORIES));
+      setTotals(FinanceCalculator.calculateTotals([], categories));
     }
   }, [items, categories]);
 

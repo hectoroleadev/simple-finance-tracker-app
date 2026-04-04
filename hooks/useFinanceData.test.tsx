@@ -6,6 +6,14 @@ import { renderHook, act } from '@testing-library/react';
 import { useFinanceData } from './useFinanceData';
 import { FinanceItem, DEFAULT_CATEGORIES } from '../types';
 import { LanguageProvider } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+vi.mock('../context/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
+
+const mockUser = { username: 'test-user', email: 'test@example.com' };
 
 // Mock the adapter to isolate hook testing
 const mockGetItems = vi.fn();
@@ -15,20 +23,21 @@ const mockSaveHistory = vi.fn();
 const mockGetCategories = vi.fn().mockResolvedValue(DEFAULT_CATEGORIES);
 const mockSaveCategories = vi.fn();
 
-vi.mock('../infrastructure/LocalStorageAdapter', () => {
-  return {
-    LocalStorageAdapter: vi.fn().mockImplementation(() => ({
-      getItems: mockGetItems,
-      saveItems: mockSaveItems,
-      getHistory: mockGetHistory,
-      saveHistory: mockSaveHistory,
-      getCategories: mockGetCategories,
-      saveCategories: mockSaveCategories,
-      deleteItem: vi.fn().mockResolvedValue(true),
-      deleteHistoryItem: vi.fn().mockResolvedValue(true),
-    }))
-  };
-});
+const mockRepo = {
+  getItems: mockGetItems,
+  saveItems: (items: any[], userId?: string) => mockSaveItems(items, userId),
+  getHistory: mockGetHistory,
+  saveHistory: (history: any[], userId?: string) => mockSaveHistory(history, userId),
+  getCategories: mockGetCategories,
+  saveCategories: (categories: any[], userId?: string) => mockSaveCategories(categories, userId),
+  deleteItem: vi.fn().mockResolvedValue(true),
+  deleteHistoryItem: vi.fn().mockResolvedValue(true),
+  getItemHistory: vi.fn().mockResolvedValue([]),
+  getMyShares: vi.fn().mockResolvedValue([]),
+  createShare: vi.fn().mockResolvedValue(undefined),
+  deleteShare: vi.fn().mockResolvedValue(undefined),
+  getSharedWithMe: vi.fn().mockResolvedValue([]),
+};
 
 // Mock Worker
 class MockWorker {
@@ -47,6 +56,8 @@ class MockWorker {
 // @ts-ignore
 global.Worker = MockWorker;
 
+let queryClient: QueryClient;
+
 // Mock constants or crypto
 beforeEach(() => {
   vi.clearAllMocks();
@@ -62,32 +73,57 @@ beforeEach(() => {
 
   // Mock window.confirm
   vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+  (useAuth as any).mockReturnValue({
+    user: mockUser,
+    isLoggedIn: true,
+    getIdToken: vi.fn().mockReturnValue('test-token'),
+    refreshAuthTokens: vi.fn().mockResolvedValue(true),
+    logout: vi.fn(),
+  });
+
+  queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+    },
+  });
 });
 
-// Wrapper to provide LanguageContext
+// Wrapper to provide LanguageContext and QueryClient
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <LanguageProvider>{children}</LanguageProvider>
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>{children}</LanguageProvider>
+  </QueryClientProvider>
 );
 
 describe('useFinanceData Hook', () => {
+  const waitForLoad = async (result: any) => {
+    await act(async () => {
+      // Small timeout to allow multiple microtasks (including React Query and Worker)
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
+  };
+
   it('initializes state by loading data from repository', async () => {
     const initialItems: FinanceItem[] = [
       { id: '1', name: 'Test', amount: 100, category: 'debt' }
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
 
-    // Wait for internal loading effect
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
+    await waitForLoad(result);
 
     expect(mockGetItems).toHaveBeenCalled();
+    expect(result.current.items).toHaveLength(1);
   });
 
   it('adds a new item correctly', async () => {
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
       await result.current.actions.addItem('investments');
@@ -104,10 +140,10 @@ describe('useFinanceData Hook', () => {
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0)); // wait for load
       result.current.actions.updateItem('uuid-test', 'Edited', 200);
     });
 
@@ -121,10 +157,10 @@ describe('useFinanceData Hook', () => {
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0)); // wait for load
       result.current.actions.deleteItem('1');
     });
 
@@ -132,7 +168,8 @@ describe('useFinanceData Hook', () => {
   });
 
   it('snapshotHistory creates a new history entry', async () => {
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
       result.current.actions.snapshotHistory();
@@ -144,7 +181,8 @@ describe('useFinanceData Hook', () => {
   // --- Category Tests ---
 
   it('adds a new category', async () => {
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
       await result.current.actions.addCategory({ id: 'cat-new', name: 'New Cat', effect: 'NEGATIVE' as any });
@@ -154,40 +192,56 @@ describe('useFinanceData Hook', () => {
   });
 
   it('updates an existing category', async () => {
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
-    // Default categories loaded... let's update 'housing'
+    // Default categories include 'debt'
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for initial load
-      await result.current.actions.updateCategory({ id: 'housing', name: 'Housing Updated', effect: 'NEGATIVE' as any });
+      await result.current.actions.updateCategory({ id: 'debt', name: 'Debt Updated', effect: 'NEGATIVE' as any });
     });
 
-    const updatedCat = result.current.categories.find(c => c.id === 'housing');
-    expect(updatedCat?.name).toBe('Housing Updated');
+    const updatedCat = result.current.categories.find(c => c.id === 'debt');
+    expect(updatedCat?.name).toBe('Debt Updated');
   });
 
   it('deletes a category', async () => {
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for initial load
-      await result.current.actions.deleteCategory('housing');
+      await result.current.actions.deleteCategory('debt');
     });
 
-    const deletedCat = result.current.categories.find(c => c.id === 'housing');
+    const deletedCat = result.current.categories.find(c => c.id === 'debt');
     expect(deletedCat).toBeUndefined();
   });
 
   it('reorders categories', async () => {
-    const { result } = renderHook(() => useFinanceData(), { wrapper });
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    await waitForLoad(result);
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0)); // Wait for initial load
       const reversed = [...result.current.categories].reverse();
       await result.current.actions.reorderCategories(reversed);
     });
 
     // The order should be reflected and the save function should have been called
     expect(mockSaveCategories).toHaveBeenCalled();
+  });
+
+  it('auto-seeds unique categories if the list is empty', async () => {
+    mockGetCategories.mockResolvedValue([]); // Start empty
+    
+    const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
+    
+    // Internal seeding happens in an effect, so we wait
+    await waitForLoad(result);
+
+    // mockSaveCategories should have been called with the seeded data
+    expect(mockSaveCategories).toHaveBeenCalled();
+    // The first argument to the call should be an array of length 5 (DEFAULT_CATEGORIES length)
+    expect(mockSaveCategories.mock.calls[0][0]).toHaveLength(5);
+    // Each category should have a UUID-like id (mocked as 'uuid-test')
+    expect(mockSaveCategories.mock.calls[0][0][0].id).toBe('uuid-test');
   });
 });

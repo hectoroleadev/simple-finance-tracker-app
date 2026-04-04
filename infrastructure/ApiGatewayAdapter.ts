@@ -1,4 +1,3 @@
-
 import { FinanceRepository } from '../domain/ports';
 import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES, ShareInvite } from '../types';
 
@@ -140,10 +139,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async saveItems(items: FinanceItem[]): Promise<void> {
+  async saveItems(items: FinanceItem[], userId?: string): Promise<void> {
     try {
+      const url = userId ? `${this.apiUrl}/items?viewAs=${userId}` : `${this.apiUrl}/items`;
       await this._makeRequest(
-        `${this.apiUrl}/items`,
+        url,
         {
           method: 'POST',
           headers: this.headers,
@@ -206,10 +206,11 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async saveHistory(history: HistoryEntry[]): Promise<void> {
+  async saveHistory(history: HistoryEntry[], userId?: string): Promise<void> {
     try {
+      const url = userId ? `${this.apiUrl}/history?viewAs=${userId}` : `${this.apiUrl}/history`;
       await this._makeRequest(
-        `${this.apiUrl}/history`,
+        url,
         {
           method: 'POST',
           headers: this.headers,
@@ -248,19 +249,18 @@ export class ApiGatewayAdapter implements FinanceRepository {
         'fetch categories'
       );
       const data = await response.json();
-      const cats: Category[] = data.categories || [];
-      // If the table is empty on first use, seed defaults so the UI has something to show
-      return cats.length > 0 ? cats : DEFAULT_CATEGORIES;
+      return data.categories || [];
     } catch (error) {
       console.error('API Gateway Error (getCategories):', error);
       throw error;
     }
   }
 
-  async saveCategories(categories: Category[]): Promise<void> {
+  async saveCategories(categories: Category[], userId?: string): Promise<void> {
     try {
+      const url = userId ? `${this.apiUrl}/categories?viewAs=${userId}` : `${this.apiUrl}/categories`;
       await this._makeRequest(
-        `${this.apiUrl}/categories`,
+        url,
         {
           method: 'POST',
           headers: this.headers,

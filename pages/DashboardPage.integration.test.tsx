@@ -17,7 +17,7 @@ const mockTotals = {
 };
 
 const mockActions = {
-    addItem: vi.fn(),
+    addItem: vi.fn().mockReturnValue({ id: 'new-id', name: 'New Item', amount: 0, category: 'debt' }),
     updateItem: vi.fn(),
     deleteItem: vi.fn(),
     snapshotHistory: vi.fn(),
@@ -66,9 +66,10 @@ describe('DashboardPage Integration', () => {
         renderWithContext(<DashboardPage />);
 
         // Check if balance, income and retirement are visible (formatted)
-        expect(screen.getByText(/6,300/)).toBeDefined();
-        expect(screen.getByText(/6,500/)).toBeDefined();
-        expect(screen.getByText(/1,500/)).toBeDefined();
+        // Use getAllByText and check that at least one is present
+        expect(screen.getAllByText(/6,300/)[0]).toBeDefined();
+        expect(screen.getAllByText(/6,500/)[0]).toBeDefined();
+        expect(screen.getAllByText(/1,500/)[0]).toBeDefined();
     });
 
     it('triggers addItem action when "+" button is clicked', () => {
@@ -84,7 +85,11 @@ describe('DashboardPage Integration', () => {
     it('triggers snapshotHistory when "Save state" button is clicked', () => {
         renderWithContext(<DashboardPage />);
 
-        const snapshotButton = screen.getByText(/Guardar estado actual/i) || screen.getByText(/Snapshot/i);
+        // The button text is "Record Snapshot" or "Registrar Snapshot" depending on locale (default en here)
+        const snapshotButton = screen.queryByText(/Record Snapshot/i) || screen.queryByText(/Registrar Snapshot/i);
+        if (!snapshotButton) {
+            throw new Error('Snapshot button not found');
+        }
         fireEvent.click(snapshotButton);
 
         expect(mockActions.snapshotHistory).toHaveBeenCalled();

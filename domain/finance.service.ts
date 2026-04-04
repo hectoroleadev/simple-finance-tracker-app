@@ -35,18 +35,22 @@ export const FinanceService = {
     return [newEntry, ...history];
   },
 
+  /** 
+   * Returns a fresh set of default categories but with unique UUIDs 
+   * to avoid clobbering other users in DynamoDB.
+   */
+  seedDefaultCategories: (): Category[] => {
+    return DEFAULT_CATEGORIES.map(cat => ({
+      ...cat,
+      id: globalThis.crypto.randomUUID(),
+    }));
+  },
+
   /**
    * Returns a new categories array with a new category appended.
-   * Handles merge safety: default categories used by existing items are included
-   * on the first explicit save so they are not silently dropped.
    */
-  addCategory: (categories: Category[], items: FinanceItem[], newCategory: Category): Category[] => {
-    const usedIds = new Set(items.map(i => i.category));
+  addCategory: (categories: Category[], _items: FinanceItem[], newCategory: Category): Category[] => {
     const nextBatch = [...categories];
-    DEFAULT_CATEGORIES.forEach(def => {
-      if (usedIds.has(def.id) && !nextBatch.some(c => c.id === def.id))
-        nextBatch.push(def);
-    });
     const maxOrder = nextBatch.reduce((max, c) => Math.max(max, c.order ?? 0), -1);
     const cat: Category = {
       ...newCategory,

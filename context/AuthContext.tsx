@@ -6,6 +6,7 @@ import {
   CognitoUserAttribute,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthTokens {
   idToken: string;
@@ -48,6 +49,7 @@ export const
     const [loading, setLoading] = useState<boolean>(false);
     const [isInitializing, setIsInitializing] = useState<boolean>(true);
     const [tokens, setTokens] = useState<AuthTokens | null>(null);
+    const queryClient = useQueryClient();
 
     const setAuthData = useCallback((session: CognitoUserSession, username: string) => {
       const idToken = session.getIdToken().getJwtToken();
@@ -174,7 +176,8 @@ export const
       setTokens(null);
       setIsLoggedIn(false);
       setUser(null);
-    }, []);
+      queryClient.clear();
+    }, [queryClient]);
 
     const getIdToken = useCallback(() => {
       return tokens?.idToken || null;
