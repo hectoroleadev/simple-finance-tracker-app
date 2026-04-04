@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFinanceData, FinanceContext } from '../hooks/useFinanceData';
+import { useFinanceData } from '../hooks/useFinanceData';
+import { FinanceContext } from '../context/FinanceContext';
 import MainLayout from './MainLayout';
 import Loading from '../components/Loading';
 import { FinanceContextType } from '../types';

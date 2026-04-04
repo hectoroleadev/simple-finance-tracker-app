@@ -10,7 +10,7 @@ import StatCard from '../components/StatCard';
 import CategoryTable from '../components/CategoryTable';
 import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
-import { useFinanceContext } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../context/FinanceContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 const DashboardPage: React.FC = () => {

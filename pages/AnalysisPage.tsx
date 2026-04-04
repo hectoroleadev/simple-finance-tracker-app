@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useRef, useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useFinanceContext } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../context/FinanceContext';
 import Loading from '../components/Loading';
 
 // Lazy load Recharts components as they are quite heavy

@@ -4,7 +4,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import DashboardPage from '../pages/DashboardPage';
-import { FinanceContext } from '../hooks/useFinanceData';
+import { FinanceContext } from '../context/FinanceContext';
 import { LanguageProvider } from '../context/LanguageContext';
 import { DEFAULT_CATEGORIES } from '../types';
 

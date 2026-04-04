@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus, Trash2, Edit2, Save, ChevronUp, ChevronDown, AlertCircle } from 'lucide-react';
 import { Category, BalanceEffect } from '../types';
-import { useFinanceContext } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmDialog from './ConfirmDialog';
 

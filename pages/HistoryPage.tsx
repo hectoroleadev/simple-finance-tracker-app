@@ -2,7 +2,7 @@
 import React from 'react';
 import HistoryTable from '../components/HistoryTable';
 import { useLanguage } from '../context/LanguageContext';
-import { useFinanceContext } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../context/FinanceContext';
 
 const HistoryPage: React.FC = () => {
   const { history, isReadOnly, actions } = useFinanceContext();

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, UserPlus, Trash2, Shield, AlertCircle } from 'lucide-react';
-import { useFinanceContext } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';
 import ConfirmDialog from './ConfirmDialog';
 

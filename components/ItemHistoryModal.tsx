@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, Clock } from 'lucide-react';
-import { useFinanceContext } from '../hooks/useFinanceData';
+import { useFinanceContext } from '../context/FinanceContext';
 import { ItemRevision } from '../types';
 import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
