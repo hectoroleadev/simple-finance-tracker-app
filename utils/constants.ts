@@ -1,5 +1,5 @@
 
-import { FinanceItem, HistoryEntry } from './types';
+import { FinanceItem, HistoryEntry } from '../types';
 
 export const INITIAL_ITEMS: FinanceItem[] = [
   // Debts

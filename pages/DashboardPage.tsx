@@ -22,7 +22,7 @@ const DashboardPage: React.FC = () => {
   // Page-specific keyboard shortcuts
   useKeyboardShortcuts({
     shortcuts: [
-      { key: 's', description: 'Take snapshot', action: actions.snapshot },
+      { key: 's', description: 'Take snapshot', action: actions.snapshotHistory },
     ],
   });
 
@@ -76,7 +76,7 @@ const DashboardPage: React.FC = () => {
 
           {!isReadOnly ? (
             <button
-              onClick={actions.snapshot}
+              onClick={actions.snapshotHistory}
               className="w-full bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
             >
               {t('snapshot')}

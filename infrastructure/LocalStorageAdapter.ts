@@ -1,7 +1,7 @@
 
 import { FinanceRepository } from '../domain/ports';
 import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES } from '../types';
-import { INITIAL_ITEMS, INITIAL_HISTORY } from '../constants';
+import { INITIAL_ITEMS, INITIAL_HISTORY } from '../utils/constants';
 
 const KEYS = {
   ITEMS: 'finance_items_v3',

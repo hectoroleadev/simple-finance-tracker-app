@@ -83,7 +83,7 @@ export const
       }
     }, [setAuthData]);
 
-    const login = useCallback(async (username, password) => {
+    const login = useCallback(async (username: string, password: string) => {
       setLoading(true);
       return new Promise<void>((resolve, reject) => {
         const authDetails = new AuthenticationDetails({
@@ -110,7 +110,7 @@ export const
       });
     }, [setAuthData]);
 
-    const signup = useCallback(async (username, password, email) => {
+    const signup = useCallback(async (username: string, password: string, email: string) => {
       setLoading(true);
       return new Promise<void>((resolve, reject) => {
         const attributeList = [
@@ -128,7 +128,7 @@ export const
       });
     }, []);
 
-    const confirmSignup = useCallback(async (username, code) => {
+    const confirmSignup = useCallback(async (username: string, code: string) => {
       setLoading(true);
       return new Promise<void>((resolve, reject) => {
         const cognitoUser = new CognitoUser({
@@ -147,7 +147,7 @@ export const
       });
     }, []);
 
-    const resendConfirmationCode = useCallback(async (username) => {
+    const resendConfirmationCode = useCallback(async (username: string) => {
       setLoading(true);
       return new Promise<void>((resolve, reject) => {
         const cognitoUser = new CognitoUser({

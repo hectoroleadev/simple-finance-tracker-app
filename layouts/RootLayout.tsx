@@ -29,8 +29,9 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   } = useFinanceData();
 
   const handleSnapshot = () => {
-    actions.snapshotHistory();
+    const success = actions.snapshotHistory();
     navigate('/history');
+    return success;
   };
 
   const contextValue: FinanceContextType = {
@@ -47,7 +48,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     sharedWithMe,
     actions: {
       ...actions,
-      snapshot: handleSnapshot
+      snapshotHistory: handleSnapshot
     }
   };
 

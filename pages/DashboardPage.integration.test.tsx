@@ -25,7 +25,10 @@ const mockActions = {
     updateCategory: vi.fn(),
     deleteCategory: vi.fn(),
     reorderCategories: vi.fn(),
-    snapshot: vi.fn(),
+    deleteHistoryItem: vi.fn(),
+    setViewAs: vi.fn(),
+    inviteUser: vi.fn().mockResolvedValue(undefined),
+    revokeShare: vi.fn().mockResolvedValue(undefined),
     getItemHistory: vi.fn().mockResolvedValue([]),
 };
 
@@ -37,6 +40,10 @@ const mockContextValue = {
     chartData: [],
     loading: false,
     error: null,
+    viewAs: null,
+    isReadOnly: false,
+    shares: [],
+    sharedWithMe: [],
     actions: mockActions
 };
 

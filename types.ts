@@ -54,7 +54,7 @@ export interface ItemRevision {
   name: string;
   amount: number;
   category: string;
-  raw?: any;
+  raw?: Record<string, unknown>;
 }
 
 export interface ShareInvite {
@@ -84,7 +84,6 @@ export interface FinanceContextType {
     deleteItem: (id: string) => void;
     addItem: (categoryId: string) => FinanceItem;
     snapshotHistory: () => boolean;
-    snapshot: () => void;
     deleteHistoryItem: (id: string) => void;
     getItemHistory: (id: string) => Promise<ItemRevision[]>;
     addCategory: (category: Category) => Promise<void>;
