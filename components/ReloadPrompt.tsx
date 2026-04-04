@@ -73,7 +73,12 @@ const ReloadPrompt: React.FC = () => {
                                 {needRefresh && (
                                     <button
                                         className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
-                                        onClick={() => updateServiceWorker(true)}
+                                        onClick={() => {
+                                            updateServiceWorker(true);
+                                            // Fallback: If "Update on reload" is checked in DevTools, 
+                                            // SW skips the waiting phase so updateServiceWorker won't trigger a reload.
+                                            setTimeout(() => window.location.reload(), 500);
+                                        }}
                                     >
                                         {t('pwa.reload')}
                                     </button>
