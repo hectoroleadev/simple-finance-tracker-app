@@ -18,6 +18,7 @@ import ShortcutsHelpModal from '../components/ShortcutsHelpModal';
 import CategoriesManagerModal from '../components/CategoriesManagerModal';
 import SharingManagerModal from '../components/SharingManagerModal';
 import AccountMenu from '../components/AccountMenu';
+import { useFinanceContext } from '../context/FinanceContext';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
   const [showSharingManager, setShowSharingManager] = useState(false);
   const { isLoggedIn, logout } = useAuth();
+  const { isReadOnly } = useFinanceContext();
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -63,6 +65,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         onHelpClick={() => setShowShortcutsHelp(true)}
         onCategoriesClick={() => setShowCategoriesManager(true)}
         onSharingClick={() => setShowSharingManager(true)}
+        isReadOnly={isReadOnly}
       />
 
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-300">
@@ -98,6 +101,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 onShowHelp={() => setShowShortcutsHelp(true)}
                 onManageCategories={() => setShowCategoriesManager(true)}
                 onManageSharing={() => setShowSharingManager(true)}
+                isReadOnly={isReadOnly}
               />
 
               <div className="text-right">

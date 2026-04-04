@@ -16,8 +16,8 @@ export const useCounterAnimation = (
 ) => {
     const { duration = 300, easing = (t) => t * (2 - t) } = options; // Default easeOutQuad, 300ms
     const [displayValue, setDisplayValue] = useState(value);
-    const rafRef = useRef<number>();
-    const startTimeRef = useRef<number>();
+    const rafRef = useRef<number | undefined>(undefined);
+    const startTimeRef = useRef<number | undefined>(undefined);
     const startValueRef = useRef(value);
 
     useEffect(() => {

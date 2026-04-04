@@ -39,7 +39,7 @@ const CategoryRow = React.memo(({
   item: FinanceItem;
   editingId: string | null;
   editName: string;
-  editAmount: string;
+  editAmount: number;
   isNewItem: boolean;
   startEditing: (item: FinanceItem) => void;
   saveEdit: () => void;

@@ -1,4 +1,4 @@
-import { BalanceEffect } from './domain/balanceEffect.ts';
+import { BalanceEffect } from './domain/balanceEffect';
 export { BalanceEffect };
 
 export interface Category {

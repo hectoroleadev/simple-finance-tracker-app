@@ -21,12 +21,14 @@ interface AccountMenuProps {
     onShowHelp: () => void;
     onManageCategories: () => void;
     onManageSharing: () => void;
+    isReadOnly?: boolean;
 }
 
 const AccountMenu: React.FC<AccountMenuProps> = ({
     onShowHelp,
     onManageCategories,
-    onManageSharing
+    onManageSharing,
+    isReadOnly
 }) => {
     const { sharedWithMe, viewAs, actions } = useFinanceContext();
     const { language, setLanguage, t } = useLanguage();
@@ -128,7 +130,7 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
                             );
                         })}
 
-                        {!viewAs && (
+                        {!viewAs && !isReadOnly && (
                             <>
                                 <div className="h-px bg-slate-100 dark:bg-slate-700 my-2 mx-2" />
 

@@ -10,9 +10,10 @@ interface MobileNavProps {
     onHelpClick?: () => void;
     onCategoriesClick?: () => void;
     onSharingClick?: () => void;
+    isReadOnly?: boolean;
 }
 
-const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick, onSharingClick }) => {
+const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick, onSharingClick, isReadOnly }) => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -185,7 +186,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ onHelpClick, onCategoriesClick, o
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
-                            {!viewAs && (
+                            {!viewAs && !isReadOnly && (
                                 <>
                                     <button
                                         onClick={() => { closeMenu(); if (onCategoriesClick) onCategoriesClick(); }}

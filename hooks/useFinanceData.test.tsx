@@ -2,7 +2,7 @@
 /** @vitest-environment jsdom */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useFinanceData } from './useFinanceData';
 import { FinanceItem, DEFAULT_CATEGORIES } from '../types';
 import { LanguageProvider } from '../context/LanguageContext';
@@ -43,11 +43,11 @@ const mockRepo = {
 class MockWorker {
   onmessage: ((e: MessageEvent) => void) | null = null;
   postMessage = vi.fn((data: any) => {
-    // Simulate worker responses
+    // Simulate worker responses synchronously for stable testing
     if (data.type === 'CALCULATE_TOTALS') {
-      setTimeout(() => {
-        this.onmessage?.({ data: { type: 'TOTALS_CALCULATED', payload: { income: 1000, expenses: 0, balance: 1000 } } } as MessageEvent);
-      }, 0);
+      this.onmessage?.({ data: { type: 'TOTALS_CALCULATED', payload: { income: 1000, expenses: 0, balance: 1000 } } } as MessageEvent);
+    } else if (data.type === 'PREPARE_CHART_DATA') {
+      this.onmessage?.({ data: { type: 'CHART_DATA_PREPARED', payload: [] } } as MessageEvent);
     }
   });
   terminate = vi.fn();
@@ -74,19 +74,22 @@ beforeEach(() => {
   // Mock window.confirm
   vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-  (useAuth as any).mockReturnValue({
+  const authValue = {
     user: mockUser,
     isLoggedIn: true,
     getIdToken: vi.fn().mockReturnValue('test-token'),
     refreshAuthTokens: vi.fn().mockResolvedValue(true),
     logout: vi.fn(),
-  });
+  };
+
+  (useAuth as any).mockReturnValue(authValue);
 
   queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
         gcTime: 0,
+        staleTime: 0,
       },
     },
   });
@@ -101,13 +104,19 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('useFinanceData Hook', () => {
   const waitForLoad = async (result: any) => {
+    // Wait for initial load
+    await waitFor(() => {
+      if (result.current.loading) throw new Error('Still loading');
+    }, { timeout: 3000 });
+    
+    // Allow any pending microtasks to settle
     await act(async () => {
-      // Small timeout to allow multiple microtasks (including React Query and Worker)
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 10));
     });
   };
 
   it('initializes state by loading data from repository', async () => {
+    console.log('>>> Test: initializes state');
     const initialItems: FinanceItem[] = [
       { id: '1', name: 'Test', amount: 100, category: 'debt' }
     ];
@@ -230,7 +239,8 @@ describe('useFinanceData Hook', () => {
   });
 
   it('auto-seeds unique categories if the list is empty', async () => {
-    mockGetCategories.mockResolvedValue([]); // Start empty
+    mockGetCategories.mockResolvedValueOnce([]); // Start empty
+    mockGetCategories.mockResolvedValue(DEFAULT_CATEGORIES); // Second load should be success
     
     const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
     

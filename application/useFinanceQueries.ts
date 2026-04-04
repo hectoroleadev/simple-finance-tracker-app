@@ -91,14 +91,20 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
   // ─── Mutations ───────────────────────────────────────────────────────────────
 
   const saveItemsMutation = useMutation({
-    mutationFn: (newItems: FinanceItem[]) => repository.saveItems(newItems, viewAs || undefined),
+    mutationFn: (newItems: FinanceItem[]) => {
+      if (viewAs) {
+        console.error('Cannot save items in read-only shared view');
+        return Promise.resolve();
+      }
+      return repository.saveItems(newItems, undefined);
+    },
     onMutate: async (newItems) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) });
       const previousItems = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId));
       queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), newItems);
       return { previousItems };
     },
-    onError: (err, _newItems, context: { previousItems: FinanceItem[] | undefined } | undefined) => {
+    onError: (err: any, _newItems: any, context: any) => {
       console.error('Failed to save items', err);
       if (context?.previousItems)
         queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), context.previousItems);
@@ -109,7 +115,13 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
   });
 
   const deleteItemMutation = useMutation({
-    mutationFn: (id: string) => repository.deleteItem(id),
+    mutationFn: (id: string) => {
+      if (viewAs) {
+        console.error('Cannot delete items in read-only shared view');
+        return Promise.resolve();
+      }
+      return repository.deleteItem(id);
+    },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) });
       const previousItems = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId));
@@ -117,7 +129,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
         queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), previousItems.filter(i => i.id !== id));
       return { previousItems };
     },
-    onError: (err, _id, context: { previousItems: FinanceItem[] | undefined } | undefined) => {
+    onError: (err: any, _id: any, context: any) => {
       console.error('Failed to delete item', err);
       if (context?.previousItems)
         queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), context.previousItems);
@@ -126,14 +138,20 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
   });
 
   const saveHistoryMutation = useMutation({
-    mutationFn: (newHistory: HistoryEntry[]) => repository.saveHistory(newHistory, viewAs || undefined),
+    mutationFn: (historyEntries: HistoryEntry[]) => {
+      if (viewAs) {
+        console.error('Cannot save history in read-only shared view');
+        return Promise.resolve();
+      }
+      return repository.saveHistory(historyEntries, undefined);
+    },
     onMutate: async (newHistory) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) });
       const previousHistory = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId));
       queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), newHistory);
       return { previousHistory };
     },
-    onError: (err, _newHistory, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
+    onError: (err: any, _newHistory: any, context: any) => {
       console.error('Failed to save history', err);
       if (context?.previousHistory)
         queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), context.previousHistory);
@@ -142,7 +160,13 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
   });
 
   const saveCategoriesMutation = useMutation({
-    mutationFn: (cats: Category[]) => repository.saveCategories(cats, viewAs || undefined),
+    mutationFn: (cats: Category[]) => {
+      if (viewAs) {
+        console.error('Cannot save categories in read-only shared view');
+        return Promise.resolve();
+      }
+      return repository.saveCategories(cats, undefined);
+    },
     onMutate: async (newCats) => {
       if (import.meta.env.DEV) console.log('[useFinanceQueries] Mutating categories:', newCats);
       await queryClient.cancelQueries({ queryKey: queryKeys.categories(isLoggedIn, viewAs, userId) });
@@ -150,8 +174,8 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
       queryClient.setQueryData(queryKeys.categories(isLoggedIn, viewAs, userId), newCats);
       return { prev };
     },
-    onError: (err, newCats, context: { prev: Category[] | undefined } | undefined) => {
-      console.error('Failed to save categories', err, newCats);
+    onError: (err: any, _newCats: any, context: any) => {
+      console.error('Failed to save categories', err);
       if (context?.prev)
         queryClient.setQueryData(queryKeys.categories(isLoggedIn, viewAs, userId), context.prev);
     },
@@ -159,7 +183,13 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
   });
 
   const deleteHistoryItemMutation = useMutation({
-    mutationFn: (id: string) => repository.deleteHistoryItem(id),
+    mutationFn: (id: string) => {
+      if (viewAs) {
+        console.error('Cannot delete history items in read-only shared view');
+        return Promise.resolve();
+      }
+      return repository.deleteHistoryItem(id);
+    },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) });
       const previousHistory = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId));
@@ -167,7 +197,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
         queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), previousHistory.filter(i => i.id !== id));
       return { previousHistory };
     },
-    onError: (err, _id, context: { previousHistory: HistoryEntry[] | undefined } | undefined) => {
+    onError: (err: any, _id: any, context: any) => {
       console.error('Failed to delete history item', err);
       if (context?.previousHistory)
         queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), context.previousHistory);

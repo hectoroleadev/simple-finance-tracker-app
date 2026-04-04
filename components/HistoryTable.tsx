@@ -188,8 +188,9 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOn
               width="100%"
               className="virtual-list h-full overflow-y-auto"
             >
-              {({ index, style }) => (
+              {({ index, style }: { index: number; style: React.CSSProperties }) => (
                 <HistoryRow
+                  key={index}
                   style={style}
                   entry={history[index]}
                   onDelete={handleDeleteClick}

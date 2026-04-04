@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { FinanceItem, HistoryEntry, Category, FinanceTotals } from '../types';
 import { FinanceRepository } from '../domain/ports';
@@ -49,7 +50,7 @@ export const useFinanceActions = ({
 }: UseFinanceActionsParams) => {
   const queryClient = useQueryClient();
 
-  return {
+  return useMemo(() => ({
     updateItem: (id: string, name: string, amount: number) => {
       const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) || [];
       saveItemsMutation.mutate(FinanceService.updateItem(current, id, name, amount));
@@ -106,5 +107,10 @@ export const useFinanceActions = ({
     revokeShare: async (sharedWithId: string): Promise<void> => {
       await revokeShareMutation.mutateAsync(sharedWithId);
     },
-  };
+  }), [
+    queryClient, isLoggedIn, viewAs, userId, repository, items, categories, totals,
+    saveItemsMutation, deleteItemMutation, saveHistoryMutation,
+    saveCategoriesMutation, deleteHistoryItemMutation,
+    inviteUserMutation, revokeShareMutation
+  ]);
 };

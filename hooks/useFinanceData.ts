@@ -53,14 +53,16 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
     inviteUserMutation, revokeShareMutation,
   } = useFinanceQueries({ repository, isLoggedIn, viewAs });
 
-  // Application: use cases
-  const actions = useFinanceActions({
+  // Application: use cases — called at top level as it is a hook
+  const actionsRes = useFinanceActions({
     repository, isLoggedIn, viewAs, userId: user?.username || null,
     items, categories, totals,
     saveItemsMutation, deleteItemMutation, saveHistoryMutation,
     saveCategoriesMutation, deleteHistoryItemMutation,
     inviteUserMutation, revokeShareMutation,
   });
+
+  const actions = useMemo(() => actionsRes, [actionsRes]);
 
   // Web Worker: off-main-thread calculations
   useEffect(() => {
@@ -75,11 +77,11 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
 
   useEffect(() => {
     // Auto-seed unique default categories if empty (and not in read-only mode)
-    if (isLoggedIn && !isReadOnly && categories.length === 0 && !loading) {
+    if (isLoggedIn && !isReadOnly && categories.length === 0 && !loading && !saveCategoriesMutation.isPending) {
       console.log('[useFinanceData] Seeding unique default categories...');
       saveCategoriesMutation.mutate(FinanceService.seedDefaultCategories());
     }
-  }, [isLoggedIn, isReadOnly, categories.length, loading]);
+  }, [isLoggedIn, isReadOnly, categories.length, loading, saveCategoriesMutation.isPending]);
 
   useEffect(() => {
     if (workerRef.current && items.length > 0 && categories.length > 0) {
@@ -99,9 +101,9 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
 
   const error = errorObj ? (errorObj.message || t('errors.loadFailed') || 'Failed to load data') : null;
 
-  return {
+  return useMemo(() => ({
     items, categories, history, totals, chartData,
     loading, error, viewAs, isReadOnly, shares, sharedWithMe,
     actions: { ...actions, setViewAs },
-  };
+  }), [items, categories, history, totals, chartData, loading, error, viewAs, isReadOnly, shares, sharedWithMe, actions]);
 };
