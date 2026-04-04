@@ -40,20 +40,5 @@ export const FinanceCalculator = {
       balance: totals.balance,
       retirement: totals.informative,
     };
-  },
-
-  prepareChartData: (history: HistoryEntry[]) => {
-    return [...history].reverse().map(h => {
-      const date = new Date(h.date);
-      // Fallback for invalid dates
-      const monthShort = isNaN(date.getTime()) ? '---' : date.toLocaleString('default', { month: 'short' });
-      return {
-        name: monthShort,
-        date: h.date,
-        Balance: h.balance,
-        Debt: h.debt,
-        Retirement: h.retirement,
-      };
-    });
   }
 };

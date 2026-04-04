@@ -1,6 +1,7 @@
 
 import { FinanceItem, Category, HistoryEntry } from '../types';
 import { FinanceCalculator } from '../domain/finance.logic';
+import { prepareChartData } from '../utils/chartUtils';
 
 self.onmessage = (e: MessageEvent) => {
     const { type, payload } = e.data;
@@ -11,7 +12,7 @@ self.onmessage = (e: MessageEvent) => {
         self.postMessage({ type: 'TOTALS_CALCULATED', payload: totals });
     } else if (type === 'PREPARE_CHART_DATA') {
         const history: HistoryEntry[] = payload;
-        const chartData = FinanceCalculator.prepareChartData(history);
+        const chartData = prepareChartData(history);
         self.postMessage({ type: 'CHART_DATA_PREPARED', payload: chartData });
     }
 };

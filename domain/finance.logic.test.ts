@@ -1,6 +1,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { FinanceCalculator } from './finance.logic';
+import { prepareChartData } from '../utils/chartUtils';
 import { FinanceItem, DEFAULT_CATEGORIES, BalanceEffect } from '../types';
 
 describe('FinanceCalculator', () => {
@@ -37,7 +38,7 @@ describe('FinanceCalculator', () => {
     expect(snapshot.savings).toBe(6500);
     expect(snapshot.debt).toBe(200);
     expect(snapshot.balance).toBe(6300);
-    expect(snapshot.retirement).toBe(0); // Standard totals don't include retirement in Snapshot construction unless logic is updated, checking logic...
+    expect(snapshot.retirement).toBe(10000); 
   });
 
   it('should handle empty items array gracefully', () => {
@@ -68,7 +69,7 @@ describe('FinanceCalculator', () => {
       { id: 'h2', date: '2024-02-01T00:00:00Z', savings: 200, debt: 20, balance: 180, retirement: 2000 },
     ];
 
-    const chartData = FinanceCalculator.prepareChartData(history);
+    const chartData = prepareChartData(history);
 
     expect(chartData).toHaveLength(2);
     // Original prepares chart data as: [...history].reverse()
@@ -82,13 +83,13 @@ describe('FinanceCalculator', () => {
     const history = [
       { id: 'h1', date: 'invalid-date', savings: 100, debt: 10, balance: 90, retirement: 1000 },
     ];
-    const chartData = FinanceCalculator.prepareChartData(history);
+    const chartData = prepareChartData(history);
     expect(chartData[0].name).toBe('---');
     expect(chartData[0].Balance).toBe(90);
   });
 
   it('should handle empty history in prepareChartData', () => {
-    const chartData = FinanceCalculator.prepareChartData([]);
+    const chartData = prepareChartData([]);
     expect(chartData).toEqual([]);
   });
 });

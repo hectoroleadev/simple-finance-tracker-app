@@ -1,10 +1,5 @@
-
-export enum BalanceEffect {
-  POSITIVE = 'POSITIVE',     // Increases balance (income/assets)
-  NEGATIVE = 'NEGATIVE',     // Decreases balance (debts/expenses)
-  INFORMATIVE = 'INFORMATIVE', // Doesn't affect balance (hidden from dashboard)
-  INFORMATIVE_STAT = 'INFORMATIVE_STAT' // Doesn't affect balance but shows in dashboard (e.g. retirement)
-}
+import { BalanceEffect } from './domain/balanceEffect.ts';
+export { BalanceEffect };
 
 export interface Category {
   id: string;
@@ -16,13 +11,8 @@ export interface Category {
 }
 
 // Default categories (used as seeds for existing data compatibility)
-export const DEFAULT_CATEGORIES: Category[] = [
-  { id: 'investments', name: 'Investments', effect: BalanceEffect.POSITIVE, color: 'green', order: 0 },
-  { id: 'liquid_cash', name: 'Liquid Cash', effect: BalanceEffect.POSITIVE, color: 'blue', order: 1 },
-  { id: 'pending_payments', name: 'Pending Payments', effect: BalanceEffect.POSITIVE, color: 'yellow', order: 2 },
-  { id: 'debt', name: 'Debt', effect: BalanceEffect.NEGATIVE, color: 'red', order: 3 },
-  { id: 'retirement', name: 'Retirement', effect: BalanceEffect.INFORMATIVE_STAT, color: 'purple', order: 4 },
-];
+// Moved to domain/defaults.ts
+export { DEFAULT_CATEGORIES } from './domain/defaults';
 
 export interface FinanceItem {
   id: string;
