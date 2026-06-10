@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -23,20 +24,15 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     onCancel,
     variant = 'danger',
 }) => {
-    // Handle Escape key
+    const trapRef = useFocusTrap(isOpen);
+
     useEffect(() => {
         if (!isOpen) return;
-
         const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onCancel();
-            }
+            if (e.key === 'Escape') onCancel();
         };
-
         window.addEventListener('keydown', handleEscape);
-        // Prevent body scroll when open
         document.body.style.overflow = 'hidden';
-
         return () => {
             window.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = '';
@@ -67,23 +63,22 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     const { Icon } = styles;
 
     return createPortal(
-        <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-        >
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+                className="fixed inset-0 animate-backdrop-in"
                 onClick={onCancel}
             />
             <div
+                ref={trapRef}
                 className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md relative z-10 animate-in zoom-in-95 duration-200 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="p-6">
                     <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-full shrink-0 ${styles.icon}`}>
+                        <div className={`p-3 rounded-full shrink-0 stagger-1 ${styles.icon}`}>
                             <Icon size={24} />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 stagger-2">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
                                 {title}
                             </h3>
@@ -94,7 +89,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                     </div>
                 </div>
 
-                <div className="bg-slate-50 dark:bg-slate-900/40 px-6 py-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-700">
+                <div className="bg-slate-50 dark:bg-slate-900/40 px-6 py-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-700 stagger-3">
                     <button
                         onClick={onCancel}
                         className="px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-all active:scale-[0.98]"

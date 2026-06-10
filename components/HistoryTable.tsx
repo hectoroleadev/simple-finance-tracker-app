@@ -1,127 +1,157 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { HistoryEntry } from '../types';
 import { formatCurrencyNoDecimals } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
-import { Trash2 } from 'lucide-react';
+import { Trash2, CalendarDays } from 'lucide-react';
 import ConfirmDialog from './ConfirmDialog';
+import EmptyState from './EmptyState';
 
 interface HistoryTableProps {
   history: HistoryEntry[];
   onDelete: (id: string) => void;
   isReadOnly?: boolean;
+  isLoading?: boolean;
 }
+
+type ColKey = 'savings' | 'debt' | 'balance' | 'retirement';
+interface ColStat { min: number; max: number; range: number }
+
+const colBarColors: Record<ColKey, string> = {
+  savings: '#10b981',
+  debt: '#f43f5e',
+  balance: '#3b82f6',
+  retirement: '#f59e0b',
+};
+
+const colTextColors: Record<ColKey, string> = {
+  savings: 'text-emerald-700 dark:text-emerald-400',
+  debt: 'text-rose-700 dark:text-rose-400',
+  balance: 'text-blue-700 dark:text-blue-400',
+  retirement: 'text-amber-700 dark:text-amber-400',
+};
 
 const HistoryRow = React.memo(({
   entry,
   onDelete,
   t,
   language,
-  getHeatmapColor,
+  colStats,
   formatYear,
   formatDate,
   dataKeys,
   style,
-  isReadOnly
+  isReadOnly,
 }: {
   entry: HistoryEntry;
   onDelete: (id: string, e?: React.MouseEvent) => void;
   t: (key: string) => string;
   language: string;
-  getHeatmapColor: (val: number, type: 'savings' | 'debt' | 'balance' | 'retirement') => string;
+  colStats: Record<ColKey, ColStat>;
   formatYear: (isoDate: string) => string | number;
   formatDate: (isoDate: string) => string;
-  dataKeys: ('savings' | 'debt' | 'balance' | 'retirement')[];
+  dataKeys: ColKey[];
   style: React.CSSProperties;
   isReadOnly?: boolean;
-}) => (
-  <div
-    style={style}
-    className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors group relative"
-  >
-    <div className="flex flex-col md:flex-row p-4 md:px-6 md:py-0 md:h-[60px] md:items-center">
-      {/* Mobile Header: Date & Delete Button */}
-      <div className="md:hidden flex justify-between items-start mb-4">
-        <div className="flex flex-col">
-          <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
-            {formatYear(entry.date)}
-          </span>
-          <span className="font-bold text-slate-800 dark:text-slate-200 text-lg capitalize">
-            {formatDate(entry.date)}
-          </span>
+}) => {
+  const { min: bMin, range: bRange } = colStats.balance;
+  const bPct = (entry.balance - bMin) / bRange;
+  const rowBg =
+    bPct > 0.6 ? 'bg-emerald-50/40 dark:bg-emerald-900/15' :
+    bPct < 0.3 ? 'bg-rose-50/30 dark:bg-rose-900/10' :
+    '';
+
+  return (
+    <div
+      style={style}
+      className={`border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors group relative ${rowBg}`}
+    >
+      <div className="flex flex-col md:flex-row p-4 md:px-6 md:py-0 md:h-[60px] md:items-center">
+        {/* Mobile Header */}
+        <div className="md:hidden flex justify-between items-start mb-4">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
+              {formatYear(entry.date)}
+            </span>
+            <span className="font-bold text-slate-800 dark:text-slate-200 text-lg capitalize">
+              {formatDate(entry.date)}
+            </span>
+          </div>
+          {!isReadOnly && (
+            <button
+              onClick={(e) => onDelete(entry.id, e)}
+              className="p-2 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 transition-colors rounded-lg bg-slate-50 dark:bg-slate-700/50"
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
         </div>
+
+        {/* Desktop: Year & Date */}
+        <div className="hidden md:block w-20 text-slate-400 dark:text-slate-500 text-sm">
+          {formatYear(entry.date)}
+        </div>
+        <div className="hidden md:block flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
+          {formatDate(entry.date)}
+        </div>
+
+        {/* Data columns */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:flex md:gap-0 w-full md:w-auto">
+          {dataKeys.map((key) => {
+            const val = entry[key];
+            const { min, range } = colStats[key];
+            const barW = Math.max(4, Math.round(((val - min) / range) * 100));
+            return (
+              <div key={key} className="flex flex-col md:block md:w-28 text-left md:text-right md:px-1">
+                <span className="md:hidden text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1.5 px-0.5">
+                  {key === 'debt' ? t('totalDebt') :
+                   key === 'savings' ? t('savings') :
+                   key === 'balance' ? t('netBalance') : t('retirementCapital')}
+                </span>
+                <div>
+                  <div className={`text-sm font-bold tabular-nums ${colTextColors[key]}`}>
+                    {formatCurrencyNoDecimals(val)}
+                  </div>
+                  <div className="h-[3px] mt-1 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${barW}%`, backgroundColor: colBarColors[key] }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {!isReadOnly && (
-          <button
-            onClick={(e) => onDelete(entry.id, e)}
-            className="p-2 text-slate-400 hover:text-rose-500 dark:text-slate-500 dark:hover:text-rose-400 transition-colors rounded-lg bg-slate-50 dark:bg-slate-700/50"
-          >
-            <Trash2 size={18} />
-          </button>
+          <div className="hidden md:flex w-10 justify-end">
+            <button
+              onClick={(e) => onDelete(entry.id, e)}
+              className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
         )}
       </div>
-
-      {/* Desktop: Year & Date Columns */}
-      <div className="hidden md:block w-20 text-slate-400 dark:text-slate-500 text-sm">
-        {formatYear(entry.date)}
-      </div>
-      <div className="hidden md:block flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
-        {formatDate(entry.date)}
-      </div>
-
-      {/* Data Grid: 2 cols on mobile, flex row on desktop */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:flex md:gap-0 w-full md:w-auto">
-        {dataKeys.map((key) => (
-          <div key={key} className="flex flex-col md:block md:w-28 text-left md:text-right md:px-1">
-            {/* Mobile Label */}
-            <span className="md:hidden text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1.5 px-0.5">
-              {key === 'debt' ? t('totalDebt') :
-                key === 'savings' ? t('savings') :
-                  key === 'balance' ? t('netBalance') : t('retirementCapital')}
-            </span>
-
-            {/* Value Badge */}
-            <div className={`inline-flex items-center md:justify-end rounded-lg px-3 py-2 md:py-1 text-sm md:text-xs font-bold tabular-nums border transition-colors w-full md:w-auto shadow-sm md:shadow-none ${getHeatmapColor(entry[key], key)}`}>
-              {formatCurrencyNoDecimals(entry[key])}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {!isReadOnly && (
-        <div className="hidden md:flex w-10 justify-end">
-          <button
-            onClick={(e) => onDelete(entry.id, e)}
-            className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      )}
     </div>
-  </div>
-));
+  );
+});
 
-const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOnly }) => {
+const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOnly, isLoading }) => {
   const { t, language } = useLanguage();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
-  const getHeatmapColor = (val: number, type: 'savings' | 'debt' | 'balance' | 'retirement') => {
-    const vals = history.map(h => h[type]);
-    const min = Math.min(...vals);
-    const max = Math.max(...vals);
-    const range = max - min || 1;
-    const percentile = (val - min) / range;
-
-    if (type === 'debt') {
-      if (percentile > 0.66) return 'bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-100 dark:border-rose-800';
-      if (percentile > 0.33) return 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800';
-      return 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800';
-    } else {
-      if (percentile > 0.66) return 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800';
-      if (percentile > 0.33) return 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 border-slate-100 dark:border-slate-600';
-      return 'bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-100 dark:border-rose-800';
-    }
-  };
+  const colStats = useMemo<Record<ColKey, ColStat>>(() => {
+    const keys: ColKey[] = ['savings', 'debt', 'balance', 'retirement'];
+    return Object.fromEntries(keys.map((key) => {
+      const vals = history.map(h => h[key]);
+      const min = Math.min(...vals);
+      const max = Math.max(...vals);
+      return [key, { min, max, range: max - min || 1 }];
+    })) as Record<ColKey, ColStat>;
+  }, [history]);
 
   const formatYear = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -133,7 +163,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOn
     if (isNaN(date.getTime())) return 'Invalid Date';
     return date.toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', {
       day: 'numeric',
-      month: 'long'
+      month: 'long',
     });
   };
 
@@ -145,23 +175,15 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOn
   };
 
   const handleDeleteClick = (id: string, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    if (e) { e.preventDefault(); e.stopPropagation(); }
     setItemToDelete(id);
   };
 
-  const dataKeys: ('savings' | 'debt' | 'balance' | 'retirement')[] = ['savings', 'debt', 'balance', 'retirement'];
+  const dataKeys: ColKey[] = ['savings', 'debt', 'balance', 'retirement'];
 
-  // Row height for virtual list
-  // Mobile rows are taller to accommodate the card layout (~230px)
   const [rowHeight, setRowHeight] = useState(window.innerWidth < 768 ? 230 : 60);
-
   useEffect(() => {
-    const handleResize = () => {
-      setRowHeight(window.innerWidth < 768 ? 230 : 60);
-    };
+    const handleResize = () => setRowHeight(window.innerWidth < 768 ? 230 : 60);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -180,7 +202,21 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOn
         </div>
 
         <div className="flex-1 relative">
-          {history.length > 0 ? (
+          {isLoading ? (
+            <div className="p-4 space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 px-2 py-3 border-b border-slate-50 dark:border-slate-700/50">
+                  <div className="skeleton h-4 w-16 rounded-md" />
+                  <div className="skeleton h-4 w-28 rounded-md" />
+                  <div className="ml-auto flex gap-3">
+                    {[...Array(4)].map((__, j) => (
+                      <div key={j} className="skeleton h-6 w-20 rounded-lg" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : history.length > 0 ? (
             <List
               height={550}
               itemCount={history.length}
@@ -196,7 +232,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOn
                   onDelete={handleDeleteClick}
                   t={t}
                   language={language}
-                  getHeatmapColor={getHeatmapColor}
+                  colStats={colStats}
                   formatYear={formatYear}
                   formatDate={formatDate}
                   dataKeys={dataKeys}
@@ -205,7 +241,11 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, onDelete, isReadOn
               )}
             </List>
           ) : (
-            <div className="p-20 text-center text-slate-400 dark:text-slate-500 text-sm">{t('emptyList')}</div>
+            <EmptyState
+              icon={<CalendarDays size={28} />}
+              title={t('emptyHistory')}
+              subtitle={t('emptyHistoryHint')}
+            />
           )}
         </div>
       </div>

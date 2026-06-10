@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { FinanceItem } from '../types';
-import { Plus, Trash2, Edit2, Check, Clock } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, Clock, PiggyBank } from 'lucide-react';
+import EmptyState from './EmptyState';
 import { useItemEditor } from '../hooks/useItemEditor';
 import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
@@ -18,6 +19,7 @@ interface CategoryTableProps {
   onDeleteItem: (id: string) => void;
   onAddItem: (categoryId: string) => FinanceItem;
   isReadOnly?: boolean;
+  isLoading?: boolean;
 }
 
 const CategoryRow = React.memo(({
@@ -105,7 +107,8 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   onUpdateItem,
   onDeleteItem,
   onAddItem,
-  isReadOnly
+  isReadOnly,
+  isLoading,
 }) => {
   const { t } = useLanguage();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
@@ -153,7 +156,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
 
   return (
     <>
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-[450px] overflow-hidden transition-colors">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-[450px] overflow-hidden card-interactive transition-colors">
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
           {!isReadOnly && (
@@ -167,7 +170,16 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto virtual-list">
-          {items.length > 0 ? (
+          {isLoading ? (
+            <>
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center px-5 py-3.5 border-b border-slate-50 dark:border-slate-700/50 gap-3">
+                  <div className="skeleton h-4 flex-1 rounded-md" />
+                  <div className="skeleton h-4 w-20 rounded-md" />
+                </div>
+              ))}
+            </>
+          ) : items.length > 0 ? (
             items.map((item) => (
               <CategoryRow
                 key={item.id}
@@ -188,9 +200,11 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
               />
             ))
           ) : (
-            <div className="h-full flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs italic">
-              {t('emptyList')}
-            </div>
+            <EmptyState
+              icon={<PiggyBank size={28} />}
+              title={t('emptyCategory')}
+              subtitle={t('emptyCategoryHint')}
+            />
           )}
         </div>
 

@@ -5,11 +5,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { useFinanceContext } from '../context/FinanceContext';
 
 const HistoryPage: React.FC = () => {
-  const { history, isReadOnly, actions } = useFinanceContext();
+  const { history, isReadOnly, actions, loading } = useFinanceContext();
   const { t } = useLanguage();
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t('historyTitle')}</h2>
@@ -21,6 +21,7 @@ const HistoryPage: React.FC = () => {
         history={history}
         onDelete={actions.deleteHistoryItem}
         isReadOnly={isReadOnly}
+        isLoading={loading}
       />
     </div>
   );

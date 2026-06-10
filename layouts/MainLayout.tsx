@@ -18,6 +18,7 @@ import ShortcutsHelpModal from '../components/ShortcutsHelpModal';
 import CategoriesManagerModal from '../components/CategoriesManagerModal';
 import SharingManagerModal from '../components/SharingManagerModal';
 import AccountMenu from '../components/AccountMenu';
+import PageTransition from '../components/PageTransition';
 import { useFinanceContext } from '../context/FinanceContext';
 
 interface MainLayoutProps {
@@ -123,7 +124,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
 
       <footer className="py-10 text-center border-t border-slate-200 dark:border-slate-800 transition-colors">

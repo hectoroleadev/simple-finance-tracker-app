@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useFinanceData } from '../hooks/useFinanceData';
 import { FinanceContext } from '../context/FinanceContext';
 import MainLayout from './MainLayout';
-import Loading from '../components/Loading';
 import { FinanceContextType } from '../types';
 
 interface RootLayoutProps {
@@ -51,14 +50,6 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
       snapshotHistory: handleSnapshot
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <Loading />
-      </div>
-    );
-  }
 
   if (error) {
     return (
