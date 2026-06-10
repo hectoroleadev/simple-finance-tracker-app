@@ -103,7 +103,7 @@ const DashboardPage: React.FC = () => {
           ))
         }
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between h-[450px] shadow-sm card-interactive transition-colors">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 flex flex-col justify-between h-[450px] shadow-sm card-interactive">
           <div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('periodClose')}</h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('periodCloseDesc')}</p>

@@ -4,6 +4,7 @@ import { X, Plus, Trash2, Edit2, Save, ChevronUp, ChevronDown, AlertCircle } fro
 import { Category, BalanceEffect } from '../types';
 import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import ConfirmDialog from './ConfirmDialog';
 
 interface CategoriesManagerModalProps {
@@ -22,7 +23,7 @@ const EFFECT_COLORS = {
     [BalanceEffect.POSITIVE]: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
     [BalanceEffect.NEGATIVE]: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
     [BalanceEffect.INFORMATIVE]: 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800',
-    [BalanceEffect.INFORMATIVE_STAT]: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+    [BalanceEffect.INFORMATIVE_STAT]: 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
 };
 
 const EMPTY_FORM: Omit<Category, 'id'> = { name: '', effect: BalanceEffect.POSITIVE };
@@ -30,6 +31,7 @@ const EMPTY_FORM: Omit<Category, 'id'> = { name: '', effect: BalanceEffect.POSIT
 const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen, onClose }) => {
     const { categories, actions, isReadOnly } = useFinanceContext();
     const { t } = useLanguage();
+    const trapRef = useFocusTrap(isOpen);
 
     const [editingId, setEditingId] = useState<string | null>(null);
     const [form, setForm] = useState<Omit<Category, 'id'>>(EMPTY_FORM);
@@ -45,6 +47,18 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
     useEffect(() => {
         setLocalCategories(categories);
     }, [categories]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
+        window.addEventListener('keydown', onEsc);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', onEsc);
+            document.body.style.overflow = '';
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -132,10 +146,13 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleClose} />
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="fixed inset-0 animate-backdrop-in" onClick={handleClose} />
+            <div
+                ref={trapRef}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+            >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 stagger-1">
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white">{cm('title')}</h2>
                     <button onClick={handleClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                         <X size={20} />
@@ -151,7 +168,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                 )}
 
                 {/* Category List */}
-                <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
+                <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700 stagger-2">
                     {localCategories.map((cat, idx) => (
                         <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group">
                             {/* Reorder buttons */}
@@ -203,7 +220,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
 
                 {/* Inline Add / Edit Form */}
                 {(isAddNew || editingId) && (
-                    <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-6 py-4 space-y-3">
+                    <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-6 py-4 space-y-3 stagger-3">
                         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                             {isAddNew ? cm('addCategory') : cm('editCategory')}
                         </h3>
@@ -263,7 +280,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
 
                 {/* Footer */}
                 {!isAddNew && !editingId && !isReadOnly && (
-                    <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+                    <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 stagger-3">
                         <button
                             onClick={openNew}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-slate-500 dark:hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all"

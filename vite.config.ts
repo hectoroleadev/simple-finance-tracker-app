@@ -20,17 +20,25 @@ export default defineConfig(({ mode }) => {
         includeAssets: ['icon.svg', 'favicon.ico', 'apple-touch-icon.png'],
         manifest: {
           name: 'Simple Finance Tracker',
-          short_name: 'FinanceApp',
+          short_name: 'Finance',
           description: 'Sigue tus finanzas de forma simple y elegante',
           theme_color: '#10b981',
           background_color: '#0f172a',
           display: 'standalone',
+          orientation: 'portrait-primary',
+          categories: ['finance', 'productivity'],
           icons: [
             {
               src: 'icon.svg',
               sizes: '192x192 512x512',
               type: 'image/svg+xml',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            {
+              src: 'icon.svg',
+              sizes: '512x512',
+              type: 'image/svg+xml',
+              purpose: 'maskable'
             }
           ]
         },

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, UserPlus, Trash2, Shield, AlertCircle } from 'lucide-react';
 import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import ConfirmDialog from './ConfirmDialog';
 
 interface SharingManagerModalProps {
@@ -13,11 +14,23 @@ interface SharingManagerModalProps {
 const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClose }) => {
     const { shares, actions, isReadOnly } = useFinanceContext();
     const { t } = useLanguage();
+    const trapRef = useFocusTrap(isOpen);
 
     const [inviteId, setInviteId] = useState('');
     const [isInviting, setIsInviting] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onEsc);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', onEsc);
+            document.body.style.overflow = '';
+        };
+    }, [isOpen, onClose]);
 
     if (!isOpen) return null;
 
@@ -51,10 +64,13 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
 
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="fixed inset-0 animate-backdrop-in" onClick={onClose} />
+            <div
+                ref={trapRef}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+            >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 stagger-1">
                     <div className="flex items-center gap-2">
                         <Shield className="text-blue-500" size={20} />
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">{sh('title')}</h2>
@@ -74,7 +90,7 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
 
                 {/* Invite Form */}
                 {!isReadOnly && (
-                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
+                    <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 stagger-2">
                         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{sh('inviteUser')}</h3>
                         <div className="flex gap-2">
                             <input
@@ -98,7 +114,7 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
                 )}
 
                 {/* My Shares List */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 stagger-3">
                     <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{sh('myShares')}</h3>
                     {shares.length === 0 ? (
                         <p className="text-sm text-slate-500 dark:text-slate-400 italic">{sh('noShares')}</p>

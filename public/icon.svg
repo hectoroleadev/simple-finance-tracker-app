@@ -1,7 +1,58 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="128" fill="#0f172a"/>
-  <path d="M160 352V288" stroke="#10b981" stroke-width="32" stroke-linecap="round"/>
-  <path d="M256 352V224" stroke="#10b981" stroke-width="32" stroke-linecap="round"/>
-  <path d="M352 352V160" stroke="#10b981" stroke-width="32" stroke-linecap="round"/>
-  <circle cx="256" cy="256" r="200" stroke="#10b981" stroke-width="12" stroke-opacity="0.2"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="g1" x1="128" y1="364" x2="128" y2="252" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="256" y1="364" x2="256" y2="188" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="384" y1="364" x2="384" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="line" x1="128" y1="252" x2="384" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#6ee7b7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <line x1="88" y1="300" x2="424" y2="300" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <line x1="88" y1="212" x2="424" y2="212" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <line x1="88" y1="364" x2="424" y2="364" stroke="#334155" stroke-width="2"/>
+
+  <!-- Bar 1 (short) -->
+  <rect x="96" y="252" width="64" height="112" rx="10" fill="url(#g1)" opacity="0.85"/>
+  <!-- Bar 2 (medium) -->
+  <rect x="224" y="188" width="64" height="176" rx="10" fill="url(#g2)"/>
+  <!-- Bar 3 (tall) -->
+  <rect x="352" y="124" width="64" height="240" rx="10" fill="url(#g3)"/>
+
+  <!-- Trend line connecting bar tops -->
+  <polyline
+    points="128,252 256,188 384,124"
+    stroke="url(#line)"
+    stroke-width="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+    opacity="0.9"
+  />
+
+  <!-- Dots at bar tops -->
+  <circle cx="128" cy="252" r="10" fill="#6ee7b7"/>
+  <circle cx="256" cy="188" r="10" fill="#6ee7b7"/>
+  <circle cx="384" cy="124" r="10" fill="#ffffff" stroke="#34d399" stroke-width="4"/>
+
+  <!-- Arrow head on top-right dot indicating growth -->
+  <path d="M370 100 L398 108 L390 136" stroke="#6ee7b7" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>

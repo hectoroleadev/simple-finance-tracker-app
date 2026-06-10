@@ -4,8 +4,11 @@ import {
   Wallet,
   LayoutDashboard,
   History as HistoryIcon,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  AlignJustify,
+  AlignLeft,
 } from 'lucide-react';
+import { useDensity } from '../hooks/useDensity';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -40,6 +43,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [showSharingManager, setShowSharingManager] = useState(false);
   const { isLoggedIn, logout } = useAuth();
   const { isReadOnly } = useFinanceContext();
+  const { density, toggleDensity } = useDensity();
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -69,7 +73,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         isReadOnly={isReadOnly}
       />
 
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 transition-colors duration-300">
+      {/* V12: sticky header with translucent blur */}
+      <header className="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-700/70 sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
             <div className="bg-slate-900 dark:bg-slate-700 p-2 rounded-lg transition-colors">
@@ -98,6 +103,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             </nav>
 
             <div className="hidden lg:flex items-center gap-4 sm:gap-6 border-l border-slate-200 dark:border-slate-700 pl-4 sm:pl-6 h-10">
+              {/* V14: Density toggle */}
+              <button
+                onClick={toggleDensity}
+                title={density === 'comfortable' ? 'Switch to compact view' : 'Switch to comfortable view'}
+                aria-label={density === 'comfortable' ? 'Switch to compact view' : 'Switch to comfortable view'}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
+              >
+                {density === 'comfortable' ? <AlignLeft size={16} /> : <AlignJustify size={16} />}
+              </button>
               <AccountMenu
                 onShowHelp={() => setShowShortcutsHelp(true)}
                 onManageCategories={() => setShowCategoriesManager(true)}
