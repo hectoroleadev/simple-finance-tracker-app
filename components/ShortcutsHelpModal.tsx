@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { X, Command, Keyboard } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ShortcutsHelpModalProps {
     isOpen: boolean;
@@ -9,19 +10,17 @@ interface ShortcutsHelpModalProps {
 
 const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose }) => {
     const { t } = useLanguage();
+    const trapRef = useFocusTrap(isOpen);
 
-    // Handle Escape key
     useEffect(() => {
         if (!isOpen) return;
-
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onClose();
-            }
+        const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onEsc);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', onEsc);
+            document.body.style.overflow = '';
         };
-
-        window.addEventListener('keydown', handleEscape);
-        return () => window.removeEventListener('keydown', handleEscape);
     }, [isOpen, onClose]);
 
     if (!isOpen) return null;
@@ -69,16 +68,15 @@ const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose
     const visibleShortcuts = isMobile ? shortcuts.filter(s => !s.hideOnMobile) : shortcuts;
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={onClose}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 animate-backdrop-in" onClick={onClose} />
             <div
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+                ref={trapRef}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-200 relative z-10"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
+                <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between stagger-1">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
                             <Keyboard className="w-5 h-5 text-slate-700 dark:text-slate-300" />
@@ -96,7 +94,7 @@ const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 stagger-2">
                     {isMobile && (
                         <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 p-3 rounded-lg text-sm mb-4">
                             {t('helpModal.shortcuts.mobileNote')}
@@ -140,7 +138,7 @@ const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose
                 </div>
 
                 {/* Footer */}
-                <div className="sticky bottom-0 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-200 dark:border-slate-700 px-6 py-4">
+                <div className="sticky bottom-0 bg-slate-50 dark:bg-slate-700/30 border-t border-slate-200 dark:border-slate-700 px-6 py-4 stagger-3">
                     <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
                         {t('helpModal.closeHelp')}
                     </p>

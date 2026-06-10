@@ -16,16 +16,32 @@
   --color-warning: #fbbf24;
 }
 
+/* V10: Variable font with optical sizing */
+@supports (font-variation-settings: normal) {
+  body {
+    font-family: 'Inter var', 'Inter', sans-serif;
+    font-optical-sizing: auto;
+  }
+}
+
 body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* Tabular nums globally for numeric content */
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Force tnum feature on all currency/numeric spans */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 html {
   scrollbar-gutter: stable;
 }
 
-/* Estilos para el scrollbar de las listas virtualizadas */
+/* Scrollbar — webkit */
 .virtual-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -37,19 +53,29 @@ html {
 .virtual-list::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
+  transition: background 0.2s ease;
 }
 
 .virtual-list::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* Dark mode scrollbar */
 .dark .virtual-list::-webkit-scrollbar-thumb {
   background: #475569;
 }
 
 .dark .virtual-list::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+
+/* V11: Firefox scrollbar */
+.virtual-list {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dark .virtual-list {
+  scrollbar-color: #475569 transparent;
 }
 
 /* Animation Keyframes */
@@ -191,7 +217,7 @@ html {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hover Effects */
+/* Hover Effects (legacy — use .card-interactive for new cards) */
 .hover-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -236,16 +262,18 @@ html {
 .card-interactive {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-interactive:hover {
   transform: translateY(-3px);
   box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.13), 0 4px 10px -4px rgba(0, 0, 0, 0.08);
-  border-color: #94a3b8;
+  border-color: #93c5fd;
 }
 .dark .card-interactive:hover {
   box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.45), 0 4px 10px -4px rgba(0, 0, 0, 0.28);
-  border-color: #475569;
+  border-color: #3b82f6;
 }
 
 /* ===== V6: Page transitions ===== */
@@ -280,3 +308,26 @@ html {
 .stagger-1 { animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 60ms  both; }
 .stagger-2 { animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 140ms both; }
 .stagger-3 { animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 220ms both; }
+
+/* ===== V14: prefers-reduced-motion — kill all animations ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== V14: Density modes ===== */
+/* Default (comfortable): rows keep their Tailwind py-3.5 / header py-4 */
+/* Compact: tighter padding via attribute selector (higher specificity than utility) */
+[data-density="compact"] .density-row-py {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+[data-density="compact"] .density-header-py {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}

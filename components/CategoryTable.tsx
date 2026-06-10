@@ -54,7 +54,7 @@ const CategoryRow = React.memo(({
   isReadOnly?: boolean;
 }) => (
   <div
-    className="border-b border-slate-50 dark:border-slate-700/50 flex items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all px-5 py-3.5 group animate-fade-in"
+    className="border-b border-slate-50 dark:border-slate-700/50 flex items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all px-5 py-3.5 density-row-py group animate-fade-in"
   >
     <div className="flex-1 overflow-hidden">
       {editingId === item.id ? (
@@ -156,8 +156,8 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
 
   return (
     <>
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-[450px] overflow-hidden card-interactive transition-colors">
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col h-[450px] overflow-hidden card-interactive">
+        <div className="px-5 py-4 density-header-py border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h3>
           {!isReadOnly && (
             <button
@@ -208,7 +208,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
           )}
         </div>
 
-        <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-700/20 flex justify-between items-center">
+        <div className="px-5 py-4 density-header-py border-t border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-700/20 flex justify-between items-center">
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('total')}</span>
           <span className={`text-lg font-bold tabular-nums ${accentColor}`}>
             {formatCurrency(animatedTotal)}

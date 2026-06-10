@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Clock } from 'lucide-react';
 import { useFinanceContext } from '../context/FinanceContext';
 import { ItemRevision } from '../types';
 import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ItemHistoryModalProps {
     isOpen: boolean;
@@ -16,9 +18,21 @@ interface ItemHistoryModalProps {
 const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({ isOpen, onClose, itemId, itemName, currentAmount }) => {
     const { actions } = useFinanceContext();
     const { t } = useLanguage();
+    const trapRef = useFocusTrap(isOpen);
     const [history, setHistory] = useState<ItemRevision[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onEsc);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            window.removeEventListener('keydown', onEsc);
+            document.body.style.overflow = '';
+        };
+    }, [isOpen, onClose]);
 
     useEffect(() => {
         if (isOpen && itemId) {
@@ -42,12 +56,15 @@ const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({ isOpen, onClose, it
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up border border-slate-200 dark:border-slate-700 flex flex-col max-h-[85vh]">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="fixed inset-0 animate-backdrop-in" onClick={onClose} />
+            <div
+                ref={trapRef}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 flex flex-col max-h-[85vh] relative z-10"
+            >
                 {/* Header */}
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30 stagger-1">
                     <div>
                         <h3 className="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
                             <Clock size={18} className="text-blue-500" />
@@ -64,13 +81,13 @@ const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({ isOpen, onClose, it
                 </div>
 
                 {/* Current Info */}
-                <div className="px-6 py-4 bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-800/30">
+                <div className="px-6 py-4 bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-800/30 stagger-2">
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{t('itemHistory.currentValue')}</p>
                     <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{formatCurrency(currentAmount)}</p>
                 </div>
 
                 {/* Timeline Body */}
-                <div className="overflow-y-auto flex-1 p-6">
+                <div className="overflow-y-auto flex-1 p-6 stagger-3">
                     {loading ? (
                         <div className="flex justify-center items-center h-32">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -133,7 +150,8 @@ const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({ isOpen, onClose, it
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

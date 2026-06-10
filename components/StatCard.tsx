@@ -23,6 +23,14 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, color, icon, trend, t
     yellow: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30',
   };
 
+  // V12: Subtle directional gradient tint per KPI sign
+  const gradientMap = {
+    green: 'bg-gradient-to-br from-white to-emerald-50/70 dark:from-slate-800 dark:to-emerald-900/20',
+    red: 'bg-gradient-to-br from-white to-rose-50/70 dark:from-slate-800 dark:to-rose-900/20',
+    blue: 'bg-gradient-to-br from-white to-blue-50/70 dark:from-slate-800 dark:to-blue-900/20',
+    yellow: 'bg-gradient-to-br from-white to-amber-50/70 dark:from-slate-800 dark:to-amber-900/20',
+  };
+
   const showTrend = trend != null;
   const trendFlat = trend === 0;
   const trendPositive = trendInverted ? trend! < 0 : trend! > 0;
@@ -33,7 +41,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, color, icon, trend, t
       : 'text-rose-500 dark:text-rose-400';
 
   return (
-    <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm card-interactive transition-colors">
+    <div className={`${gradientMap[color]} p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm card-interactive`}>
       <div className="flex items-center gap-3 mb-3">
         <div className={`p-2 rounded-lg transition-all ${colorMap[color]}`}>
           {icon}
