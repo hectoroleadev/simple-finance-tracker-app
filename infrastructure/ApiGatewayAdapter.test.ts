@@ -107,36 +107,36 @@ describe('ApiGatewayAdapter', () => {
     });
   });
 
-  describe('Shared Access (viewAs)', () => {
-    it('should include viewAs in URL when saving items for another user', async () => {
+  describe('Mutation endpoints never send viewAs', () => {
+    it('saveItems posts to /items without viewAs', async () => {
       mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve({}) });
 
-      await adapter.saveItems([], 'other-user');
+      await adapter.saveItems([]);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/items?viewAs=other-user'),
+        expect.not.stringContaining('viewAs'),
         expect.objectContaining({ method: 'POST' })
       );
     });
 
-    it('should include viewAs in URL when saving history for another user', async () => {
+    it('saveHistory posts to /history without viewAs', async () => {
       mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve({}) });
 
-      await adapter.saveHistory([], 'other-user');
+      await adapter.saveHistory([]);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/history?viewAs=other-user'),
+        expect.not.stringContaining('viewAs'),
         expect.objectContaining({ method: 'POST' })
       );
     });
 
-    it('should include viewAs in URL when saving categories for another user', async () => {
+    it('saveCategories posts to /categories without viewAs', async () => {
       mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve({}) });
 
-      await adapter.saveCategories([], 'other-user');
+      await adapter.saveCategories([]);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/categories?viewAs=other-user'),
+        expect.not.stringContaining('viewAs'),
         expect.objectContaining({ method: 'POST' })
       );
     });

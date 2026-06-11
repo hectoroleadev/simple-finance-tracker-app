@@ -139,11 +139,10 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async saveItems(items: FinanceItem[], userId?: string): Promise<void> {
+  async saveItems(items: FinanceItem[]): Promise<void> {
     try {
-      const url = userId ? `${this.apiUrl}/items?viewAs=${userId}` : `${this.apiUrl}/items`;
       await this._makeRequest(
-        url,
+        `${this.apiUrl}/items`,
         {
           method: 'POST',
           headers: this.headers,
@@ -206,11 +205,10 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async saveHistory(history: HistoryEntry[], userId?: string): Promise<void> {
+  async saveHistory(history: HistoryEntry[]): Promise<void> {
     try {
-      const url = userId ? `${this.apiUrl}/history?viewAs=${userId}` : `${this.apiUrl}/history`;
       await this._makeRequest(
-        url,
+        `${this.apiUrl}/history`,
         {
           method: 'POST',
           headers: this.headers,
@@ -256,11 +254,10 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 
-  async saveCategories(categories: Category[], userId?: string): Promise<void> {
+  async saveCategories(categories: Category[]): Promise<void> {
     try {
-      const url = userId ? `${this.apiUrl}/categories?viewAs=${userId}` : `${this.apiUrl}/categories`;
       await this._makeRequest(
-        url,
+        `${this.apiUrl}/categories`,
         {
           method: 'POST',
           headers: this.headers,

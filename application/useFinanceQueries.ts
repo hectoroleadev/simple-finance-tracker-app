@@ -98,11 +98,8 @@ export const useFinanceQueries = ({
 
   const saveItemsMutation = useMutation({
     mutationFn: (newItems: FinanceItem[]) => {
-      if (viewAs) {
-        console.error('Cannot save items in read-only shared view');
-        return Promise.resolve();
-      }
-      return repository.saveItems(newItems, undefined);
+      if (viewAs) throw new Error('Cannot save items in read-only shared view');
+      return repository.saveItems(newItems);
     },
     onMutate: async (newItems) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) });
@@ -123,10 +120,7 @@ export const useFinanceQueries = ({
 
   const deleteItemMutation = useMutation({
     mutationFn: (id: string) => {
-      if (viewAs) {
-        console.error('Cannot delete items in read-only shared view');
-        return Promise.resolve();
-      }
+      if (viewAs) throw new Error('Cannot delete items in read-only shared view');
       return repository.deleteItem(id);
     },
     onMutate: async (id) => {
@@ -147,11 +141,8 @@ export const useFinanceQueries = ({
 
   const saveHistoryMutation = useMutation({
     mutationFn: (historyEntries: HistoryEntry[]) => {
-      if (viewAs) {
-        console.error('Cannot save history in read-only shared view');
-        return Promise.resolve();
-      }
-      return repository.saveHistory(historyEntries, undefined);
+      if (viewAs) throw new Error('Cannot save history in read-only shared view');
+      return repository.saveHistory(historyEntries);
     },
     onMutate: async (newHistory) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) });
@@ -170,11 +161,8 @@ export const useFinanceQueries = ({
 
   const saveCategoriesMutation = useMutation({
     mutationFn: (cats: Category[]) => {
-      if (viewAs) {
-        console.error('Cannot save categories in read-only shared view');
-        return Promise.resolve();
-      }
-      return repository.saveCategories(cats, undefined);
+      if (viewAs) throw new Error('Cannot save categories in read-only shared view');
+      return repository.saveCategories(cats);
     },
     onMutate: async (newCats) => {
       if (import.meta.env.DEV) console.log('[useFinanceQueries] Mutating categories:', newCats);
@@ -194,10 +182,7 @@ export const useFinanceQueries = ({
 
   const deleteHistoryItemMutation = useMutation({
     mutationFn: (id: string) => {
-      if (viewAs) {
-        console.error('Cannot delete history items in read-only shared view');
-        return Promise.resolve();
-      }
+      if (viewAs) throw new Error('Cannot delete history items in read-only shared view');
       return repository.deleteHistoryItem(id);
     },
     onMutate: async (id) => {
