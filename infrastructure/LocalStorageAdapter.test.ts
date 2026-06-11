@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LocalStorageAdapter } from './LocalStorageAdapter';
 import { INITIAL_ITEMS, INITIAL_HISTORY } from '../utils/constants';
+import { BalanceEffect } from '../domain/balanceEffect';
 
 describe('LocalStorageAdapter', () => {
   let adapter: LocalStorageAdapter;
@@ -174,7 +175,7 @@ describe('LocalStorageAdapter', () => {
     });
 
     it('returns parsed categories from localStorage', async () => {
-      const cats = [{ id: 'debt', name: 'Debt', effect: 'NEGATIVE', order: 0 }];
+      const cats = [{ id: 'debt', name: 'Debt', effect: BalanceEffect.NEGATIVE, order: 0 }];
       localStorage.setItem('finance_categories_v1', JSON.stringify(cats));
       const categories = await adapter.getCategories();
       expect(categories).toEqual(cats);
@@ -183,7 +184,7 @@ describe('LocalStorageAdapter', () => {
 
   describe('saveCategories', () => {
     it('writes categories to localStorage', async () => {
-      const cats = [{ id: 'savings', name: 'Savings', effect: 'POSITIVE', order: 0 }];
+      const cats = [{ id: 'savings', name: 'Savings', effect: BalanceEffect.POSITIVE, order: 0 }];
       await adapter.saveCategories(cats);
       const raw = localStorage.getItem('finance_categories_v1');
       expect(JSON.parse(raw!)).toEqual(cats);
