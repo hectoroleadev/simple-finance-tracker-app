@@ -1,4 +1,3 @@
-
 import { describe, it, expect } from 'vitest';
 import { FinanceCalculator } from './finance.logic';
 import { prepareChartData } from '../utils/chartUtils';
@@ -38,7 +37,7 @@ describe('FinanceCalculator', () => {
     expect(snapshot.savings).toBe(6500);
     expect(snapshot.debt).toBe(200);
     expect(snapshot.balance).toBe(6300);
-    expect(snapshot.retirement).toBe(10000); 
+    expect(snapshot.retirement).toBe(10000);
   });
 
   it('should handle empty items array gracefully', () => {
@@ -65,8 +64,22 @@ describe('FinanceCalculator', () => {
 
   it('should prepare chart data and reverse history order', () => {
     const history = [
-      { id: 'h1', date: '2024-01-01T00:00:00Z', savings: 100, debt: 10, balance: 90, retirement: 1000 },
-      { id: 'h2', date: '2024-02-01T00:00:00Z', savings: 200, debt: 20, balance: 180, retirement: 2000 },
+      {
+        id: 'h1',
+        date: '2024-01-01T00:00:00Z',
+        savings: 100,
+        debt: 10,
+        balance: 90,
+        retirement: 1000,
+      },
+      {
+        id: 'h2',
+        date: '2024-02-01T00:00:00Z',
+        savings: 200,
+        debt: 20,
+        balance: 180,
+        retirement: 2000,
+      },
     ];
 
     const chartData = prepareChartData(history);
@@ -74,7 +87,7 @@ describe('FinanceCalculator', () => {
     expect(chartData).toHaveLength(2);
     // Original prepares chart data as: [...history].reverse()
     // [h1, h2] -> [h2, h1]
-    expect(chartData[1].Balance).toBe(90);  // h1
+    expect(chartData[1].Balance).toBe(90); // h1
     expect(chartData[0].Balance).toBe(180); // h2 (newest)
     expect(chartData[0].date).toBe('2024-02-01T00:00:00Z');
   });

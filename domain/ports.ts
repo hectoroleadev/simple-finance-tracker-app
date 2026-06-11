@@ -17,4 +17,3 @@ export interface FinanceRepository {
   deleteShare(sharedWithId: string): Promise<void>;
   getSharedWithMe(): Promise<ShareInvite[]>;
 }
-

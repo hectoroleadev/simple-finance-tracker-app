@@ -39,7 +39,7 @@ export const useFinanceQueries = ({
     queryKey: queryKeys.items(isLoggedIn, viewAs, userId),
     queryFn: async () => {
       const fetched = await repository.getItems(viewAs || undefined);
-      return fetched.map(item => ({ ...item, amount: Number(item.amount) || 0 }));
+      return fetched.map((item) => ({ ...item, amount: Number(item.amount) || 0 }));
     },
     enabled: isLoggedIn,
   });
@@ -54,10 +54,11 @@ export const useFinanceQueries = ({
     enabled: isLoggedIn,
   });
 
-  const categories = useMemo(() =>
-    rawCategories
-      .map((cat, idx) => ({ ...cat, order: cat.order ?? idx }))
-      .sort((a, b) => a.order! - b.order!),
+  const categories = useMemo(
+    () =>
+      rawCategories
+        .map((cat, idx) => ({ ...cat, order: cat.order ?? idx }))
+        .sort((a, b) => a.order! - b.order!),
     [rawCategories]
   );
 
@@ -70,7 +71,7 @@ export const useFinanceQueries = ({
     queryFn: async () => {
       const fetched = await repository.getHistory(viewAs || undefined);
       return fetched
-        .map(entry => ({
+        .map((entry) => ({
           ...entry,
           debt: Number(entry.debt) || 0,
           savings: Number(entry.savings) || 0,
@@ -103,7 +104,9 @@ export const useFinanceQueries = ({
     },
     onMutate: async (newItems) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) });
-      const previousItems = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId));
+      const previousItems = queryClient.getQueryData<FinanceItem[]>(
+        queryKeys.items(isLoggedIn, viewAs, userId)
+      );
       queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), newItems);
       return { previousItems };
     },
@@ -111,7 +114,10 @@ export const useFinanceQueries = ({
       console.error('Failed to save items', err);
       onMutationError?.('Could not save changes. Please try again.');
       if (context?.previousItems)
-        queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), context.previousItems);
+        queryClient.setQueryData(
+          queryKeys.items(isLoggedIn, viewAs, userId),
+          context.previousItems
+        );
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) });
@@ -125,18 +131,27 @@ export const useFinanceQueries = ({
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) });
-      const previousItems = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId));
+      const previousItems = queryClient.getQueryData<FinanceItem[]>(
+        queryKeys.items(isLoggedIn, viewAs, userId)
+      );
       if (previousItems)
-        queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), previousItems.filter(i => i.id !== id));
+        queryClient.setQueryData(
+          queryKeys.items(isLoggedIn, viewAs, userId),
+          previousItems.filter((i) => i.id !== id)
+        );
       return { previousItems };
     },
     onError: (err: any, _id: any, context: any) => {
       console.error('Failed to delete item', err);
       onMutationError?.('Could not delete item. Please try again.');
       if (context?.previousItems)
-        queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), context.previousItems);
+        queryClient.setQueryData(
+          queryKeys.items(isLoggedIn, viewAs, userId),
+          context.previousItems
+        );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.items(isLoggedIn, viewAs, userId) }),
   });
 
   const saveHistoryMutation = useMutation({
@@ -146,7 +161,9 @@ export const useFinanceQueries = ({
     },
     onMutate: async (newHistory) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) });
-      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId));
+      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(
+        queryKeys.history(isLoggedIn, viewAs, userId)
+      );
       queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), newHistory);
       return { previousHistory };
     },
@@ -154,9 +171,13 @@ export const useFinanceQueries = ({
       console.error('Failed to save history', err);
       onMutationError?.('Could not save snapshot. Please try again.');
       if (context?.previousHistory)
-        queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), context.previousHistory);
+        queryClient.setQueryData(
+          queryKeys.history(isLoggedIn, viewAs, userId),
+          context.previousHistory
+        );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) }),
   });
 
   const saveCategoriesMutation = useMutation({
@@ -166,8 +187,12 @@ export const useFinanceQueries = ({
     },
     onMutate: async (newCats) => {
       if (import.meta.env.DEV) console.log('[useFinanceQueries] Mutating categories:', newCats);
-      await queryClient.cancelQueries({ queryKey: queryKeys.categories(isLoggedIn, viewAs, userId) });
-      const prev = queryClient.getQueryData<Category[]>(queryKeys.categories(isLoggedIn, viewAs, userId));
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.categories(isLoggedIn, viewAs, userId),
+      });
+      const prev = queryClient.getQueryData<Category[]>(
+        queryKeys.categories(isLoggedIn, viewAs, userId)
+      );
       queryClient.setQueryData(queryKeys.categories(isLoggedIn, viewAs, userId), newCats);
       return { prev };
     },
@@ -177,7 +202,8 @@ export const useFinanceQueries = ({
       if (context?.prev)
         queryClient.setQueryData(queryKeys.categories(isLoggedIn, viewAs, userId), context.prev);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories(isLoggedIn, viewAs, userId) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories(isLoggedIn, viewAs, userId) }),
   });
 
   const deleteHistoryItemMutation = useMutation({
@@ -187,18 +213,27 @@ export const useFinanceQueries = ({
     },
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) });
-      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId));
+      const previousHistory = queryClient.getQueryData<HistoryEntry[]>(
+        queryKeys.history(isLoggedIn, viewAs, userId)
+      );
       if (previousHistory)
-        queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), previousHistory.filter(i => i.id !== id));
+        queryClient.setQueryData(
+          queryKeys.history(isLoggedIn, viewAs, userId),
+          previousHistory.filter((i) => i.id !== id)
+        );
       return { previousHistory };
     },
     onError: (err: any, _id: any, context: any) => {
       console.error('Failed to delete history item', err);
       onMutationError?.('Could not delete history entry. Please try again.');
       if (context?.previousHistory)
-        queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), context.previousHistory);
+        queryClient.setQueryData(
+          queryKeys.history(isLoggedIn, viewAs, userId),
+          context.previousHistory
+        );
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.history(isLoggedIn, viewAs, userId) }),
   });
 
   const inviteUserMutation = useMutation({
@@ -207,7 +242,8 @@ export const useFinanceQueries = ({
       console.error('Failed to invite user', err);
       onMutationError?.('Could not invite user. Please check the username and try again.');
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.shares(isLoggedIn, userId) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.shares(isLoggedIn, userId) }),
   });
 
   const revokeShareMutation = useMutation({
@@ -216,7 +252,8 @@ export const useFinanceQueries = ({
       console.error('Failed to revoke share', err);
       onMutationError?.('Could not revoke access. Please try again.');
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.shares(isLoggedIn, userId) }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.shares(isLoggedIn, userId) }),
   });
 
   // ─── Derived State ───────────────────────────────────────────────────────────

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FinanceItem } from '../types';
 import { Plus, Trash2, Edit2, Check, Clock, PiggyBank } from 'lucide-react';
@@ -22,82 +21,111 @@ interface CategoryTableProps {
   isLoading?: boolean;
 }
 
-const CategoryRow = React.memo(({
-  item,
-  editingId,
-  editName,
-  editAmount,
-  isNewItem,
-  startEditing,
-  saveEdit,
-  handleNameChange,
-  handleAmountChange,
-  handleKeyDown,
-  handleDeleteClick,
-  openHistory,
-  t,
-  isReadOnly
-}: {
-  item: FinanceItem;
-  editingId: string | null;
-  editName: string;
-  editAmount: number;
-  isNewItem: boolean;
-  startEditing: (item: FinanceItem) => void;
-  saveEdit: () => void;
-  handleNameChange: (val: string) => void;
-  handleAmountChange: (val: string) => void;
-  handleKeyDown: (e: React.KeyboardEvent) => void;
-  handleDeleteClick: (id: string) => void;
-  openHistory: (item: FinanceItem) => void;
-  t: (key: string) => string;
-  isReadOnly?: boolean;
-}) => (
-  <div
-    className="border-b border-slate-50 dark:border-slate-700/50 flex items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all px-5 py-3.5 density-row-py group animate-fade-in"
-  >
-    <div className="flex-1 overflow-hidden">
-      {editingId === item.id ? (
-        <input
-          autoFocus={isNewItem}
-          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
-          value={editName}
-          onChange={(e) => handleNameChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={(e) => e.target.select()}
-        />
-      ) : (
-        <span className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate block">{item.name}</span>
-      )}
+const CategoryRow = React.memo(
+  ({
+    item,
+    editingId,
+    editName,
+    editAmount,
+    isNewItem,
+    startEditing,
+    saveEdit,
+    handleNameChange,
+    handleAmountChange,
+    handleKeyDown,
+    handleDeleteClick,
+    openHistory,
+    t,
+    isReadOnly,
+  }: {
+    item: FinanceItem;
+    editingId: string | null;
+    editName: string;
+    editAmount: number;
+    isNewItem: boolean;
+    startEditing: (item: FinanceItem) => void;
+    saveEdit: () => void;
+    handleNameChange: (val: string) => void;
+    handleAmountChange: (val: string) => void;
+    handleKeyDown: (e: React.KeyboardEvent) => void;
+    handleDeleteClick: (id: string) => void;
+    openHistory: (item: FinanceItem) => void;
+    t: (key: string) => string;
+    isReadOnly?: boolean;
+  }) => (
+    <div className="border-b border-slate-50 dark:border-slate-700/50 flex items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all px-5 py-3.5 density-row-py group animate-fade-in">
+      <div className="flex-1 overflow-hidden">
+        {editingId === item.id ? (
+          <input
+            autoFocus={isNewItem}
+            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
+            value={editName}
+            onChange={(e) => handleNameChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={(e) => e.target.select()}
+          />
+        ) : (
+          <span className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate block">
+            {item.name}
+          </span>
+        )}
+      </div>
+      <div className="w-24 text-right ml-3 shrink-0">
+        {editingId === item.id ? (
+          <input
+            type="number"
+            autoFocus={!isNewItem}
+            className="w-full text-right bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
+            value={editAmount}
+            onChange={(e) => handleAmountChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={(e) => e.target.select()}
+          />
+        ) : (
+          <span className="text-sm text-slate-900 dark:text-white font-semibold tabular-nums">
+            {formatCurrency(item.amount)}
+          </span>
+        )}
+      </div>
+      <div
+        className={`w-14 flex justify-end gap-1.5 transition-opacity ml-2 ${isReadOnly ? 'hidden' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}
+      >
+        {editingId === item.id ? (
+          <button
+            onClick={saveEdit}
+            className="text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"
+          >
+            <Check size={16} />
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => openHistory(item)}
+              className="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:scale-110 transition-transform"
+              title={t('history')}
+            >
+              <Clock size={14} />
+            </button>
+            <button
+              onClick={() => startEditing(item)}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-110 transition-transform"
+              title={t('edit')}
+            >
+              <Edit2 size={14} />
+            </button>
+            <button
+              onClick={() => handleDeleteClick(item.id)}
+              className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"
+              title={t('delete')}
+            >
+              <Trash2 size={14} />
+            </button>
+          </>
+        )}
+      </div>
     </div>
-    <div className="w-24 text-right ml-3 shrink-0">
-      {editingId === item.id ? (
-        <input
-          type="number"
-          autoFocus={!isNewItem}
-          className="w-full text-right bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
-          value={editAmount}
-          onChange={(e) => handleAmountChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={(e) => e.target.select()}
-        />
-      ) : (
-        <span className="text-sm text-slate-900 dark:text-white font-semibold tabular-nums">{formatCurrency(item.amount)}</span>
-      )}
-    </div>
-    <div className={`w-14 flex justify-end gap-1.5 transition-opacity ml-2 ${isReadOnly ? 'hidden' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}>
-      {editingId === item.id ? (
-        <button onClick={saveEdit} className="text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"><Check size={16} /></button>
-      ) : (
-        <>
-          <button onClick={() => openHistory(item)} className="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:scale-110 transition-transform" title={t('history')}><Clock size={14} /></button>
-          <button onClick={() => startEditing(item)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-110 transition-transform" title={t('edit')}><Edit2 size={14} /></button>
-          <button onClick={() => handleDeleteClick(item.id)} className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform" title={t('delete')}><Trash2 size={14} /></button>
-        </>
-      )}
-    </div>
-  </div>
-));
+  )
+);
 
 const CategoryTable: React.FC<CategoryTableProps> = ({
   title,
@@ -122,7 +150,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
     saveEdit,
     handleNameChange,
     handleAmountChange,
-    handleKeyDown
+    handleKeyDown,
   } = useItemEditor({ onUpdate: onUpdateItem });
 
   const total = items.reduce((acc, item) => acc + item.amount, 0);
@@ -173,7 +201,10 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
           {isLoading ? (
             <>
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center px-5 py-3.5 border-b border-slate-50 dark:border-slate-700/50 gap-3">
+                <div
+                  key={i}
+                  className="flex items-center px-5 py-3.5 border-b border-slate-50 dark:border-slate-700/50 gap-3"
+                >
                   <div className="skeleton h-4 flex-1 rounded-md" />
                   <div className="skeleton h-4 w-20 rounded-md" />
                 </div>
@@ -209,7 +240,9 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
         </div>
 
         <div className="px-5 py-4 density-header-py border-t border-slate-100 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-700/20 flex justify-between items-center">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('total')}</span>
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {t('total')}
+          </span>
           <span className={`text-lg font-bold tabular-nums ${accentColor}`}>
             {formatCurrency(animatedTotal)}
           </span>

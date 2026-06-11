@@ -1,4 +1,3 @@
-
 /** @vitest-environment jsdom */
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
@@ -10,7 +9,7 @@ import { FinanceItem } from '../types';
 
 const mockItems: FinanceItem[] = [
   { id: '1', name: 'Groceries', amount: 300, category: 'food' },
-  { id: '2', name: 'Rent', amount: 1500, category: 'housing' }
+  { id: '2', name: 'Rent', amount: 1500, category: 'housing' },
 ];
 
 const mockActions = {
@@ -41,15 +40,13 @@ const mockContextValue = {
   isReadOnly: false,
   shares: [],
   sharedWithMe: [],
-  actions: mockActions
+  actions: mockActions,
 };
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(
     <LanguageProvider>
-      <FinanceContext.Provider value={mockContextValue}>
-        {ui}
-      </FinanceContext.Provider>
+      <FinanceContext.Provider value={mockContextValue}>{ui}</FinanceContext.Provider>
     </LanguageProvider>
   );
 };
@@ -74,7 +71,9 @@ describe('CategoryTable Integration', () => {
   });
 
   it('triggers onAddItem when plus button is clicked', () => {
-    const onAddItem = vi.fn().mockReturnValue({ id: 'new-id', name: '', amount: 0, category: 'cat-expenses' });
+    const onAddItem = vi
+      .fn()
+      .mockReturnValue({ id: 'new-id', name: '', amount: 0, category: 'cat-expenses' });
     renderWithProvider(
       <CategoryTable
         title="Expenses"
@@ -94,4 +93,3 @@ describe('CategoryTable Integration', () => {
     expect(onAddItem).toHaveBeenCalledWith('cat-expenses');
   });
 });
-

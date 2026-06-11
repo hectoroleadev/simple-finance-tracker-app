@@ -7,7 +7,7 @@ import { HistoryEntry, ChartDataPoint } from '../types';
  * not a business rule. The domain should not know what a chart axis label looks like.
  */
 export const prepareChartData = (history: HistoryEntry[]): ChartDataPoint[] => {
-  return [...history].reverse().map(h => {
+  return [...history].reverse().map((h) => {
     const date = new Date(h.date);
     const monthShort = isNaN(date.getTime())
       ? '---'

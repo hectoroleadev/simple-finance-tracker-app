@@ -6,8 +6,12 @@ import { FinanceService } from '../domain/finance.service';
 import { queryKeys } from '../hooks/queryKeys';
 
 // Narrow mutation interfaces: only the methods useFinanceActions needs
-interface MutationWithMutate<TVar> { mutate: (v: TVar) => void; }
-interface MutationWithMutateAsync<TVar> { mutateAsync: (v: TVar) => Promise<void>; }
+interface MutationWithMutate<TVar> {
+  mutate: (v: TVar) => void;
+}
+interface MutationWithMutateAsync<TVar> {
+  mutateAsync: (v: TVar) => Promise<void>;
+}
 
 interface UseFinanceActionsParams {
   repository: FinanceRepository;
@@ -50,67 +54,91 @@ export const useFinanceActions = ({
 }: UseFinanceActionsParams) => {
   const queryClient = useQueryClient();
 
-  return useMemo(() => ({
-    updateItem: (id: string, name: string, amount: number) => {
-      const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) || [];
-      saveItemsMutation.mutate(FinanceService.updateItem(current, id, name, amount));
-    },
+  return useMemo(
+    () => ({
+      updateItem: (id: string, name: string, amount: number) => {
+        const current =
+          queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) ||
+          [];
+        saveItemsMutation.mutate(FinanceService.updateItem(current, id, name, amount));
+      },
 
-    deleteItem: (id: string) => {
-      deleteItemMutation.mutate(id);
-    },
+      deleteItem: (id: string) => {
+        deleteItemMutation.mutate(id);
+      },
 
-    addItem: (categoryId: string): FinanceItem => {
-      const current = queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) || [];
-      const { items: newItems, newItem } = FinanceService.addItem(current, categoryId);
-      saveItemsMutation.mutate(newItems);
-      return newItem;
-    },
+      addItem: (categoryId: string): FinanceItem => {
+        const current =
+          queryClient.getQueryData<FinanceItem[]>(queryKeys.items(isLoggedIn, viewAs, userId)) ||
+          [];
+        const { items: newItems, newItem } = FinanceService.addItem(current, categoryId);
+        saveItemsMutation.mutate(newItems);
+        return newItem;
+      },
 
-    snapshotHistory: (): boolean => {
-      const current = queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId)) || [];
-      saveHistoryMutation.mutate(FinanceService.createSnapshot(totals, current));
-      return true;
-    },
+      snapshotHistory: (): boolean => {
+        const current =
+          queryClient.getQueryData<HistoryEntry[]>(queryKeys.history(isLoggedIn, viewAs, userId)) ||
+          [];
+        saveHistoryMutation.mutate(FinanceService.createSnapshot(totals, current));
+        return true;
+      },
 
-    deleteHistoryItem: (id: string) => {
-      deleteHistoryItemMutation.mutate(id);
-    },
+      deleteHistoryItem: (id: string) => {
+        deleteHistoryItemMutation.mutate(id);
+      },
 
-    getItemHistory: (id: string) =>
-      queryClient.fetchQuery({
-        queryKey: queryKeys.itemHistory(id),
-        queryFn: () => repository.getItemHistory(id),
-        staleTime: 1000 * 60,
-      }),
+      getItemHistory: (id: string) =>
+        queryClient.fetchQuery({
+          queryKey: queryKeys.itemHistory(id),
+          queryFn: () => repository.getItemHistory(id),
+          staleTime: 1000 * 60,
+        }),
 
-    addCategory: async (category: Category): Promise<void> => {
-      await saveCategoriesMutation.mutateAsync(FinanceService.addCategory(categories, items, category));
-    },
+      addCategory: async (category: Category): Promise<void> => {
+        await saveCategoriesMutation.mutateAsync(
+          FinanceService.addCategory(categories, items, category)
+        );
+      },
 
-    updateCategory: async (category: Category): Promise<void> => {
-      await saveCategoriesMutation.mutateAsync(FinanceService.updateCategory(categories, category));
-    },
+      updateCategory: async (category: Category): Promise<void> => {
+        await saveCategoriesMutation.mutateAsync(
+          FinanceService.updateCategory(categories, category)
+        );
+      },
 
-    deleteCategory: async (id: string): Promise<void> => {
-      await saveCategoriesMutation.mutateAsync(FinanceService.removeCategory(categories, id));
-    },
+      deleteCategory: async (id: string): Promise<void> => {
+        await saveCategoriesMutation.mutateAsync(FinanceService.removeCategory(categories, id));
+      },
 
-    reorderCategories: async (reordered: Category[]): Promise<void> => {
-      await saveCategoriesMutation.mutateAsync(FinanceService.reorderCategories(reordered));
-    },
+      reorderCategories: async (reordered: Category[]): Promise<void> => {
+        await saveCategoriesMutation.mutateAsync(FinanceService.reorderCategories(reordered));
+      },
 
-    inviteUser: async (sharedWithId: string): Promise<void> => {
-      await inviteUserMutation.mutateAsync(sharedWithId);
-    },
+      inviteUser: async (sharedWithId: string): Promise<void> => {
+        await inviteUserMutation.mutateAsync(sharedWithId);
+      },
 
-    revokeShare: async (sharedWithId: string): Promise<void> => {
-      await revokeShareMutation.mutateAsync(sharedWithId);
-    },
-  }), [
-    queryClient, isLoggedIn, viewAs, userId, repository, items, categories, totals,
-    saveItemsMutation, deleteItemMutation, saveHistoryMutation,
-    saveCategoriesMutation, deleteHistoryItemMutation,
-    inviteUserMutation, revokeShareMutation
-  ]);
+      revokeShare: async (sharedWithId: string): Promise<void> => {
+        await revokeShareMutation.mutateAsync(sharedWithId);
+      },
+    }),
+    [
+      queryClient,
+      isLoggedIn,
+      viewAs,
+      userId,
+      repository,
+      items,
+      categories,
+      totals,
+      saveItemsMutation,
+      deleteItemMutation,
+      saveHistoryMutation,
+      saveCategoriesMutation,
+      deleteHistoryItemMutation,
+      inviteUserMutation,
+      revokeShareMutation,
+    ]
+  );
 };

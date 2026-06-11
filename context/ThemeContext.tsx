@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 
 // Tipos
@@ -11,10 +10,13 @@ interface ThemeState {
 type ThemeAction = { type: 'TOGGLE_THEME' } | { type: 'SET_THEME'; payload: Theme };
 
 // Contexto
-const ThemeContext = createContext<{
-  state: ThemeState;
-  dispatch: React.Dispatch<ThemeAction>;
-} | undefined>(undefined);
+const ThemeContext = createContext<
+  | {
+      state: ThemeState;
+      dispatch: React.Dispatch<ThemeAction>;
+    }
+  | undefined
+>(undefined);
 
 // Reducer
 const themeReducer = (state: ThemeState, action: ThemeAction): ThemeState => {
@@ -51,11 +53,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     localStorage.setItem('theme', state.theme);
   }, [state.theme]);
 
-  return (
-    <ThemeContext.Provider value={{ state, dispatch }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ state, dispatch }}>{children}</ThemeContext.Provider>;
 };
 
 // Hook personalizado

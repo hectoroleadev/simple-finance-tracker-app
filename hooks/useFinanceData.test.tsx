@@ -1,4 +1,3 @@
-
 /** @vitest-environment jsdom */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -45,7 +44,9 @@ class MockWorker {
   postMessage = vi.fn((data: any) => {
     // Simulate worker responses synchronously for stable testing
     if (data.type === 'CALCULATE_TOTALS') {
-      this.onmessage?.({ data: { type: 'TOTALS_CALCULATED', payload: { income: 1000, expenses: 0, balance: 1000 } } } as MessageEvent);
+      this.onmessage?.({
+        data: { type: 'TOTALS_CALCULATED', payload: { income: 1000, expenses: 0, balance: 1000 } },
+      } as MessageEvent);
     } else if (data.type === 'PREPARE_CHART_DATA') {
       this.onmessage?.({ data: { type: 'CHART_DATA_PREPARED', payload: [] } } as MessageEvent);
     }
@@ -68,7 +69,7 @@ beforeEach(() => {
 
   Object.defineProperty(globalThis, 'crypto', {
     value: { randomUUID: () => 'uuid-test' },
-    writable: true
+    writable: true,
   });
 
   // Mock window.confirm
@@ -110,21 +111,22 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe.skip('useFinanceData Hook', () => {
   const waitForLoad = async (result: any) => {
     // Wait for initial load
-    await waitFor(() => {
-      if (result.current.loading) throw new Error('Still loading');
-    }, { timeout: 3000 });
-    
+    await waitFor(
+      () => {
+        if (result.current.loading) throw new Error('Still loading');
+      },
+      { timeout: 3000 }
+    );
+
     // Allow any pending microtasks to settle
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
   };
 
   it('initializes state by loading data from repository', async () => {
     console.log('>>> Test: initializes state');
-    const initialItems: FinanceItem[] = [
-      { id: '1', name: 'Test', amount: 100, category: 'debt' }
-    ];
+    const initialItems: FinanceItem[] = [{ id: '1', name: 'Test', amount: 100, category: 'debt' }];
     mockGetItems.mockResolvedValue(initialItems);
 
     const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
@@ -150,7 +152,7 @@ describe.skip('useFinanceData Hook', () => {
 
   it('updates an existing item', async () => {
     const initialItems: FinanceItem[] = [
-      { id: 'uuid-test', name: 'Original', amount: 100, category: 'debt' }
+      { id: 'uuid-test', name: 'Original', amount: 100, category: 'debt' },
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
@@ -167,7 +169,7 @@ describe.skip('useFinanceData Hook', () => {
 
   it('deletes an item', async () => {
     const initialItems: FinanceItem[] = [
-      { id: '1', name: 'Delete Me', amount: 100, category: 'debt' }
+      { id: '1', name: 'Delete Me', amount: 100, category: 'debt' },
     ];
     mockGetItems.mockResolvedValue(initialItems);
 
@@ -199,10 +201,16 @@ describe.skip('useFinanceData Hook', () => {
     await waitForLoad(result);
 
     await act(async () => {
-      await result.current.actions.addCategory({ id: 'cat-new', name: 'New Cat', effect: 'NEGATIVE' as any });
+      await result.current.actions.addCategory({
+        id: 'cat-new',
+        name: 'New Cat',
+        effect: 'NEGATIVE' as any,
+      });
     });
 
-    expect(result.current.categories).toContainEqual(expect.objectContaining({ id: 'cat-new', name: 'New Cat' }));
+    expect(result.current.categories).toContainEqual(
+      expect.objectContaining({ id: 'cat-new', name: 'New Cat' })
+    );
   });
 
   it('updates an existing category', async () => {
@@ -211,10 +219,14 @@ describe.skip('useFinanceData Hook', () => {
 
     // Default categories include 'debt'
     await act(async () => {
-      await result.current.actions.updateCategory({ id: 'debt', name: 'Debt Updated', effect: 'NEGATIVE' as any });
+      await result.current.actions.updateCategory({
+        id: 'debt',
+        name: 'Debt Updated',
+        effect: 'NEGATIVE' as any,
+      });
     });
 
-    const updatedCat = result.current.categories.find(c => c.id === 'debt');
+    const updatedCat = result.current.categories.find((c) => c.id === 'debt');
     expect(updatedCat?.name).toBe('Debt Updated');
   });
 
@@ -226,7 +238,7 @@ describe.skip('useFinanceData Hook', () => {
       await result.current.actions.deleteCategory('debt');
     });
 
-    const deletedCat = result.current.categories.find(c => c.id === 'debt');
+    const deletedCat = result.current.categories.find((c) => c.id === 'debt');
     expect(deletedCat).toBeUndefined();
   });
 
@@ -246,9 +258,9 @@ describe.skip('useFinanceData Hook', () => {
   it('auto-seeds unique categories if the list is empty', async () => {
     mockGetCategories.mockResolvedValueOnce([]); // Start empty
     mockGetCategories.mockResolvedValue(DEFAULT_CATEGORIES); // Second load should be success
-    
+
     const { result } = renderHook(() => useFinanceData(mockRepo), { wrapper });
-    
+
     // Internal seeding happens in an effect, so we wait
     await waitForLoad(result);
 

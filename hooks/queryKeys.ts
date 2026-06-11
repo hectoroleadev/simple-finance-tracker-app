@@ -14,12 +14,10 @@ export const queryKeys = {
   categories: (loggedIn: boolean, viewAs: string | null, userId: string | null) =>
     ['categories', loggedIn, viewAs, userId] as const,
 
-  shares: (loggedIn: boolean, userId: string | null) =>
-    ['shares', loggedIn, userId] as const,
+  shares: (loggedIn: boolean, userId: string | null) => ['shares', loggedIn, userId] as const,
 
   sharedWithMe: (loggedIn: boolean, userId: string | null) =>
     ['sharedWithMe', loggedIn, userId] as const,
 
-  itemHistory: (id: string) =>
-    ['itemHistory', id] as const,
+  itemHistory: (id: string) => ['itemHistory', id] as const,
 };

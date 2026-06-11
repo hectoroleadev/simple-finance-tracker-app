@@ -16,8 +16,7 @@ export function useDensity() {
     document.documentElement.dataset.density = density;
   }, []);
 
-  const toggleDensity = () =>
-    setDensity(d => (d === 'comfortable' ? 'compact' : 'comfortable'));
+  const toggleDensity = () => setDensity((d) => (d === 'comfortable' ? 'compact' : 'comfortable'));
 
   return { density, toggleDensity, isCompact: density === 'compact' };
 }

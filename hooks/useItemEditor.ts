@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FinanceItem } from '../types';
 
@@ -47,6 +46,6 @@ export const useItemEditor = ({ onUpdate }: UseItemEditorProps) => {
     saveEdit,
     handleNameChange,
     handleAmountChange,
-    handleKeyDown
+    handleKeyDown,
   };
 };

@@ -34,7 +34,12 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
   const { addToast } = useToast();
 
   const [viewAs, setViewAs] = useState<string | null>(null);
-  const [totals, setTotals] = useState<FinanceTotals>({ income: 0, expenses: 0, balance: 0, informative: 0 });
+  const [totals, setTotals] = useState<FinanceTotals>({
+    income: 0,
+    expenses: 0,
+    balance: 0,
+    informative: 0,
+  });
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const workerRef = useRef<Worker | null>(null);
 
@@ -42,17 +47,28 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
 
   // Infrastructure: choose the right adapter or use the injected one
   const repository = useMemo<FinanceRepository>(
-    () => externalRepository || createRepository(isLoggedIn, { getToken: getIdToken, refreshAuthTokens, logout }),
+    () =>
+      externalRepository ||
+      createRepository(isLoggedIn, { getToken: getIdToken, refreshAuthTokens, logout }),
     [externalRepository, getIdToken, isLoggedIn, refreshAuthTokens, logout]
   );
 
   // Application: queries + mutations
   const {
-    items, categories, history, shares, sharedWithMe,
-    loading, errorObj,
-    saveItemsMutation, deleteItemMutation, saveHistoryMutation,
-    saveCategoriesMutation, deleteHistoryItemMutation,
-    inviteUserMutation, revokeShareMutation,
+    items,
+    categories,
+    history,
+    shares,
+    sharedWithMe,
+    loading,
+    errorObj,
+    saveItemsMutation,
+    deleteItemMutation,
+    saveHistoryMutation,
+    saveCategoriesMutation,
+    deleteHistoryItemMutation,
+    inviteUserMutation,
+    revokeShareMutation,
   } = useFinanceQueries({
     repository,
     isLoggedIn,
@@ -62,18 +78,29 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
 
   // Application: use cases — called at top level as it is a hook
   const actionsRes = useFinanceActions({
-    repository, isLoggedIn, viewAs, userId: user?.username || null,
-    items, categories, totals,
-    saveItemsMutation, deleteItemMutation, saveHistoryMutation,
-    saveCategoriesMutation, deleteHistoryItemMutation,
-    inviteUserMutation, revokeShareMutation,
+    repository,
+    isLoggedIn,
+    viewAs,
+    userId: user?.username || null,
+    items,
+    categories,
+    totals,
+    saveItemsMutation,
+    deleteItemMutation,
+    saveHistoryMutation,
+    saveCategoriesMutation,
+    deleteHistoryItemMutation,
+    inviteUserMutation,
+    revokeShareMutation,
   });
 
   const actions = useMemo(() => actionsRes, [actionsRes]);
 
   // Web Worker: off-main-thread calculations
   useEffect(() => {
-    workerRef.current = new Worker(new URL('../utils/finance.worker.ts', import.meta.url), { type: 'module' });
+    workerRef.current = new Worker(new URL('../utils/finance.worker.ts', import.meta.url), {
+      type: 'module',
+    });
     workerRef.current.onmessage = (e) => {
       const { type, payload } = e.data;
       if (type === 'TOTALS_CALCULATED') setTotals(payload);
@@ -84,7 +111,13 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
 
   useEffect(() => {
     // Auto-seed unique default categories if empty (and not in read-only mode)
-    if (isLoggedIn && !isReadOnly && categories.length === 0 && !loading && !saveCategoriesMutation.isPending) {
+    if (
+      isLoggedIn &&
+      !isReadOnly &&
+      categories.length === 0 &&
+      !loading &&
+      !saveCategoriesMutation.isPending
+    ) {
       console.log('[useFinanceData] Seeding unique default categories...');
       saveCategoriesMutation.mutate(FinanceService.seedDefaultCategories());
     }
@@ -106,11 +139,38 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
     }
   }, [history]);
 
-  const error = errorObj ? (errorObj.message || t('errors.loadFailed') || 'Failed to load data') : null;
+  const error = errorObj
+    ? errorObj.message || t('errors.loadFailed') || 'Failed to load data'
+    : null;
 
-  return useMemo(() => ({
-    items, categories, history, totals, chartData,
-    loading, error, viewAs, isReadOnly, shares, sharedWithMe,
-    actions: { ...actions, setViewAs },
-  }), [items, categories, history, totals, chartData, loading, error, viewAs, isReadOnly, shares, sharedWithMe, actions]);
+  return useMemo(
+    () => ({
+      items,
+      categories,
+      history,
+      totals,
+      chartData,
+      loading,
+      error,
+      viewAs,
+      isReadOnly,
+      shares,
+      sharedWithMe,
+      actions: { ...actions, setViewAs },
+    }),
+    [
+      items,
+      categories,
+      history,
+      totals,
+      chartData,
+      loading,
+      error,
+      viewAs,
+      isReadOnly,
+      shares,
+      sharedWithMe,
+      actions,
+    ]
+  );
 };

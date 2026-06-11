@@ -1,4 +1,3 @@
-
 import React from 'react';
 import HistoryTable from '../components/HistoryTable';
 import { useLanguage } from '../context/LanguageContext';

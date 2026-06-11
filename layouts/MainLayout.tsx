@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Wallet,
@@ -29,11 +28,11 @@ interface MainLayoutProps {
   netWorth: number;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({
-  children,
-  netWorth
-}) => {
-  const { state: { theme }, dispatch } = useTheme();
+const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
+  const {
+    state: { theme },
+    dispatch,
+  } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,7 +49,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   // Global keyboard shortcuts
   useKeyboardShortcuts({
     shortcuts: [
-      { key: '?', description: 'Show keyboard shortcuts', action: () => setShowShortcutsHelp(true) },
+      {
+        key: '?',
+        description: 'Show keyboard shortcuts',
+        action: () => setShowShortcutsHelp(true),
+      },
       { key: 't', description: 'Toggle theme', action: () => dispatch({ type: 'TOGGLE_THEME' }) },
       { key: '1', description: 'Go to Dashboard', action: () => navigate('/dashboard') },
       { key: '2', description: 'Go to History', action: () => navigate('/history') },
@@ -81,7 +84,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               <Wallet size={20} className="text-white" />
             </div>
             <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              {t('appTitle')}<span className="text-slate-400 font-medium hidden sm:inline">{t('appTitleCore')}</span>
+              {t('appTitle')}
+              <span className="text-slate-400 font-medium hidden sm:inline">
+                {t('appTitleCore')}
+              </span>
             </h1>
           </div>
 
@@ -91,10 +97,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => navigate(tab.path)}
-                  className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentPath === tab.id
-                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    currentPath === tab.id
+                      ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
                 >
                   <tab.icon size={16} />
                   {tab.label}
@@ -106,8 +113,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               {/* V14: Density toggle */}
               <button
                 onClick={toggleDensity}
-                title={density === 'comfortable' ? 'Switch to compact view' : 'Switch to comfortable view'}
-                aria-label={density === 'comfortable' ? 'Switch to compact view' : 'Switch to comfortable view'}
+                title={
+                  density === 'comfortable'
+                    ? 'Switch to compact view'
+                    : 'Switch to comfortable view'
+                }
+                aria-label={
+                  density === 'comfortable'
+                    ? 'Switch to compact view'
+                    : 'Switch to comfortable view'
+                }
                 className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
               >
                 {density === 'comfortable' ? <AlignLeft size={16} /> : <AlignJustify size={16} />}
@@ -120,8 +135,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               />
 
               <div className="text-right">
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('netWorth')}</span>
-                <span className={`text-lg sm:text-xl font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {t('netWorth')}
+                </span>
+                <span
+                  className={`text-lg sm:text-xl font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                >
                   {formatCurrency(animatedNetWorth)}
                 </span>
               </div>
@@ -129,7 +148,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
             {/* Always show net worth on mobile, but simply */}
             <div className="text-right lg:hidden mr-12">
-              <span className={`text-lg font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              <span
+                className={`text-lg font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+              >
                 {formatCurrency(animatedNetWorth)}
               </span>
             </div>
@@ -142,7 +163,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       </main>
 
       <footer className="py-10 text-center border-t border-slate-200 dark:border-slate-800 transition-colors">
-        <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">{t('footer')}</p>
+        <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+          {t('footer')}
+        </p>
       </footer>
 
       {/* Mobile Bottom Navigation */}
@@ -151,8 +174,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           <button
             key={tab.id}
             onClick={() => navigate(tab.path)}
-            className={`flex flex-col items-center gap-1 p-2 transition-all ${currentPath === tab.id ? 'text-slate-900 dark:text-white scale-110' : 'text-slate-400 dark:text-slate-500'
-              }`}
+            className={`flex flex-col items-center gap-1 p-2 transition-all ${
+              currentPath === tab.id
+                ? 'text-slate-900 dark:text-white scale-110'
+                : 'text-slate-400 dark:text-slate-500'
+            }`}
           >
             <tab.icon size={22} />
             <span className="text-[10px] font-medium">{tab.label}</span>
@@ -160,10 +186,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         ))}
       </div>
 
-      <ShortcutsHelpModal
-        isOpen={showShortcutsHelp}
-        onClose={() => setShowShortcutsHelp(false)}
-      />
+      <ShortcutsHelpModal isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
       <CategoriesManagerModal
         isOpen={showCategoriesManager}
         onClose={() => setShowCategoriesManager(false)}

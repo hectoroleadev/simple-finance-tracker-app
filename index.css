@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "./tailwind.config.js";
 
 /* Design Tokens */
@@ -28,13 +28,15 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   /* Tabular nums globally for numeric content */
-  font-feature-settings: "kern" 1, "liga" 1;
+  font-feature-settings:
+    'kern' 1,
+    'liga' 1;
 }
 
 /* Force tnum feature on all currency/numeric spans */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font-feature-settings: 'tnum' 1;
 }
 
 html {
@@ -192,23 +194,13 @@ html {
 
 /* Skeleton Loading */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 0%,
-    #e0e0e0 50%,
-    #f0f0f0 100%
-  );
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
 }
 
 .dark .skeleton {
-  background: linear-gradient(
-    90deg,
-    #1e293b 0%,
-    #334155 50%,
-    #1e293b 100%
-  );
+  background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
   background-size: 1000px 100%;
 }
 
@@ -219,16 +211,22 @@ html {
 
 /* Hover Effects (legacy — use .card-interactive for new cards) */
 .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
 .dark .hover-lift:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 8px 10px -6px rgba(0, 0, 0, 0.2);
 }
 
 /* Item Highlight Effect */
@@ -260,58 +258,109 @@ html {
 
 /* ===== V5: Unified card hover interactions ===== */
 .card-interactive {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-interactive:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.13), 0 4px 10px -4px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 14px 30px -8px rgba(0, 0, 0, 0.13),
+    0 4px 10px -4px rgba(0, 0, 0, 0.08);
   border-color: #93c5fd;
 }
 .dark .card-interactive:hover {
-  box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.45), 0 4px 10px -4px rgba(0, 0, 0, 0.28);
+  box-shadow:
+    0 14px 30px -8px rgba(0, 0, 0, 0.45),
+    0 4px 10px -4px rgba(0, 0, 0, 0.28);
   border-color: #3b82f6;
 }
 
 /* ===== V6: Page transitions ===== */
 @keyframes pageSlideFromRight {
-  from { opacity: 0; transform: translateX(14px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @keyframes pageSlideFromLeft {
-  from { opacity: 0; transform: translateX(-14px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @keyframes pageFadeUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.page-slide-right { animation: pageSlideFromRight 0.22s cubic-bezier(0.4, 0, 0.2, 1); }
-.page-slide-left  { animation: pageSlideFromLeft  0.22s cubic-bezier(0.4, 0, 0.2, 1); }
-.page-fade        { animation: pageFadeUp          0.22s cubic-bezier(0.4, 0, 0.2, 1); }
+.page-slide-right {
+  animation: pageSlideFromRight 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-slide-left {
+  animation: pageSlideFromLeft 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-fade {
+  animation: pageFadeUp 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* ===== V9: Modal backdrop with progressive blur ===== */
 @keyframes backdropIn {
-  from { backdrop-filter: blur(0px); background-color: rgba(15, 23, 42, 0); }
-  to   { backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.6); }
+  from {
+    backdrop-filter: blur(0px);
+    background-color: rgba(15, 23, 42, 0);
+  }
+  to {
+    backdrop-filter: blur(4px);
+    background-color: rgba(15, 23, 42, 0.6);
+  }
 }
-.animate-backdrop-in { animation: backdropIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.animate-backdrop-in {
+  animation: backdropIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 
 /* ===== V9: Modal content stagger ===== */
 @keyframes staggerIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.stagger-1 { animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 60ms  both; }
-.stagger-2 { animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 140ms both; }
-.stagger-3 { animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 220ms both; }
+.stagger-1 {
+  animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 60ms both;
+}
+.stagger-2 {
+  animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 140ms both;
+}
+.stagger-3 {
+  animation: staggerIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) 220ms both;
+}
 
 /* ===== V14: prefers-reduced-motion — kill all animations ===== */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -322,12 +371,12 @@ html {
 /* ===== V14: Density modes ===== */
 /* Default (comfortable): rows keep their Tailwind py-3.5 / header py-4 */
 /* Compact: tighter padding via attribute selector (higher specificity than utility) */
-[data-density="compact"] .density-row-py {
+[data-density='compact'] .density-row-py {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
 
-[data-density="compact"] .density-header-py {
+[data-density='compact'] .density-header-py {
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
 }

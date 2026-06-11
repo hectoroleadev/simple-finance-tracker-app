@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from 'react';
 import {
   CognitoUserPool,
   CognitoUser,
@@ -41,51 +48,50 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<{ username: string; email?: string } | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [tokens, setTokens] = useState<AuthTokens | null>(null);
+  const queryClient = useQueryClient();
 
-  AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    const [user, setUser] = useState<{ username: string; email?: string } | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [isInitializing, setIsInitializing] = useState<boolean>(true);
-    const [tokens, setTokens] = useState<AuthTokens | null>(null);
-    const queryClient = useQueryClient();
+  const setAuthData = useCallback((session: CognitoUserSession, username: string) => {
+    const idToken = session.getIdToken().getJwtToken();
+    const accessToken = session.getAccessToken().getJwtToken();
+    const refreshToken = session.getRefreshToken().getToken();
 
-    const setAuthData = useCallback((session: CognitoUserSession, username: string) => {
-      const idToken = session.getIdToken().getJwtToken();
-      const accessToken = session.getAccessToken().getJwtToken();
-      const refreshToken = session.getRefreshToken().getToken();
+    setTokens({ idToken, accessToken, refreshToken });
+    setIsLoggedIn(true);
 
-      setTokens({ idToken, accessToken, refreshToken });
-      setIsLoggedIn(true);
+    const payload = session.getIdToken().decodePayload();
+    setUser({
+      username: payload['cognito:username'] || payload.username || username,
+      email: payload.email,
+    });
+  }, []);
 
-      const payload = session.getIdToken().decodePayload();
-      setUser({
-        username: payload['cognito:username'] || payload.username || username,
-        email: payload.email,
-      });
-    }, []);
-
-    useEffect(() => {
-      const cognitoUser = userPool.getCurrentUser();
-      if (cognitoUser) {
-        cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
-          if (err || !session || !session.isValid()) {
-            setIsLoggedIn(false);
-            setLoading(false);
-            return;
-          }
-          setAuthData(session, cognitoUser.getUsername());
+  useEffect(() => {
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+        if (err || !session || !session.isValid()) {
+          setIsLoggedIn(false);
           setLoading(false);
-          setIsInitializing(false);
-        });
-      } else {
+          return;
+        }
+        setAuthData(session, cognitoUser.getUsername());
         setLoading(false);
         setIsInitializing(false);
-      }
-    }, [setAuthData]);
+      });
+    } else {
+      setLoading(false);
+      setIsInitializing(false);
+    }
+  }, [setAuthData]);
 
-    const login = useCallback(async (username: string, password: string) => {
+  const login = useCallback(
+    async (username: string, password: string) => {
       setLoading(true);
       return new Promise<void>((resolve, reject) => {
         const authDetails = new AuthenticationDetails({
@@ -110,98 +116,99 @@ export const
           },
         });
       });
-    }, [setAuthData]);
+    },
+    [setAuthData]
+  );
 
-    const signup = useCallback(async (username: string, password: string, email: string) => {
-      setLoading(true);
-      return new Promise<void>((resolve, reject) => {
-        const attributeList = [
-          new CognitoUserAttribute({ Name: 'email', Value: email }),
-        ];
+  const signup = useCallback(async (username: string, password: string, email: string) => {
+    setLoading(true);
+    return new Promise<void>((resolve, reject) => {
+      const attributeList = [new CognitoUserAttribute({ Name: 'email', Value: email })];
 
-        userPool.signUp(username, password, attributeList, [], (err, result) => {
-          setLoading(false);
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve();
-        });
+      userPool.signUp(username, password, attributeList, [], (err, result) => {
+        setLoading(false);
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
       });
-    }, []);
+    });
+  }, []);
 
-    const confirmSignup = useCallback(async (username: string, code: string) => {
-      setLoading(true);
-      return new Promise<void>((resolve, reject) => {
-        const cognitoUser = new CognitoUser({
-          Username: username,
-          Pool: userPool,
-        });
-
-        cognitoUser.confirmRegistration(code, true, (err, result) => {
-          setLoading(false);
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve();
-        });
+  const confirmSignup = useCallback(async (username: string, code: string) => {
+    setLoading(true);
+    return new Promise<void>((resolve, reject) => {
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: userPool,
       });
-    }, []);
 
-    const resendConfirmationCode = useCallback(async (username: string) => {
-      setLoading(true);
-      return new Promise<void>((resolve, reject) => {
-        const cognitoUser = new CognitoUser({
-          Username: username,
-          Pool: userPool,
-        });
-
-        cognitoUser.resendConfirmationCode((err, result) => {
-          setLoading(false);
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve();
-        });
+      cognitoUser.confirmRegistration(code, true, (err, result) => {
+        setLoading(false);
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
       });
-    }, []);
+    });
+  }, []);
 
-    const logout = useCallback(() => {
-      const cognitoUser = userPool.getCurrentUser();
-      if (cognitoUser) {
-        cognitoUser.signOut();
-      }
-      setTokens(null);
-      setIsLoggedIn(false);
-      setUser(null);
-      queryClient.clear();
-    }, [queryClient]);
-
-    const getIdToken = useCallback(() => {
-      return tokens?.idToken || null;
-    }, [tokens]);
-
-    const refreshAuthTokens = useCallback(async (): Promise<boolean> => {
-      const cognitoUser = userPool.getCurrentUser();
-      if (!cognitoUser) return false;
-
-      return new Promise<boolean>((resolve) => {
-        cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
-          if (err || !session || !session.isValid()) {
-            logout();
-            resolve(false);
-            return;
-          }
-          setAuthData(session, cognitoUser.getUsername());
-          resolve(true);
-        });
+  const resendConfirmationCode = useCallback(async (username: string) => {
+    setLoading(true);
+    return new Promise<void>((resolve, reject) => {
+      const cognitoUser = new CognitoUser({
+        Username: username,
+        Pool: userPool,
       });
-    }, [logout, setAuthData]);
 
-    return (
-      <AuthContext.Provider value={{
+      cognitoUser.resendConfirmationCode((err, result) => {
+        setLoading(false);
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
+    });
+  }, []);
+
+  const logout = useCallback(() => {
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.signOut();
+    }
+    setTokens(null);
+    setIsLoggedIn(false);
+    setUser(null);
+    queryClient.clear();
+  }, [queryClient]);
+
+  const getIdToken = useCallback(() => {
+    return tokens?.idToken || null;
+  }, [tokens]);
+
+  const refreshAuthTokens = useCallback(async (): Promise<boolean> => {
+    const cognitoUser = userPool.getCurrentUser();
+    if (!cognitoUser) return false;
+
+    return new Promise<boolean>((resolve) => {
+      cognitoUser.getSession((err: Error | null, session: CognitoUserSession | null) => {
+        if (err || !session || !session.isValid()) {
+          logout();
+          resolve(false);
+          return;
+        }
+        setAuthData(session, cognitoUser.getUsername());
+        resolve(true);
+      });
+    });
+  }, [logout, setAuthData]);
+
+  return (
+    <AuthContext.Provider
+      value={{
         isLoggedIn,
         user,
         loading,
@@ -212,12 +219,13 @@ export const
         resendConfirmationCode,
         logout,
         getIdToken,
-        refreshAuthTokens
-      }}>
-        {children}
-      </AuthContext.Provider>
-    );
-  };
+        refreshAuthTokens,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

@@ -13,10 +13,7 @@ export interface ApiAdapterDeps {
  * based on environment config and auth state. Keeps this infrastructure
  * decision out of the application layer (hooks/useFinanceData).
  */
-export function createRepository(
-  isLoggedIn: boolean,
-  deps: ApiAdapterDeps
-): FinanceRepository {
+export function createRepository(isLoggedIn: boolean, deps: ApiAdapterDeps): FinanceRepository {
   const apiUrl = import.meta.env.VITE_API_GATEWAY_URL;
 
   if (apiUrl && isLoggedIn) {

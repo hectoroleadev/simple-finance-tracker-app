@@ -23,15 +23,15 @@ export interface FinanceItem {
 }
 
 export interface FinanceTotals {
-  income: number;      // Sum of POSITIVE categories
-  expenses: number;    // Sum of NEGATIVE categories
-  balance: number;     // income - expenses
+  income: number; // Sum of POSITIVE categories
+  expenses: number; // Sum of NEGATIVE categories
+  balance: number; // income - expenses
   informative: number; // Sum of INFORMATIVE categories
 }
 
 export interface ChartDataPoint {
-  name: string;        // Short month label (e.g. "Jan")
-  date: string;        // ISO date string
+  name: string; // Short month label (e.g. "Jan")
+  date: string; // ISO date string
   Balance: number;
   Debt: number;
   Retirement: number;

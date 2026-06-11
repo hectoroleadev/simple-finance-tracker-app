@@ -1,4 +1,3 @@
-
 import { FinanceRepository } from '../domain/ports';
 import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES } from '../types';
 import { INITIAL_ITEMS, INITIAL_HISTORY } from '../utils/constants';
@@ -20,7 +19,7 @@ export class LocalStorageAdapter implements FinanceRepository {
     }
   }
 
-  async saveItems(items: FinanceItem[]): Promise<void> {
+  async saveItems(items: FinanceItem[], _userId?: string): Promise<void> {
     try {
       localStorage.setItem(KEYS.ITEMS, JSON.stringify(items));
     } catch (error) {
@@ -31,7 +30,7 @@ export class LocalStorageAdapter implements FinanceRepository {
   async deleteItem(id: string): Promise<void> {
     try {
       const items = await this.getItems();
-      const newItems = items.filter(item => item.id !== id);
+      const newItems = items.filter((item) => item.id !== id);
       await this.saveItems(newItems);
     } catch (error) {
       console.error('Error deleting item from local storage', error);
@@ -75,7 +74,7 @@ export class LocalStorageAdapter implements FinanceRepository {
   async deleteHistoryItem(id: string): Promise<void> {
     try {
       const history = await this.getHistory();
-      const newHistory = history.filter(h => h.id !== id);
+      const newHistory = history.filter((h) => h.id !== id);
       await this.saveHistory(newHistory);
     } catch (error) {
       console.error('Error deleting history item from local storage', error);
@@ -101,8 +100,12 @@ export class LocalStorageAdapter implements FinanceRepository {
   }
 
   // --- Sharing (Not supported in Local Storage) ---
-  async getMyShares(): Promise<any[]> { return []; }
-  async createShare(_sharedWithId: string): Promise<void> { }
-  async deleteShare(_sharedWithId: string): Promise<void> { }
-  async getSharedWithMe(): Promise<any[]> { return []; }
+  async getMyShares(): Promise<any[]> {
+    return [];
+  }
+  async createShare(_sharedWithId: string): Promise<void> {}
+  async deleteShare(_sharedWithId: string): Promise<void> {}
+  async getSharedWithMe(): Promise<any[]> {
+    return [];
+  }
 }

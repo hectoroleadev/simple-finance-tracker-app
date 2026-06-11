@@ -8,303 +8,331 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 import ConfirmDialog from './ConfirmDialog';
 
 interface CategoriesManagerModalProps {
-    isOpen: boolean;
-    onClose: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const EFFECT_OPTIONS = [
-    { value: BalanceEffect.POSITIVE, labelKey: 'effectPositive' },
-    { value: BalanceEffect.NEGATIVE, labelKey: 'effectNegative' },
-    { value: BalanceEffect.INFORMATIVE, labelKey: 'effectInformative' },
-    { value: BalanceEffect.INFORMATIVE_STAT, labelKey: 'effectInformativeStat' },
+  { value: BalanceEffect.POSITIVE, labelKey: 'effectPositive' },
+  { value: BalanceEffect.NEGATIVE, labelKey: 'effectNegative' },
+  { value: BalanceEffect.INFORMATIVE, labelKey: 'effectInformative' },
+  { value: BalanceEffect.INFORMATIVE_STAT, labelKey: 'effectInformativeStat' },
 ];
 
 const EFFECT_COLORS = {
-    [BalanceEffect.POSITIVE]: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
-    [BalanceEffect.NEGATIVE]: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
-    [BalanceEffect.INFORMATIVE]: 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800',
-    [BalanceEffect.INFORMATIVE_STAT]: 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+  [BalanceEffect.POSITIVE]:
+    'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
+  [BalanceEffect.NEGATIVE]:
+    'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
+  [BalanceEffect.INFORMATIVE]:
+    'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800',
+  [BalanceEffect.INFORMATIVE_STAT]:
+    'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
 };
 
 const EMPTY_FORM: Omit<Category, 'id'> = { name: '', effect: BalanceEffect.POSITIVE };
 
 const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen, onClose }) => {
-    const { categories, actions, isReadOnly } = useFinanceContext();
-    const { t } = useLanguage();
-    const trapRef = useFocusTrap(isOpen);
+  const { categories, actions, isReadOnly } = useFinanceContext();
+  const { t } = useLanguage();
+  const trapRef = useFocusTrap(isOpen);
 
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [form, setForm] = useState<Omit<Category, 'id'>>(EMPTY_FORM);
-    const [isAddNew, setIsAddNew] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<Omit<Category, 'id'>>(EMPTY_FORM);
+  const [isAddNew, setIsAddNew] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    // Local order state — updated instantly on move, persisted only on close
-    const [localCategories, setLocalCategories] = useState<Category[]>([]);
+  // Local order state — updated instantly on move, persisted only on close
+  const [localCategories, setLocalCategories] = useState<Category[]>([]);
 
-    // Sync local order whenever the source-of-truth changes (e.g. after external update)
-    useEffect(() => {
-        setLocalCategories(categories);
-    }, [categories]);
+  // Sync local order whenever the source-of-truth changes (e.g. after external update)
+  useEffect(() => {
+    setLocalCategories(categories);
+  }, [categories]);
 
-    useEffect(() => {
-        if (!isOpen) return;
-        const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
-        window.addEventListener('keydown', onEsc);
-        document.body.style.overflow = 'hidden';
-        return () => {
-            window.removeEventListener('keydown', onEsc);
-            document.body.style.overflow = '';
-        };
+  useEffect(() => {
+    if (!isOpen) return;
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onEsc);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onEsc);
+      document.body.style.overflow = '';
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen]);
+  }, [isOpen]);
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const cm = (key: string) => t(`categoriesManager.${key}`);
+  const cm = (key: string) => t(`categoriesManager.${key}`);
 
-    // ── Reorder ──────────────────────────────────────────────────────────────
-    const moveCategory = (index: number, direction: 'up' | 'down') => {
-        setErrorMsg(null);
-        setLocalCategories(prev => {
-            const next = [...prev];
-            const targetIdx = direction === 'up' ? index - 1 : index + 1;
-            [next[index], next[targetIdx]] = [next[targetIdx], next[index]];
-            return next;
-        });
-    };
+  // ── Reorder ──────────────────────────────────────────────────────────────
+  const moveCategory = (index: number, direction: 'up' | 'down') => {
+    setErrorMsg(null);
+    setLocalCategories((prev) => {
+      const next = [...prev];
+      const targetIdx = direction === 'up' ? index - 1 : index + 1;
+      [next[index], next[targetIdx]] = [next[targetIdx], next[index]];
+      return next;
+    });
+  };
 
-    // ── Close: persist order only if it changed ───────────────────────────────
-    const handleClose = async () => {
-        const orderChanged = localCategories.some((cat, idx) => cat.id !== categories[idx]?.id);
-        if (orderChanged && !isReadOnly) {
-            try {
-                await actions.reorderCategories(localCategories);
-            } catch (err: any) {
-                setErrorMsg(err.message || 'Error saving order');
-                return; // keep modal open so the user can retry
-            }
-        }
-        onClose();
-    };
+  // ── Close: persist order only if it changed ───────────────────────────────
+  const handleClose = async () => {
+    const orderChanged = localCategories.some((cat, idx) => cat.id !== categories[idx]?.id);
+    if (orderChanged && !isReadOnly) {
+      try {
+        await actions.reorderCategories(localCategories);
+      } catch (err: any) {
+        setErrorMsg(err.message || 'Error saving order');
+        return; // keep modal open so the user can retry
+      }
+    }
+    onClose();
+  };
 
-    // ── Add / Edit form ───────────────────────────────────────────────────────
-    const openNew = () => {
-        setForm(EMPTY_FORM);
-        setEditingId(null);
-        setIsAddNew(true);
-        setErrorMsg(null);
-    };
+  // ── Add / Edit form ───────────────────────────────────────────────────────
+  const openNew = () => {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setIsAddNew(true);
+    setErrorMsg(null);
+  };
 
-    const openEdit = (cat: Category) => {
-        setForm({ name: cat.name, effect: cat.effect, color: cat.color });
-        setEditingId(cat.id);
-        setIsAddNew(false);
-        setErrorMsg(null);
-    };
+  const openEdit = (cat: Category) => {
+    setForm({ name: cat.name, effect: cat.effect, color: cat.color });
+    setEditingId(cat.id);
+    setIsAddNew(false);
+    setErrorMsg(null);
+  };
 
-    const cancelForm = () => {
-        setIsAddNew(false);
-        setEditingId(null);
-        setForm(EMPTY_FORM);
-        setErrorMsg(null);
-    };
+  const cancelForm = () => {
+    setIsAddNew(false);
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setErrorMsg(null);
+  };
 
-    const handleSave = async () => {
-        if (!form.name.trim()) return;
-        setSaving(true);
-        setErrorMsg(null);
-        try {
-            const id = isAddNew ? (window.crypto?.randomUUID?.() || Date.now().toString()) : editingId!;
-            if (isAddNew) {
-                await actions.addCategory({ id, ...form });
-            } else {
-                await actions.updateCategory({ id, ...form });
-            }
-            cancelForm();
-        } catch (err: any) {
-            console.error('handleSave error:', err);
-            setErrorMsg(err.message || 'Error saving category');
-        } finally {
-            setSaving(false);
-        }
-    };
+  const handleSave = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    setErrorMsg(null);
+    try {
+      const id = isAddNew ? window.crypto?.randomUUID?.() || Date.now().toString() : editingId!;
+      if (isAddNew) {
+        await actions.addCategory({ id, ...form });
+      } else {
+        await actions.updateCategory({ id, ...form });
+      }
+      cancelForm();
+    } catch (err: any) {
+      console.error('handleSave error:', err);
+      setErrorMsg(err.message || 'Error saving category');
+    } finally {
+      setSaving(false);
+    }
+  };
 
-    const handleDelete = async () => {
-        if (deletingId) {
-            try {
-                await actions.deleteCategory(deletingId);
-                setDeletingId(null);
-            } catch (err: any) {
-                console.error('handleDelete error:', err);
-                setErrorMsg(err.message || 'Error deleting category');
-                setDeletingId(null);
-            }
-        }
-    };
+  const handleDelete = async () => {
+    if (deletingId) {
+      try {
+        await actions.deleteCategory(deletingId);
+        setDeletingId(null);
+      } catch (err: any) {
+        console.error('handleDelete error:', err);
+        setErrorMsg(err.message || 'Error deleting category');
+        setDeletingId(null);
+      }
+    }
+  };
 
-    return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="fixed inset-0 animate-backdrop-in" onClick={handleClose} />
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div className="fixed inset-0 animate-backdrop-in" onClick={handleClose} />
+      <div
+        ref={trapRef}
+        className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 stagger-1">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">{cm('title')}</h2>
+          <button
+            onClick={handleClose}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Inline error banner */}
+        {errorMsg && (
+          <div className="mx-6 mt-3 flex items-start gap-2 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-sm text-rose-700 dark:text-rose-400">
+            <AlertCircle size={15} className="mt-0.5 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        {/* Category List */}
+        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700 stagger-2">
+          {localCategories.map((cat, idx) => (
             <div
-                ref={trapRef}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+              key={cat.id}
+              className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group"
             >
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 stagger-1">
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">{cm('title')}</h2>
-                    <button onClick={handleClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                        <X size={20} />
-                    </button>
+              {/* Reorder buttons */}
+              {!isReadOnly && (
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => moveCategory(idx, 'up')}
+                    disabled={idx === 0}
+                    title={cm('moveUp')}
+                    className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => moveCategory(idx, 'down')}
+                    disabled={idx === localCategories.length - 1}
+                    title={cm('moveDown')}
+                    className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
                 </div>
-
-                {/* Inline error banner */}
-                {errorMsg && (
-                    <div className="mx-6 mt-3 flex items-start gap-2 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2 text-sm text-rose-700 dark:text-rose-400">
-                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
-                        <span>{errorMsg}</span>
-                    </div>
-                )}
-
-                {/* Category List */}
-                <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700 stagger-2">
-                    {localCategories.map((cat, idx) => (
-                        <div key={cat.id} className="flex items-center gap-3 px-6 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors group">
-                            {/* Reorder buttons */}
-                            {!isReadOnly && (
-                                <div className="flex flex-col gap-0.5">
-                                    <button
-                                        onClick={() => moveCategory(idx, 'up')}
-                                        disabled={idx === 0}
-                                        title={cm('moveUp')}
-                                        className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
-                                    >
-                                        <ChevronUp size={14} />
-                                    </button>
-                                    <button
-                                        onClick={() => moveCategory(idx, 'down')}
-                                        disabled={idx === localCategories.length - 1}
-                                        title={cm('moveDown')}
-                                        className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
-                                    >
-                                        <ChevronDown size={14} />
-                                    </button>
-                                </div>
-                            )}
-                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[cat.effect]}`}>
-                                {cat.effect === BalanceEffect.POSITIVE ? '➕' : cat.effect === BalanceEffect.NEGATIVE ? '➖' : cat.effect === BalanceEffect.INFORMATIVE_STAT ? '📊' : 'ℹ️'}
-                            </span>
-                            <span className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-200">{cat.name}</span>
-                            {!isReadOnly && (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => openEdit(cat)}
-                                        className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-110 transition-transform"
-                                        title={cm('editCategory')}
-                                    >
-                                        <Edit2 size={14} />
-                                    </button>
-                                    <button
-                                        onClick={() => setDeletingId(cat.id)}
-                                        className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"
-                                        title={cm('deleteCategoryTitle')}
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ))}
+              )}
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[cat.effect]}`}
+              >
+                {cat.effect === BalanceEffect.POSITIVE
+                  ? '➕'
+                  : cat.effect === BalanceEffect.NEGATIVE
+                    ? '➖'
+                    : cat.effect === BalanceEffect.INFORMATIVE_STAT
+                      ? '📊'
+                      : 'ℹ️'}
+              </span>
+              <span className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+                {cat.name}
+              </span>
+              {!isReadOnly && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openEdit(cat)}
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-110 transition-transform"
+                    title={cm('editCategory')}
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                  <button
+                    onClick={() => setDeletingId(cat.id)}
+                    className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"
+                    title={cm('deleteCategoryTitle')}
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
-
-                {/* Inline Add / Edit Form */}
-                {(isAddNew || editingId) && (
-                    <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-6 py-4 space-y-3 stagger-3">
-                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {isAddNew ? cm('addCategory') : cm('editCategory')}
-                        </h3>
-                        {/* Name */}
-                        <div>
-                            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{cm('categoryName')}</label>
-                            <input
-                                type="text"
-                                className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                                value={form.name}
-                                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                                onKeyDown={e => e.key === 'Enter' && handleSave()}
-                                autoFocus
-                                placeholder={cm('categoryName')}
-                            />
-                        </div>
-                        {/* Effect */}
-                        <div>
-                            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{cm('categoryEffect')}</label>
-                            <div className="flex flex-col gap-2">
-                                {EFFECT_OPTIONS.map(opt => (
-                                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="effect"
-                                            value={opt.value}
-                                            checked={form.effect === opt.value}
-                                            onChange={() => setForm(f => ({ ...f, effect: opt.value }))}
-                                            className="accent-blue-600"
-                                        />
-                                        <span className={`text-sm font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[opt.value]}`}>
-                                            {cm(opt.labelKey)}
-                                        </span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                        {/* Actions */}
-                        <div className="flex gap-2 pt-1">
-                            <button
-                                onClick={cancelForm}
-                                className="flex-1 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                            >
-                                {t('cancel')}
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                disabled={saving || !form.name.trim()}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 rounded-lg transition-colors disabled:opacity-50"
-                            >
-                                <Save size={14} />
-                                {saving ? cm('saving') : cm('save')}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Footer */}
-                {!isAddNew && !editingId && !isReadOnly && (
-                    <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 stagger-3">
-                        <button
-                            onClick={openNew}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-slate-500 dark:hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all"
-                        >
-                            <Plus size={16} />
-                            {cm('addCategory')}
-                        </button>
-                    </div>
-                )}
+              )}
             </div>
+          ))}
+        </div>
 
-            <ConfirmDialog
-                isOpen={deletingId !== null}
-                title={cm('deleteCategoryTitle')}
-                message={cm('deleteCategoryMessage')}
-                confirmText={cm('confirmDeleteCategory')}
-                cancelText={t('cancel')}
-                variant="danger"
-                onConfirm={handleDelete}
-                onCancel={() => setDeletingId(null)}
-            />
-        </div>,
-        document.body
-    );
+        {/* Inline Add / Edit Form */}
+        {(isAddNew || editingId) && (
+          <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-6 py-4 space-y-3 stagger-3">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              {isAddNew ? cm('addCategory') : cm('editCategory')}
+            </h3>
+            {/* Name */}
+            <div>
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                {cm('categoryName')}
+              </label>
+              <input
+                type="text"
+                className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                autoFocus
+                placeholder={cm('categoryName')}
+              />
+            </div>
+            {/* Effect */}
+            <div>
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+                {cm('categoryEffect')}
+              </label>
+              <div className="flex flex-col gap-2">
+                {EFFECT_OPTIONS.map((opt) => (
+                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="effect"
+                      value={opt.value}
+                      checked={form.effect === opt.value}
+                      onChange={() => setForm((f) => ({ ...f, effect: opt.value }))}
+                      className="accent-blue-600"
+                    />
+                    <span
+                      className={`text-sm font-medium px-2 py-0.5 rounded-full border ${EFFECT_COLORS[opt.value]}`}
+                    >
+                      {cm(opt.labelKey)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* Actions */}
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={cancelForm}
+                className="flex-1 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.name.trim()}
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <Save size={14} />
+                {saving ? cm('saving') : cm('save')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        {!isAddNew && !editingId && !isReadOnly && (
+          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 stagger-3">
+            <button
+              onClick={openNew}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-slate-500 dark:hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all"
+            >
+              <Plus size={16} />
+              {cm('addCategory')}
+            </button>
+          </div>
+        )}
+      </div>
+
+      <ConfirmDialog
+        isOpen={deletingId !== null}
+        title={cm('deleteCategoryTitle')}
+        message={cm('deleteCategoryMessage')}
+        confirmText={cm('confirmDeleteCategory')}
+        cancelText={t('cancel')}
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingId(null)}
+      />
+    </div>,
+    document.body
+  );
 };
 
 export default CategoriesManagerModal;

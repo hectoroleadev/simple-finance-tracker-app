@@ -34,7 +34,9 @@ describe('ApiGatewayAdapter', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       });
 
-      await expect(adapter.getItems()).rejects.toThrow('Failed to fetch items: 500 Internal Server Error');
+      await expect(adapter.getItems()).rejects.toThrow(
+        'Failed to fetch items: 500 Internal Server Error'
+      );
     });
 
     it('should parse error messages from the server', async () => {
@@ -42,14 +44,17 @@ describe('ApiGatewayAdapter', () => {
         ok: false,
         status: 400,
         statusText: 'Bad Request',
-        json: () => Promise.resolve({
-          message: 'Invalid item state',
-          errorCode: 'ERR_100',
-          details: { field: 'name' }
-        }),
+        json: () =>
+          Promise.resolve({
+            message: 'Invalid item state',
+            errorCode: 'ERR_100',
+            details: { field: 'name' },
+          }),
       });
 
-      await expect(adapter.getItems()).rejects.toThrow('Invalid item state (Code: ERR_100) | Details: {"field":"name"}');
+      await expect(adapter.getItems()).rejects.toThrow(
+        'Invalid item state (Code: ERR_100) | Details: {"field":"name"}'
+      );
     });
   });
 
@@ -59,14 +64,14 @@ describe('ApiGatewayAdapter', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: () => Promise.resolve({ message: 'Unauthorized' })
+        json: () => Promise.resolve({ message: 'Unauthorized' }),
       });
 
       // Second call -> OK
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ items: [{ id: '1', amount: 100 }] })
+        json: () => Promise.resolve({ items: [{ id: '1', amount: 100 }] }),
       });
 
       mockGetToken.mockReturnValueOnce('old-token').mockReturnValueOnce('new-token');
@@ -83,7 +88,7 @@ describe('ApiGatewayAdapter', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: () => Promise.resolve({ message: 'Unauthorized' })
+        json: () => Promise.resolve({ message: 'Unauthorized' }),
       });
 
       mockRefreshAuthTokens.mockResolvedValueOnce(false); // Refresh fails
@@ -96,7 +101,7 @@ describe('ApiGatewayAdapter', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
-        json: () => Promise.resolve({ message: 'Session expired' })
+        json: () => Promise.resolve({ message: 'Session expired' }),
       });
 
       mockRefreshAuthTokens.mockResolvedValueOnce(true); // Claims success

@@ -17,6 +17,7 @@ npx playwright test  # Run E2E tests
 ## Environment Setup
 
 Copy `.env.example` to `.env.local` and fill in:
+
 - `VITE_COGNITO_USER_POOL_ID` — AWS Cognito User Pool ID
 - `VITE_COGNITO_CLIENT_ID` — AWS Cognito App Client ID
 - `VITE_API_GATEWAY_URL` — API Gateway base URL (e.g. `https://api.example.com/prod`)

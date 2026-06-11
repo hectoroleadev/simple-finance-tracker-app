@@ -1,9 +1,8 @@
-
 import { FinanceItem, Category, BalanceEffect, HistoryEntry, FinanceTotals } from '../types';
 
 export const FinanceCalculator = {
   calculateTotals: (items: FinanceItem[], categories: Category[]): FinanceTotals => {
-    const categoryMap = new Map(categories.map(c => [c.id, c]));
+    const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
     let income = 0;
     let expenses = 0;
@@ -27,7 +26,7 @@ export const FinanceCalculator = {
 
   getCategorySum: (items: FinanceItem[], categoryId: string): number => {
     return items
-      .filter(item => item.category === categoryId)
+      .filter((item) => item.category === categoryId)
       .reduce((sum, item) => sum + item.amount, 0);
   },
 
@@ -40,5 +39,5 @@ export const FinanceCalculator = {
       balance: totals.balance,
       retirement: totals.informative,
     };
-  }
+  },
 };

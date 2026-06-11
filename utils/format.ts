@@ -1,4 +1,3 @@
-
 export const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',

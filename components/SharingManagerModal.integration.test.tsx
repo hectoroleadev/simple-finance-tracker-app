@@ -23,17 +23,21 @@ const renderWithContext = (ui: React.ReactElement) => {
     viewAs: null,
     isReadOnly: false,
     shares: [
-      { ownerId: '1', sharedWithId: 'user-a', status: 'ACTIVE', permissions: 'READ', createdAt: '2025-01-01' }
+      {
+        ownerId: '1',
+        sharedWithId: 'user-a',
+        status: 'ACTIVE',
+        permissions: 'READ',
+        createdAt: '2025-01-01',
+      },
     ],
     sharedWithMe: [],
-    actions: mockActions
+    actions: mockActions,
   };
 
   return render(
     <LanguageProvider>
-      <FinanceContext.Provider value={mockContextValue as any}>
-        {ui}
-      </FinanceContext.Provider>
+      <FinanceContext.Provider value={mockContextValue as any}>{ui}</FinanceContext.Provider>
     </LanguageProvider>
   );
 };
@@ -41,7 +45,7 @@ const renderWithContext = (ui: React.ReactElement) => {
 describe('SharingManagerModal Integration', () => {
   it('renders correctly and shows active shares', () => {
     renderWithContext(<SharingManagerModal isOpen={true} onClose={vi.fn()} />);
-    
+
     // The sharedWithId user-a should be visible in the list
     expect(screen.getByText('user-a')).toBeDefined();
   });

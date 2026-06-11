@@ -104,7 +104,15 @@ describe('LocalStorageAdapter', () => {
 
     it('migrates legacy year/month entries to ISO date strings', async () => {
       const legacy = [
-        { id: '1', year: 2023, month: 'January', savings: 1000, debt: 0, balance: 1000, retirement: 0 },
+        {
+          id: '1',
+          year: 2023,
+          month: 'January',
+          savings: 1000,
+          debt: 0,
+          balance: 1000,
+          retirement: 0,
+        },
       ];
       localStorage.setItem('finance_history_v3', JSON.stringify(legacy));
       const history = await adapter.getHistory();

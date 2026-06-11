@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout';
@@ -16,7 +15,11 @@ export const AppRoutes = () => {
   const { isLoggedIn, isInitializing } = useAuth();
 
   if (isInitializing) {
-    return <RootLayout><Loading /></RootLayout>; // Show loading while auth state is being determined
+    return (
+      <RootLayout>
+        <Loading />
+      </RootLayout>
+    ); // Show loading while auth state is being determined
   }
 
   return (
@@ -29,7 +32,13 @@ export const AppRoutes = () => {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </>
         ) : (
-          <Route element={<RootLayout><Outlet /></RootLayout>}>
+          <Route
+            element={
+              <RootLayout>
+                <Outlet />
+              </RootLayout>
+            }
+          >
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/history" element={<HistoryPage />} />

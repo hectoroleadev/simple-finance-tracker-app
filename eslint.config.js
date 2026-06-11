@@ -48,5 +48,5 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'warn',
     },
   },
-  prettierConfig,
+  prettierConfig
 );

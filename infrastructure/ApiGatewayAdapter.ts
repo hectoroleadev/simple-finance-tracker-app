@@ -1,5 +1,12 @@
 import { FinanceRepository } from '../domain/ports';
-import { FinanceItem, HistoryEntry, ItemRevision, Category, DEFAULT_CATEGORIES, ShareInvite } from '../types';
+import {
+  FinanceItem,
+  HistoryEntry,
+  ItemRevision,
+  Category,
+  DEFAULT_CATEGORIES,
+  ShareInvite,
+} from '../types';
 
 export class ApiGatewayAdapter implements FinanceRepository {
   private apiUrl: string;
@@ -62,7 +69,7 @@ export class ApiGatewayAdapter implements FinanceRepository {
           ...options,
           headers: {
             ...options.headers,
-            'Authorization': `Bearer ${newToken}`,
+            Authorization: `Bearer ${newToken}`,
           },
         };
 
@@ -72,7 +79,6 @@ export class ApiGatewayAdapter implements FinanceRepository {
           console.error(`_makeRequest: Network error during retried fetch to ${url}:`, retryError);
           throw retryError;
         }
-
       } else {
         console.error('Token refresh failed. Logging out...');
         this.logout();
@@ -174,7 +180,7 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async getItemHistory(id: string): Promise<ItemRevision[]> {
     try {
-      // NOTE: For now history is fetched directly by itemId, 
+      // NOTE: For now history is fetched directly by itemId,
       // the backend checkAccess logic handles permission.
       const response = await this._makeRequest(
         `${this.apiUrl}/items/${id}/history`,
@@ -240,7 +246,9 @@ export class ApiGatewayAdapter implements FinanceRepository {
 
   async getCategories(userId?: string): Promise<Category[]> {
     try {
-      const url = userId ? `${this.apiUrl}/categories?viewAs=${userId}` : `${this.apiUrl}/categories`;
+      const url = userId
+        ? `${this.apiUrl}/categories?viewAs=${userId}`
+        : `${this.apiUrl}/categories`;
       const response = await this._makeRequest(
         url,
         { method: 'GET', headers: this.headers },
@@ -333,4 +341,3 @@ export class ApiGatewayAdapter implements FinanceRepository {
     }
   }
 }
-

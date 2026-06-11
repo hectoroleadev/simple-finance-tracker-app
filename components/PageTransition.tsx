@@ -14,9 +14,7 @@ const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const current = routeOrder[location.pathname] ?? 0;
   const prev = prevOrderRef.current;
   const animClass =
-    current > prev ? 'page-slide-right' :
-    current < prev ? 'page-slide-left' :
-    'page-fade';
+    current > prev ? 'page-slide-right' : current < prev ? 'page-slide-left' : 'page-fade';
 
   useEffect(() => {
     prevOrderRef.current = routeOrder[location.pathname] ?? 0;

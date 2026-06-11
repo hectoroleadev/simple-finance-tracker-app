@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { translations, Language } from '../utils/translations';
 
@@ -29,12 +28,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const t = (path: string): string => {
     const keys = path.split('.');
     let current: any = translations[language];
-    
+
     for (const key of keys) {
       if (current[key] === undefined) return path;
       current = current[key];
     }
-    
+
     return typeof current === 'string' ? current : path;
   };
 

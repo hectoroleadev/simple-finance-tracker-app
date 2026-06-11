@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinanceData } from '../hooks/useFinanceData';
@@ -24,7 +23,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     isReadOnly,
     shares,
     sharedWithMe,
-    actions
+    actions,
   } = useFinanceData();
 
   const handleSnapshot = () => {
@@ -47,8 +46,8 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     sharedWithMe,
     actions: {
       ...actions,
-      snapshotHistory: handleSnapshot
-    }
+      snapshotHistory: handleSnapshot,
+    },
   };
 
   if (error) {
@@ -64,9 +63,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
 
   return (
     <FinanceContext.Provider value={contextValue}>
-      <MainLayout netWorth={totals.balance}>
-        {children}
-      </MainLayout>
+      <MainLayout netWorth={totals.balance}>{children}</MainLayout>
     </FinanceContext.Provider>
   );
 };
