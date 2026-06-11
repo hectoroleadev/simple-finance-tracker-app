@@ -16,8 +16,14 @@ test.describe('Simple Finance Tracker Critical Flows', () => {
         ]);
 
         if (isLogin && page.url().includes('login')) {
-            await page.getByPlaceholder(/Your username|Usuario/i).fill('hector.test');
-            await page.getByPlaceholder(/••••••••/i).fill('Test1234##');
+            const username = process.env.PLAYWRIGHT_TEST_USERNAME;
+            const password = process.env.PLAYWRIGHT_TEST_PASSWORD;
+            if (!username || !password) {
+                test.skip(true, 'PLAYWRIGHT_TEST_USERNAME / PLAYWRIGHT_TEST_PASSWORD not set');
+                return;
+            }
+            await page.getByPlaceholder(/Your username|Usuario/i).fill(username);
+            await page.getByPlaceholder(/••••••••/i).fill(password);
             
             // Click and wait for navigation
             await page.getByRole('button', { name: /Login|Iniciar Sesión/i }).first().click();

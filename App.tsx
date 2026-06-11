@@ -4,6 +4,7 @@ import { AppRoutes } from './router';
 import { AuthProvider } from './context/AuthContext';
 import ReloadPrompt from './components/ReloadPrompt';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ToastContainer } from './components/ToastContainer';
 
 const App: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const App: React.FC = () => {
         <AuthProvider>
           <AppRoutes />
           <ReloadPrompt />
+          <ToastContainer />
         </AuthProvider>
       </HashRouter>
     </ErrorBoundary>

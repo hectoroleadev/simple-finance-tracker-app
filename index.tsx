@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ToastProvider } from './context/ToastContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Configure React Query Client
@@ -34,7 +35,9 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <ThemeProvider>
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </ThemeProvider>
       </LanguageProvider>
     </QueryClientProvider>

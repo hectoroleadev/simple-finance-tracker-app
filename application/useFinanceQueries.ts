@@ -11,6 +11,7 @@ interface UseFinanceQueriesParams {
   repository: FinanceRepository;
   isLoggedIn: boolean;
   viewAs: string | null;
+  onMutationError?: (message: string) => void;
 }
 
 /**
@@ -18,7 +19,12 @@ interface UseFinanceQueriesParams {
  * Knows about the port (FinanceRepository) and query keys,
  * but has no direct dependency on infrastructure adapters.
  */
-export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinanceQueriesParams) => {
+export const useFinanceQueries = ({
+  repository,
+  isLoggedIn,
+  viewAs,
+  onMutationError,
+}: UseFinanceQueriesParams) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userId = user?.username || null;
@@ -106,6 +112,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
     },
     onError: (err: any, _newItems: any, context: any) => {
       console.error('Failed to save items', err);
+      onMutationError?.('Could not save changes. Please try again.');
       if (context?.previousItems)
         queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), context.previousItems);
     },
@@ -131,6 +138,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
     },
     onError: (err: any, _id: any, context: any) => {
       console.error('Failed to delete item', err);
+      onMutationError?.('Could not delete item. Please try again.');
       if (context?.previousItems)
         queryClient.setQueryData(queryKeys.items(isLoggedIn, viewAs, userId), context.previousItems);
     },
@@ -153,6 +161,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
     },
     onError: (err: any, _newHistory: any, context: any) => {
       console.error('Failed to save history', err);
+      onMutationError?.('Could not save snapshot. Please try again.');
       if (context?.previousHistory)
         queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), context.previousHistory);
     },
@@ -176,6 +185,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
     },
     onError: (err: any, _newCats: any, context: any) => {
       console.error('Failed to save categories', err);
+      onMutationError?.('Could not save categories. Please try again.');
       if (context?.prev)
         queryClient.setQueryData(queryKeys.categories(isLoggedIn, viewAs, userId), context.prev);
     },
@@ -199,6 +209,7 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
     },
     onError: (err: any, _id: any, context: any) => {
       console.error('Failed to delete history item', err);
+      onMutationError?.('Could not delete history entry. Please try again.');
       if (context?.previousHistory)
         queryClient.setQueryData(queryKeys.history(isLoggedIn, viewAs, userId), context.previousHistory);
     },
@@ -207,11 +218,19 @@ export const useFinanceQueries = ({ repository, isLoggedIn, viewAs }: UseFinance
 
   const inviteUserMutation = useMutation({
     mutationFn: (sharedWithId: string) => repository.createShare(sharedWithId),
+    onError: (err: any) => {
+      console.error('Failed to invite user', err);
+      onMutationError?.('Could not invite user. Please check the username and try again.');
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.shares(isLoggedIn, userId) }),
   });
 
   const revokeShareMutation = useMutation({
     mutationFn: (sharedWithId: string) => repository.deleteShare(sharedWithId),
+    onError: (err: any) => {
+      console.error('Failed to revoke share', err);
+      onMutationError?.('Could not revoke access. Please try again.');
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.shares(isLoggedIn, userId) }),
   });
 

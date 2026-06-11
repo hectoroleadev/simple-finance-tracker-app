@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { FinanceTotals, ChartDataPoint, DEFAULT_CATEGORIES } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 // Domain
 import { FinanceCalculator } from '../domain/finance.logic';
@@ -30,6 +31,7 @@ export { FinanceContext, useFinanceContext } from '../context/FinanceContext';
 export const useFinanceData = (externalRepository?: FinanceRepository) => {
   const { t } = useLanguage();
   const { user, getIdToken, isLoggedIn, refreshAuthTokens, logout } = useAuth();
+  const { addToast } = useToast();
 
   const [viewAs, setViewAs] = useState<string | null>(null);
   const [totals, setTotals] = useState<FinanceTotals>({ income: 0, expenses: 0, balance: 0, informative: 0 });
@@ -51,7 +53,12 @@ export const useFinanceData = (externalRepository?: FinanceRepository) => {
     saveItemsMutation, deleteItemMutation, saveHistoryMutation,
     saveCategoriesMutation, deleteHistoryItemMutation,
     inviteUserMutation, revokeShareMutation,
-  } = useFinanceQueries({ repository, isLoggedIn, viewAs });
+  } = useFinanceQueries({
+    repository,
+    isLoggedIn,
+    viewAs,
+    onMutationError: (msg) => addToast(msg, 'error'),
+  });
 
   // Application: use cases — called at top level as it is a hook
   const actionsRes = useFinanceActions({

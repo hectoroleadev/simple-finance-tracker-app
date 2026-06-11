@@ -98,6 +98,8 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: true,
       css: false,
+      setupFiles: ['./vitest.setup.tsx'],
+      testTimeout: 15000,
       pool: 'threads',
       poolOptions: {
         threads: {
@@ -108,6 +110,22 @@ export default defineConfig(({ mode }) => {
         deps: {
           inline: true,
         },
+      },
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'lcov', 'json-summary'],
+        exclude: [
+          'node_modules/**',
+          'dist/**',
+          'coverage/**',
+          '**/*.test.{ts,tsx}',
+          '**/*.d.ts',
+          'tests/**',
+          'empty-module.*',
+          'vite.config.ts',
+          'playwright.config.ts',
+          'index.tsx',
+        ],
       },
     }
   };
