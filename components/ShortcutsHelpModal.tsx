@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, Command, Keyboard } from 'lucide-react';
+import { X, Keyboard } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 

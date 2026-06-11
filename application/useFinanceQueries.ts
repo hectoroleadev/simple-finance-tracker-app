@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
-import { FinanceItem, HistoryEntry, Category, ShareInvite, DEFAULT_CATEGORIES } from '../types';
+import { FinanceItem, HistoryEntry, Category, ShareInvite } from '../types';
 import { FinanceRepository } from '../domain/ports';
 import { queryKeys } from '../hooks/queryKeys';
 

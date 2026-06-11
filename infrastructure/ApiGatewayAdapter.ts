@@ -4,7 +4,6 @@ import {
   HistoryEntry,
   ItemRevision,
   Category,
-  DEFAULT_CATEGORIES,
   ShareInvite,
 } from '../types';
 

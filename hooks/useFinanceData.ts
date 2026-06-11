@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { FinanceTotals, ChartDataPoint, DEFAULT_CATEGORIES } from '../types';
+import { FinanceTotals, ChartDataPoint } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';

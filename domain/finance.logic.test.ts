@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { FinanceCalculator } from './finance.logic';
 import { prepareChartData } from '../utils/chartUtils';
-import { FinanceItem, DEFAULT_CATEGORIES, BalanceEffect } from '../types';
+import { FinanceItem, DEFAULT_CATEGORIES } from '../types';
 
 describe('FinanceCalculator', () => {
   const mockItems: FinanceItem[] = [

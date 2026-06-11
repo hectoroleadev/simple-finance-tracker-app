@@ -3,6 +3,7 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import prettierConfig from 'eslint-config-prettier';
+import unusedImports from 'eslint-plugin-unused-imports';
 
 export default tseslint.config(
   {
@@ -22,6 +23,7 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       'jsx-a11y': jsxA11y,
+      'unused-imports': unusedImports,
     },
     languageOptions: {
       parserOptions: {
@@ -39,6 +41,8 @@ export default tseslint.config(
       'jsx-a11y/anchor-is-valid': 'warn',
       'jsx-a11y/click-events-have-key-events': 'warn',
       'jsx-a11y/no-static-element-interactions': 'warn',
+      // Unused imports (auto-fixable: removes the import line)
+      'unused-imports/no-unused-imports': 'error',
       // TypeScript
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [

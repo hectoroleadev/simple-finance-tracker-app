@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { RefreshCw, WifiOff, X } from 'lucide-react';
+import { RefreshCw, WifiOff } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const ReloadPrompt: React.FC = () => {

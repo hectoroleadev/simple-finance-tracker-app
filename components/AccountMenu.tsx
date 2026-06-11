@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   User,
-  Settings,
   Users,
   HelpCircle,
   Moon,
@@ -10,7 +9,6 @@ import {
   Check,
   ChevronDown,
   Tags,
-  Globe,
 } from 'lucide-react';
 import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';

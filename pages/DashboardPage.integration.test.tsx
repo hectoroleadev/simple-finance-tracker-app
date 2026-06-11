@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import DashboardPage from '../pages/DashboardPage';
 import { FinanceContext } from '../context/FinanceContext';
 import { LanguageProvider } from '../context/LanguageContext';
