@@ -82,7 +82,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-0 focus:left-0 focus:z-[10000] focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2"
       >
-        Skip to main content
+        {t('skipToContent')}
       </a>
 
       {/* V12: sticky header with translucent blur */}
@@ -101,7 +101,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
           </div>
 
           <div className="flex-1 flex items-center justify-end gap-6 sm:gap-8 ml-4">
-            <nav aria-label="Primary navigation" className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors">
+            <nav
+              aria-label="Primary navigation"
+              className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors"
+            >
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -122,15 +125,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
               {/* V14: Density toggle */}
               <button
                 onClick={toggleDensity}
-                title={
-                  density === 'comfortable'
-                    ? 'Switch to compact view'
-                    : 'Switch to comfortable view'
-                }
+                title={density === 'comfortable' ? t('densityCompact') : t('densityComfortable')}
                 aria-label={
-                  density === 'comfortable'
-                    ? 'Switch to compact view'
-                    : 'Switch to comfortable view'
+                  density === 'comfortable' ? t('densityCompact') : t('densityComfortable')
                 }
                 className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
               >
@@ -178,7 +175,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <nav aria-label="Mobile navigation" className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-6 py-3 flex justify-around items-center z-30 transition-colors">
+      <nav
+        aria-label="Mobile navigation"
+        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-6 py-3 flex justify-around items-center z-30 transition-colors"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -197,7 +197,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
       </nav>
 
       <Suspense fallback={null}>
-        <ShortcutsHelpModal isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
+        <ShortcutsHelpModal
+          isOpen={showShortcutsHelp}
+          onClose={() => setShowShortcutsHelp(false)}
+        />
         <CategoriesManagerModal
           isOpen={showCategoriesManager}
           onClose={() => setShowCategoriesManager(false)}

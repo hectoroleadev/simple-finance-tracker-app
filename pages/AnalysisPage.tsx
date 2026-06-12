@@ -210,7 +210,7 @@ const AnalysisPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-8 h-[400px] sm:h-[500px] shadow-sm flex flex-col card-interactive overflow-hidden">
           <div className="mb-4 sm:mb-6">
             <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 mb-2">
-              Balance & Debt
+              {t('badgeWealth')}
             </span>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
               {t('trendWealth')}
@@ -218,6 +218,16 @@ const AnalysisPage: React.FC = () => {
             <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
               {t('trendWealthDesc')}
             </p>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span className="inline-block w-4 border-t-2 border-emerald-500 rounded-full" />
+                {t('netBalance')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <span className="inline-block w-4 border-t-2 border-dashed border-rose-500" />
+                {t('totalDebt')}
+              </span>
+            </div>
           </div>
           <div className="flex-1">
             {empty ? (
@@ -267,7 +277,7 @@ const AnalysisPage: React.FC = () => {
                       strokeOpacity={0.45}
                       label={
                         {
-                          value: 'avg',
+                          value: t('avgLabel'),
                           fill: chartColors.text,
                           fontSize: 10,
                           position: 'insideTopRight',
@@ -308,7 +318,7 @@ const AnalysisPage: React.FC = () => {
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-8 h-[400px] sm:h-[500px] shadow-sm flex flex-col card-interactive overflow-hidden">
           <div className="mb-4 sm:mb-6">
             <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 mb-2">
-              Retirement
+              {t('badgeRetirement')}
             </span>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
               {t('evolutionRetirement')}
@@ -361,7 +371,7 @@ const AnalysisPage: React.FC = () => {
                       strokeOpacity={0.45}
                       label={
                         {
-                          value: 'avg',
+                          value: t('avgLabel'),
                           fill: chartColors.text,
                           fontSize: 10,
                           position: 'insideTopRight',
