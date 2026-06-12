@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useRef } from 'react';
 import { translations, Language } from '../utils/translations';
+import { debounce } from '../utils/debounce';
 
 interface LanguageContextType {
   language: Language;
@@ -19,10 +20,13 @@ const getInitialLanguage = (): Language => {
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(getInitialLanguage());
+  const debouncedSaveRef = useRef(debounce((lang: Language) => {
+    localStorage.setItem('app_language', lang);
+  }, 500));
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('app_language', lang);
+    debouncedSaveRef.current(lang);
   };
 
   const t = (path: string): string => {

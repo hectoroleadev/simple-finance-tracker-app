@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { debounce } from '../utils/debounce';
 
 export type Density = 'comfortable' | 'compact';
 
@@ -6,9 +7,12 @@ export function useDensity() {
   const [density, setDensity] = useState<Density>(() => {
     return (localStorage.getItem('ui-density') as Density) ?? 'comfortable';
   });
+  const debouncedSaveRef = useRef(debounce((d: Density) => {
+    localStorage.setItem('ui-density', d);
+  }, 500));
 
   useEffect(() => {
-    localStorage.setItem('ui-density', density);
+    debouncedSaveRef.current(density);
     document.documentElement.dataset.density = density;
   }, [density]);
 

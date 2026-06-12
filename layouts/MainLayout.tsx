@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import {
   Wallet,
   LayoutDashboard,
@@ -16,12 +16,13 @@ import { formatCurrency } from '../utils/format';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import MobileNav from '../components/MobileNav';
-import ShortcutsHelpModal from '../components/ShortcutsHelpModal';
-import CategoriesManagerModal from '../components/CategoriesManagerModal';
-import SharingManagerModal from '../components/SharingManagerModal';
 import AccountMenu from '../components/AccountMenu';
 import PageTransition from '../components/PageTransition';
 import { useFinanceContext } from '../context/FinanceContext';
+
+const ShortcutsHelpModal = lazy(() => import('../components/ShortcutsHelpModal'));
+const CategoriesManagerModal = lazy(() => import('../components/CategoriesManagerModal'));
+const SharingManagerModal = lazy(() => import('../components/SharingManagerModal'));
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -195,15 +196,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         ))}
       </nav>
 
-      <ShortcutsHelpModal isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
-      <CategoriesManagerModal
-        isOpen={showCategoriesManager}
-        onClose={() => setShowCategoriesManager(false)}
-      />
-      <SharingManagerModal
-        isOpen={showSharingManager}
-        onClose={() => setShowSharingManager(false)}
-      />
+      <Suspense fallback={null}>
+        <ShortcutsHelpModal isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
+        <CategoriesManagerModal
+          isOpen={showCategoriesManager}
+          onClose={() => setShowCategoriesManager(false)}
+        />
+        <SharingManagerModal
+          isOpen={showSharingManager}
+          onClose={() => setShowSharingManager(false)}
+        />
+      </Suspense>
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useRef } from 'react';
+import { debounce } from '../utils/debounce';
 
 // Tipos
 type Theme = 'light' | 'dark';
@@ -42,6 +43,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [state, dispatch] = useReducer(themeReducer, {
     theme: getInitialTheme(),
   });
+  const debouncedSaveRef = useRef(debounce((theme: Theme) => {
+    localStorage.setItem('theme', theme);
+  }, 500));
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -50,7 +54,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem('theme', state.theme);
+    debouncedSaveRef.current(state.theme);
   }, [state.theme]);
 
   return <ThemeContext.Provider value={{ state, dispatch }}>{children}</ThemeContext.Provider>;
