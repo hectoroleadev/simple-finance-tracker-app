@@ -76,6 +76,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         isReadOnly={isReadOnly}
       />
 
+      {/* Skip to content link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-0 focus:left-0 focus:z-[10000] focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2"
+      >
+        Skip to main content
+      </a>
+
       {/* V12: sticky header with translucent blur */}
       <header className="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-700/70 sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -92,7 +100,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
           </div>
 
           <div className="flex-1 flex items-center justify-end gap-6 sm:gap-8 ml-4">
-            <nav className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors">
+            <nav aria-label="Primary navigation" className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -158,7 +166,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <PageTransition>{children}</PageTransition>
       </main>
 
@@ -169,11 +177,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-6 py-3 flex justify-around items-center z-30 transition-colors">
+      <nav aria-label="Mobile navigation" className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-6 py-3 flex justify-around items-center z-30 transition-colors">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => navigate(tab.path)}
+            aria-current={currentPath === tab.id ? 'page' : undefined}
             className={`flex flex-col items-center gap-1 p-2 transition-all ${
               currentPath === tab.id
                 ? 'text-slate-900 dark:text-white scale-110'
@@ -184,7 +193,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
             <span className="text-[10px] font-medium">{tab.label}</span>
           </button>
         ))}
-      </div>
+      </nav>
 
       <ShortcutsHelpModal isOpen={showShortcutsHelp} onClose={() => setShowShortcutsHelp(false)} />
       <CategoriesManagerModal

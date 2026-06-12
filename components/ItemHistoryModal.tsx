@@ -69,12 +69,15 @@ const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({
       <div className="fixed inset-0 animate-backdrop-in" onClick={onClose} />
       <div
         ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="item-history-modal-title"
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-slate-700 flex flex-col max-h-[85vh] relative z-10"
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/30 stagger-1">
           <div>
-            <h3 className="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+            <h3 id="item-history-modal-title" className="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
               <Clock size={18} className="text-blue-500" />
               {t('itemHistory.title')}
             </h3>
@@ -84,6 +87,7 @@ const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 p-2 rounded-full transition-colors"
           >
             <X size={20} />

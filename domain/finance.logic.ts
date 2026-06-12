@@ -1,4 +1,5 @@
 import { FinanceItem, Category, BalanceEffect, HistoryEntry, FinanceTotals } from '../types';
+import { generateId } from '../utils/id';
 
 export const FinanceCalculator = {
   calculateTotals: (items: FinanceItem[], categories: Category[]): FinanceTotals => {
@@ -32,7 +33,7 @@ export const FinanceCalculator = {
 
   createSnapshot: (totals: FinanceTotals): HistoryEntry => {
     return {
-      id: crypto.randomUUID(),
+      id: generateId(),
       date: new Date().toISOString(),
       savings: totals.income,
       debt: totals.expenses,

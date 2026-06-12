@@ -69,16 +69,20 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
       <div className="fixed inset-0 animate-backdrop-in" onClick={onClose} />
       <div
         ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sharing-modal-title"
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 stagger-1">
           <div className="flex items-center gap-2">
             <Shield className="text-blue-500" size={20} />
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{sh('title')}</h2>
+            <h2 id="sharing-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">{sh('title')}</h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <X size={20} />
@@ -95,21 +99,21 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
 
         {/* Invite Form */}
         {!isReadOnly && (
-          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 stagger-2">
+          <form className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20 stagger-2" onSubmit={(e) => { e.preventDefault(); handleInvite(); }}>
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
               {sh('inviteUser')}
             </h3>
             <div className="flex gap-2">
               <input
-                type="text"
+                type="email"
                 className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder={sh('username')}
                 value={inviteId}
                 onChange={(e) => setInviteId(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                required
               />
               <button
-                onClick={handleInvite}
+                type="submit"
                 disabled={isInviting || !inviteId.trim()}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
               >
@@ -117,7 +121,7 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
                 {isInviting ? sh('inviting') : sh('invite')}
               </button>
             </div>
-          </div>
+          </form>
         )}
 
         {/* My Shares List */}
@@ -145,6 +149,7 @@ const SharingManagerModal: React.FC<SharingManagerModalProps> = ({ isOpen, onClo
                   {!isReadOnly && (
                     <button
                       onClick={() => setRevokingId(share.sharedWithId)}
+                      aria-label={`${sh('revoke')} access for ${share.sharedWithId}`}
                       className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
                       title={sh('revoke')}
                     >

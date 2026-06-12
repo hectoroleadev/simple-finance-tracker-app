@@ -5,6 +5,8 @@ import { Category, BalanceEffect } from '../types';
 import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { generateId } from '../utils/id';
+import { validateCategoryName } from '../utils/validators';
 import ConfirmDialog from './ConfirmDialog';
 
 interface CategoriesManagerModalProps {
@@ -118,11 +120,14 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return;
+    const nameError = validateCategoryName(form.name);
+    if (nameError) {
+      setErrorMsg(nameError.message);
+      return;
+    }
     setSaving(true);
-    setErrorMsg(null);
     try {
-      const id = isAddNew ? window.crypto?.randomUUID?.() || Date.now().toString() : editingId!;
+      const id = isAddNew ? generateId() : editingId!;
       if (isAddNew) {
         await actions.addCategory({ id, ...form });
       } else {
@@ -155,13 +160,17 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
       <div className="fixed inset-0 animate-backdrop-in" onClick={handleClose} />
       <div
         ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="categories-modal-title"
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg relative z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 stagger-1">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">{cm('title')}</h2>
+          <h2 id="categories-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">{cm('title')}</h2>
           <button
             onClick={handleClose}
+            aria-label="Close dialog"
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <X size={20} />
@@ -189,6 +198,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                   <button
                     onClick={() => moveCategory(idx, 'up')}
                     disabled={idx === 0}
+                    aria-label={cm('moveUp')}
                     title={cm('moveUp')}
                     className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
                   >
@@ -197,6 +207,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                   <button
                     onClick={() => moveCategory(idx, 'down')}
                     disabled={idx === localCategories.length - 1}
+                    aria-label={cm('moveDown')}
                     title={cm('moveDown')}
                     className="text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 disabled:opacity-0 disabled:cursor-default transition-all hover:scale-110"
                   >
@@ -222,6 +233,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                 <div className="flex gap-2">
                   <button
                     onClick={() => openEdit(cat)}
+                    aria-label={cm('editCategory')}
                     className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:scale-110 transition-transform"
                     title={cm('editCategory')}
                   >
@@ -229,6 +241,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                   </button>
                   <button
                     onClick={() => setDeletingId(cat.id)}
+                    aria-label={cm('deleteCategoryTitle')}
                     className="text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 hover:scale-110 transition-transform"
                     title={cm('deleteCategoryTitle')}
                   >
@@ -242,30 +255,33 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
 
         {/* Inline Add / Edit Form */}
         {(isAddNew || editingId) && (
-          <div className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-6 py-4 space-y-3 stagger-3">
+          <form className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-6 py-4 space-y-3 stagger-3" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               {isAddNew ? cm('addCategory') : cm('editCategory')}
             </h3>
             {/* Name */}
             <div>
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+              <label htmlFor="category-name" className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
                 {cm('categoryName')}
               </label>
               <input
+                id="category-name"
                 type="text"
+                maxLength={100}
                 className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 onKeyDown={(e) => e.key === 'Enter' && handleSave()}
                 autoFocus
                 placeholder={cm('categoryName')}
+                required
               />
             </div>
             {/* Effect */}
-            <div>
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+            <fieldset>
+              <legend className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
                 {cm('categoryEffect')}
-              </label>
+              </legend>
               <div className="flex flex-col gap-2">
                 {EFFECT_OPTIONS.map((opt) => (
                   <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
@@ -285,17 +301,18 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                   </label>
                 ))}
               </div>
-            </div>
+            </fieldset>
             {/* Actions */}
             <div className="flex gap-2 pt-1">
               <button
+                type="button"
                 onClick={cancelForm}
                 className="flex-1 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
               >
                 {t('cancel')}
               </button>
               <button
-                onClick={handleSave}
+                type="submit"
                 disabled={saving || !form.name.trim()}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 rounded-lg transition-colors disabled:opacity-50"
               >
@@ -303,7 +320,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
                 {saving ? cm('saving') : cm('save')}
               </button>
             </div>
-          </div>
+          </form>
         )}
 
         {/* Footer */}

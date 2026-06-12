@@ -70,6 +70,9 @@ const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose
       <div className="fixed inset-0 animate-backdrop-in" onClick={onClose} />
       <div
         ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcuts-modal-title"
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto animate-in zoom-in-95 duration-200 relative z-10"
         onClick={(e) => e.stopPropagation()}
       >
@@ -79,12 +82,13 @@ const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose
             <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
               <Keyboard className="w-5 h-5 text-slate-700 dark:text-slate-300" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            <h2 id="shortcuts-modal-title" className="text-xl font-bold text-slate-900 dark:text-white">
               {t('helpModal.title')}
             </h2>
           </div>
           <button
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
           >
             <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />

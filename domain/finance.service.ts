@@ -1,5 +1,6 @@
 import { FinanceItem, HistoryEntry, Category, FinanceTotals, DEFAULT_CATEGORIES } from '../types';
 import { FinanceCalculator } from './finance.logic';
+import { generateId } from '../utils/id';
 
 /**
  * Domain Service — pure business logic orchestration.
@@ -23,7 +24,7 @@ export const FinanceService = {
     categoryId: string
   ): { items: FinanceItem[]; newItem: FinanceItem } => {
     const newItem: FinanceItem = {
-      id: globalThis.crypto.randomUUID(),
+      id: generateId(),
       name: 'New Item',
       amount: 0,
       category: categoryId,
@@ -44,7 +45,7 @@ export const FinanceService = {
   seedDefaultCategories: (): Category[] => {
     return DEFAULT_CATEGORIES.map((cat) => ({
       ...cat,
-      id: globalThis.crypto.randomUUID(),
+      id: generateId(),
     }));
   },
 
@@ -60,7 +61,7 @@ export const FinanceService = {
     const maxOrder = nextBatch.reduce((max, c) => Math.max(max, c.order ?? 0), -1);
     const cat: Category = {
       ...newCategory,
-      id: newCategory.id || (globalThis.crypto?.randomUUID?.() ?? Date.now().toString()),
+      id: newCategory.id || generateId(),
       order: maxOrder + 1,
     };
     return [...nextBatch, cat];

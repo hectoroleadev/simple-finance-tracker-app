@@ -70,6 +70,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div className="fixed inset-0 animate-backdrop-in" onClick={onCancel} />
       <div
         ref={trapRef}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md relative z-10 animate-in zoom-in-95 duration-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -79,7 +82,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               <Icon size={24} />
             </div>
             <div className="flex-1 stagger-2">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
+              <h3 id="confirm-dialog-title" className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
                 {title}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{message}</p>
