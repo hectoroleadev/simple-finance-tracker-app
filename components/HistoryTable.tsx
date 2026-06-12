@@ -150,7 +150,7 @@ const HistoryRow = React.memo(
                     <div className="flex items-baseline gap-1.5 md:justify-end">
                       {delta !== null && (
                         <span
-                          className={`text-[10px] font-semibold tabular-nums md:opacity-0 md:group-hover:opacity-100 transition-opacity ${deltaColor}`}
+                          className={`text-[10px] font-semibold tabular-nums pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 transition-opacity ${deltaColor}`}
                         >
                           {delta >= 0 ? '+' : ''}
                           {delta.toFixed(1)}%
@@ -176,7 +176,7 @@ const HistoryRow = React.memo(
             <div className="hidden md:flex w-10 justify-end">
               <button
                 onClick={(e) => onDelete(entry.id, e)}
-                className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
+                className="p-2 text-slate-300 hover:text-rose-500 dark:hover:text-rose-400 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100 transition-all rounded-lg"
               >
                 <Trash2 size={16} />
               </button>

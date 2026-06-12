@@ -88,7 +88,7 @@ const CategoryRow = React.memo(
         )}
       </div>
       <div
-        className={`w-14 flex justify-end gap-1.5 transition-opacity ml-2 ${isReadOnly ? 'hidden' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}
+        className={`w-14 flex justify-end gap-1.5 transition-opacity ml-2 ${isReadOnly ? 'hidden' : 'opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100'}`}
       >
         {editingId === item.id ? (
           <button
