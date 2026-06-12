@@ -10,9 +10,48 @@ interface StatCardProps {
   icon?: React.ReactNode;
   trend?: number | null;
   trendInverted?: boolean;
+  sparkline?: number[];
 }
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, color, icon, trend, trendInverted }) => {
+// Lightweight inline SVG — recharts is lazy-loaded and too heavy for a 64px line
+const Sparkline: React.FC<{ data: number[]; className?: string }> = ({ data, className }) => {
+  if (data.length < 2) return null;
+  const w = 64;
+  const h = 22;
+  const pad = 2;
+  const min = Math.min(...data);
+  const range = Math.max(...data) - min || 1;
+  const points = data
+    .map(
+      (v, i) =>
+        `${pad + (i * (w - 2 * pad)) / (data.length - 1)},${
+          h - pad - ((v - min) / range) * (h - 2 * pad)
+        }`
+    )
+    .join(' ');
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className={className} aria-hidden="true">
+      <polyline
+        points={points}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  color,
+  icon,
+  trend,
+  trendInverted,
+  sparkline,
+}) => {
   const animatedValue = useCounterAnimation(value, { duration: 300 });
 
   const colorMap = {
@@ -20,6 +59,13 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, color, icon, trend, t
     red: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30',
     blue: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30',
     yellow: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30',
+  };
+
+  const sparkColorMap = {
+    green: 'text-emerald-500/60 dark:text-emerald-400/60',
+    red: 'text-rose-500/60 dark:text-rose-400/60',
+    blue: 'text-blue-500/60 dark:text-blue-400/60',
+    yellow: 'text-amber-500/60 dark:text-amber-400/60',
   };
 
   // V12: Subtle directional gradient tint per KPI sign
@@ -49,6 +95,9 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, color, icon, trend, t
         <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           {label}
         </span>
+        {sparkline && (
+          <Sparkline data={sparkline} className={`ml-auto shrink-0 ${sparkColorMap[color]}`} />
+        )}
       </div>
       <div className="flex items-end justify-between gap-2">
         <div className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">

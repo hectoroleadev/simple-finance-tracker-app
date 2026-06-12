@@ -190,6 +190,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
           {!isReadOnly && (
             <button
               onClick={handleAddItem}
+              aria-label={`${t('addItem')}: ${title}`}
               className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors p-1 hover:scale-110 transition-transform"
             >
               <Plus size={18} />

@@ -12,6 +12,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   variant?: 'danger' | 'warning' | 'info';
+  children?: React.ReactNode;
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -23,6 +24,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
   variant = 'danger',
+  children,
 }) => {
   const trapRef = useFocusTrap(isOpen);
 
@@ -82,12 +84,16 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               <Icon size={24} />
             </div>
             <div className="flex-1 stagger-2">
-              <h3 id="confirm-dialog-title" className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
+              <h3
+                id="confirm-dialog-title"
+                className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight"
+              >
                 {title}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{message}</p>
             </div>
           </div>
+          {children && <div className="mt-4 stagger-2">{children}</div>}
         </div>
 
         <div className="bg-slate-50 dark:bg-slate-900/40 px-6 py-4 flex gap-3 justify-end border-t border-slate-100 dark:border-slate-700 stagger-3">

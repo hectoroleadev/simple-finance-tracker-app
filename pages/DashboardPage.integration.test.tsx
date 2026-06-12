@@ -73,13 +73,13 @@ describe('DashboardPage Integration', () => {
     renderWithContext(<DashboardPage />);
 
     // Get all "add" buttons (plus icons)
-    const addButtons = screen.getAllByRole('button');
+    const addButtons = screen.getAllByLabelText(/add item/i);
     fireEvent.click(addButtons[0]);
 
     expect(mockActions.addItem).toHaveBeenCalled();
   });
 
-  it('triggers snapshotHistory when "Save state" button is clicked', () => {
+  it('triggers snapshotHistory after confirming the snapshot dialog', () => {
     renderWithContext(<DashboardPage />);
 
     // The button text is "Record Snapshot" or "Registrar Snapshot" depending on locale (default en here)
@@ -89,6 +89,15 @@ describe('DashboardPage Integration', () => {
       throw new Error('Snapshot button not found');
     }
     fireEvent.click(snapshotButton);
+
+    // Clicking the header button only opens the confirmation dialog
+    expect(mockActions.snapshotHistory).not.toHaveBeenCalled();
+
+    const confirmButton = screen.queryByText(/^Save$/) || screen.queryByText(/^Guardar$/);
+    if (!confirmButton) {
+      throw new Error('Confirm button not found');
+    }
+    fireEvent.click(confirmButton);
 
     expect(mockActions.snapshotHistory).toHaveBeenCalled();
   });

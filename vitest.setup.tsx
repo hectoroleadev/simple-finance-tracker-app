@@ -44,6 +44,8 @@ vi.mock('lucide-react', () => ({
   MoreVertical: () => 'MoreVerticalIcon',
   Edit2: () => 'EditIcon',
   Save: () => 'SaveIcon',
+  Camera: () => 'CameraIcon',
+  FolderPlus: () => 'FolderPlusIcon',
   RefreshCw: () => 'RefreshIcon',
   UserPlus: () => 'UserPlusIcon',
 }));
