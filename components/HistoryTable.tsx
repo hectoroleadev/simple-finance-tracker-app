@@ -38,6 +38,8 @@ const colTextColors: Record<ColKey, string> = {
 const HistoryRow = React.memo(
   ({
     entry,
+    prevEntry,
+    isLatest,
     onDelete,
     t,
     language,
@@ -49,6 +51,8 @@ const HistoryRow = React.memo(
     isReadOnly,
   }: {
     entry: HistoryEntry;
+    prevEntry?: HistoryEntry;
+    isLatest?: boolean;
     onDelete: (id: string, e?: React.MouseEvent) => void;
     t: (key: string) => string;
     language: string;
@@ -82,6 +86,11 @@ const HistoryRow = React.memo(
               </span>
               <span className="font-bold text-slate-800 dark:text-slate-200 text-lg capitalize">
                 {formatDate(entry.date)}
+                {isLatest && (
+                  <span className="ml-2 align-middle text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                    {t('latest')}
+                  </span>
+                )}
               </span>
             </div>
             {!isReadOnly && (
@@ -98,8 +107,13 @@ const HistoryRow = React.memo(
           <div className="hidden md:block w-20 text-slate-400 dark:text-slate-500 text-sm">
             {formatYear(entry.date)}
           </div>
-          <div className="hidden md:block flex-1 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
+          <div className="hidden md:flex flex-1 items-center gap-2 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
             {formatDate(entry.date)}
+            {isLatest && (
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                {t('latest')}
+              </span>
+            )}
           </div>
 
           {/* Data columns */}
@@ -108,6 +122,16 @@ const HistoryRow = React.memo(
               const val = entry[key];
               const { min, range } = colStats[key];
               const barW = Math.max(4, Math.round(((val - min) / range) * 100));
+              const prevVal = prevEntry?.[key];
+              const delta = prevVal ? ((val - prevVal) / Math.abs(prevVal)) * 100 : null;
+              // For debt, an increase is bad news
+              const deltaGood = key === 'debt' ? delta! < 0 : delta! > 0;
+              const deltaColor =
+                delta === 0
+                  ? 'text-slate-400 dark:text-slate-500'
+                  : deltaGood
+                    ? 'text-emerald-500 dark:text-emerald-400'
+                    : 'text-rose-500 dark:text-rose-400';
               return (
                 <div
                   key={key}
@@ -123,8 +147,18 @@ const HistoryRow = React.memo(
                           : t('retirementCapital')}
                   </span>
                   <div>
-                    <div className={`text-sm font-bold tabular-nums ${colTextColors[key]}`}>
-                      {formatCurrencyNoDecimals(val)}
+                    <div className="flex items-baseline gap-1.5 md:justify-end">
+                      {delta !== null && (
+                        <span
+                          className={`text-[10px] font-semibold tabular-nums md:opacity-0 md:group-hover:opacity-100 transition-opacity ${deltaColor}`}
+                        >
+                          {delta >= 0 ? '+' : ''}
+                          {delta.toFixed(1)}%
+                        </span>
+                      )}
+                      <span className={`text-sm font-bold tabular-nums ${colTextColors[key]}`}>
+                        {formatCurrencyNoDecimals(val)}
+                      </span>
                     </div>
                     <div className="h-[3px] mt-1 rounded-full bg-slate-100 dark:bg-slate-700/60 overflow-hidden">
                       <div
@@ -213,9 +247,12 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Grow with content instead of leaving dead space, capped at the previous fixed height
+  const listHeight = Math.min(550, Math.max(rowHeight, history.length * rowHeight));
+
   return (
     <>
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-[600px] transition-colors relative z-0">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col transition-colors relative z-0">
         <div className="hidden md:flex bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           <div className="w-20 text-left">{t('year')}</div>
           <div className="flex-1 text-left">{t('date')}</div>
@@ -226,7 +263,10 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
           <div className="w-10"></div>
         </div>
 
-        <div className="flex-1 relative">
+        <div
+          className={`relative ${history.length === 0 && !isLoading ? 'h-[320px]' : ''}`}
+          style={!isLoading && history.length > 0 ? { height: listHeight } : undefined}
+        >
           {isLoading ? (
             <div className="p-4 space-y-2">
               {[...Array(5)].map((_, i) => (
@@ -246,7 +286,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
             </div>
           ) : history.length > 0 ? (
             <List
-              height={550}
+              height={listHeight}
               itemCount={history.length}
               itemSize={rowHeight}
               width="100%"
@@ -257,6 +297,8 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
                   key={index}
                   style={style}
                   entry={history[index]}
+                  prevEntry={history[index + 1]}
+                  isLatest={index === 0}
                   onDelete={handleDeleteClick}
                   t={t}
                   language={language}
