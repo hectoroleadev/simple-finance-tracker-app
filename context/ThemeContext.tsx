@@ -35,6 +35,7 @@ const themeReducer = (state: ThemeState, action: ThemeAction): ThemeState => {
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Inicializar estado basado en localStorage o preferencia del sistema
   const getInitialTheme = (): Theme => {
+    if (typeof localStorage === 'undefined') return 'light';
     const savedTheme = localStorage.getItem('theme') as Theme;
     if (savedTheme) return savedTheme;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -44,7 +45,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     theme: getInitialTheme(),
   });
   const debouncedSaveRef = useRef(debounce((theme: Theme) => {
-    localStorage.setItem('theme', theme);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('theme', theme);
+    }
   }, 500));
 
   useEffect(() => {
@@ -56,6 +59,12 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
     debouncedSaveRef.current(state.theme);
   }, [state.theme]);
+
+  useEffect(() => {
+    return () => {
+      debouncedSaveRef.current.cancel?.();
+    };
+  }, []);
 
   return <ThemeContext.Provider value={{ state, dispatch }}>{children}</ThemeContext.Provider>;
 };

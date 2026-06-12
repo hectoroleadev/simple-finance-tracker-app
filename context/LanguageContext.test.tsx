@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 
@@ -18,8 +18,13 @@ const TestConsumer: React.FC = () => {
 
 describe('LanguageContext', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     localStorage.clear();
     Object.defineProperty(navigator, 'language', { writable: true, value: 'en-US' });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('defaults to browser language when nothing is stored', () => {
@@ -80,6 +85,7 @@ describe('LanguageContext', () => {
       </LanguageProvider>
     );
     act(() => getByRole('button', { name: 'set-es' }).click());
+    act(() => vi.runAllTimers());
     expect(localStorage.getItem('app_language')).toBe('es');
   });
 

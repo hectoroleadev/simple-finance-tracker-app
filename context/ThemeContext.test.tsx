@@ -34,12 +34,14 @@ const TestConsumer: React.FC = () => {
 
 describe('ThemeContext', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     localStorage.clear();
     mockMatchMedia(false);
     document.documentElement.classList.remove('dark');
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     document.documentElement.classList.remove('dark');
   });
 
@@ -104,8 +106,10 @@ describe('ThemeContext', () => {
       </ThemeProvider>
     );
     act(() => getByRole('button', { name: 'set-dark' }).click());
+    act(() => vi.runAllTimers());
     expect(localStorage.getItem('theme')).toBe('dark');
     act(() => getByRole('button', { name: 'set-light' }).click());
+    act(() => vi.runAllTimers());
     expect(localStorage.getItem('theme')).toBe('light');
   });
 
