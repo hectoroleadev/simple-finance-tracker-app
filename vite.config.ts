@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       react(),
       visualizer({
         emitFile: true,
-        filename: 'dist/stats.html',
+        filename: 'stats.html',
         open: false,
       }),
       VitePWA({
