@@ -11,7 +11,6 @@ import { useDensity } from '../hooks/useDensity';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
 import { formatCurrency } from '../utils/format';
 import { useCounterAnimation } from '../hooks/useCounterAnimation';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
