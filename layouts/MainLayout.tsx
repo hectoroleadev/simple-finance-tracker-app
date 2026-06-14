@@ -1,11 +1,11 @@
 import React, { useState, Suspense, lazy } from 'react';
 import {
-  Wallet,
   LayoutDashboard,
   History as HistoryIcon,
   PieChart as PieChartIcon,
   AlignJustify,
   AlignLeft,
+  User,
 } from 'lucide-react';
 import { useDensity } from '../hooks/useDensity';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -41,7 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
   const [showSharingManager, setShowSharingManager] = useState(false);
-  const { isLoggedIn, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isReadOnly } = useFinanceContext();
   const { density, toggleDensity } = useDensity();
 
@@ -69,8 +69,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 lg:pb-0 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       <MobileNav
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
         onHelpClick={() => setShowShortcutsHelp(true)}
         onCategoriesClick={() => setShowCategoriesManager(true)}
         onSharingClick={() => setShowSharingManager(true)}
@@ -85,22 +87,64 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         {t('skipToContent')}
       </a>
 
-      {/* V12: sticky header with translucent blur */}
-      <header className="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-700/70 sticky top-0 z-40 transition-colors duration-300">
+      <header className="bg-white/75 dark:bg-slate-800/75 backdrop-blur-[3px] border-b border-slate-200/70 dark:border-slate-700/70 sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="bg-slate-900 dark:bg-slate-700 p-2 rounded-lg transition-colors">
-              <Wallet size={20} className="text-white" />
+          <div className="flex items-center gap-3">
+            {/* Avatar — desktop: AccountMenu dropdown, mobile: opens drawer */}
+            <div className="hidden lg:block">
+              <AccountMenu
+                onShowHelp={() => setShowShortcutsHelp(true)}
+                onManageCategories={() => setShowCategoriesManager(true)}
+                onManageSharing={() => setShowSharingManager(true)}
+                isReadOnly={isReadOnly}
+              />
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+            <button
+              className={`lg:hidden relative w-9 h-9 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 ${
+                mobileMenuOpen
+                  ? 'ring-2 ring-blue-500/50 ring-offset-2 ring-offset-white dark:ring-offset-slate-800'
+                  : ''
+              }`}
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              aria-label="Open menu"
+            >
+              <div className="w-full h-full rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center overflow-hidden">
+                <User size={18} className="text-slate-400 dark:text-slate-300" />
+              </div>
+            </button>
+
+            {/* App title — desktop only */}
+            <h1
+              className="hidden lg:block text-base lg:text-lg font-bold text-slate-900 dark:text-white tracking-tight cursor-pointer"
+              onClick={() => navigate('/')}
+            >
               {t('appTitle')}
-              <span className="text-slate-400 font-medium hidden sm:inline">
-                {t('appTitleCore')}
-              </span>
+              <span className="text-slate-400 font-medium">{t('appTitleCore')}</span>
             </h1>
           </div>
 
           <div className="flex-1 flex items-center justify-end gap-6 sm:gap-8 ml-4">
+            {/* Mobile icon-only nav */}
+            <nav
+              aria-label="Primary navigation"
+              className="lg:hidden flex items-center gap-1"
+            >
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => navigate(tab.path)}
+                  aria-label={tab.label}
+                  className={`p-2 rounded-lg transition-all ${
+                    currentPath === tab.id
+                      ? 'text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-700'
+                      : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <tab.icon size={20} />
+                </button>
+              ))}
+            </nav>
+
             <nav
               aria-label="Primary navigation"
               className="hidden lg:flex items-center bg-slate-100 dark:bg-slate-700/50 p-1 rounded-lg transition-colors"
@@ -122,7 +166,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
             </nav>
 
             <div className="hidden lg:flex items-center gap-4 sm:gap-6 border-l border-slate-200 dark:border-slate-700 pl-4 sm:pl-6 h-10">
-              {/* V14: Density toggle */}
               <button
                 onClick={toggleDensity}
                 title={density === 'comfortable' ? t('densityCompact') : t('densityComfortable')}
@@ -133,12 +176,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
               >
                 {density === 'comfortable' ? <AlignLeft size={16} /> : <AlignJustify size={16} />}
               </button>
-              <AccountMenu
-                onShowHelp={() => setShowShortcutsHelp(true)}
-                onManageCategories={() => setShowCategoriesManager(true)}
-                onManageSharing={() => setShowSharingManager(true)}
-                isReadOnly={isReadOnly}
-              />
 
               <div className="text-right">
                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -152,8 +189,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
               </div>
             </div>
 
-            {/* Always show net worth on mobile, but simply */}
-            <div className="text-right lg:hidden mr-12">
+            {/* Mobile: net worth only */}
+            <div className="text-right lg:hidden">
               <span
                 className={`text-lg font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
               >
@@ -174,10 +211,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         </p>
       </footer>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation — hidden now that nav is in the header */}
       <nav
         aria-label="Mobile navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-6 py-3 flex justify-around items-center z-30 transition-colors"
+        className="hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 px-6 py-3 flex justify-around items-center z-30 transition-colors"
       >
         {tabs.map((tab) => (
           <button

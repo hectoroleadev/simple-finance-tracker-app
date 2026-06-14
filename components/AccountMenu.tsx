@@ -7,7 +7,6 @@ import {
   Sun,
   LogOut,
   Check,
-  ChevronDown,
   Tags,
 } from 'lucide-react';
 import { useFinanceContext } from '../context/FinanceContext';
@@ -60,33 +59,21 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
-          isOpen
-            ? 'bg-slate-100 dark:bg-slate-700 shadow-inner'
-            : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm'
+        className={`relative w-9 h-9 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 ${
+          isOpen ? 'ring-2 ring-blue-500/50 ring-offset-2 ring-offset-white dark:ring-offset-slate-800' : ''
         }`}
+        aria-label={currentUserName}
       >
-        <div
-          className={`p-1 rounded-md ${isShared ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}
-        >
-          {isShared ? <Users size={16} /> : <User size={16} />}
+        <div className="w-full h-full rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center overflow-hidden">
+          <User size={18} className="text-slate-400 dark:text-slate-300" />
         </div>
-        <div className="flex flex-col items-start hidden sm:flex">
-          <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-0.5">
-            {isShared ? sh('sharedAccount') : t('dashboard')}
-          </span>
-          <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate leading-none">
-            {currentUserName}
-          </span>
-        </div>
-        <ChevronDown
-          size={14}
-          className={`text-slate-400 transition-transform duration-200 ml-1 ${isOpen ? 'rotate-180' : ''}`}
-        />
+        {isShared && (
+          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800" />
+        )}
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 right-0 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden animate-scale-in origin-top-right backdrop-blur-xl bg-white/90 dark:bg-slate-800/90">
+        <div className="absolute top-full mt-2 left-0 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden animate-scale-in origin-top-left backdrop-blur-xl bg-white/90 dark:bg-slate-800/90">
           <div className="p-2 space-y-1">
             {/* Account Selection Section */}
             <div className="px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
