@@ -58,7 +58,10 @@ const ShortcutsHelpModal: React.FC<ShortcutsHelpModalProps> = ({ isOpen, onClose
     },
     {
       category: t('helpModal.categories.theme'),
-      items: [{ keys: ['t'], description: t('helpModal.shortcuts.toggleTheme') }],
+      items: [
+        { keys: ['t'], description: t('helpModal.shortcuts.toggleTheme') },
+        { keys: ['c'], description: t('helpModal.shortcuts.toggleDensity') },
+      ],
       hideOnMobile: true,
     },
   ];

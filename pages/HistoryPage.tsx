@@ -9,13 +9,6 @@ const HistoryPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t('historyTitle')}</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('historyDesc')}</p>
-        </div>
-      </div>
-
       <HistoryTable
         history={history}
         onDelete={actions.deleteHistoryItem}

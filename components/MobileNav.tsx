@@ -11,8 +11,11 @@ import {
   Users,
   User,
   Check,
+  AlignLeft,
+  AlignJustify,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDensity } from '../hooks/useDensity';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -36,6 +39,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
   isReadOnly,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     state: { theme },
     dispatch,
@@ -43,6 +47,8 @@ const MobileNav: React.FC<MobileNavProps> = ({
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, logout } = useAuth();
   const { sharedWithMe, viewAs, actions } = useFinanceContext();
+  const { density, toggleDensity } = useDensity();
+  const isDensityPage = ['/dashboard', '/history'].includes(location.pathname);
 
   const sh = (key: string) => t(`sharing.${key}`);
 
@@ -223,6 +229,22 @@ const MobileNav: React.FC<MobileNavProps> = ({
                   {language === 'en' ? 'ESPAÑOL' : 'ENGLISH'}
                 </span>
               </button>
+
+              {isDensityPage && (
+                <button
+                  onClick={toggleDensity}
+                  className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                >
+                  {density === 'compact' ? (
+                    <AlignLeft size={20} className="text-violet-500 mb-2" />
+                  ) : (
+                    <AlignJustify size={20} className="text-violet-500 mb-2" />
+                  )}
+                  <span className="text-[10px] font-bold uppercase tracking-tight text-center">
+                    {density === 'comfortable' ? 'COMPACT' : 'NORMAL'}
+                  </span>
+                </button>
+              )}
             </div>
 
             <div className="mt-2 space-y-2">

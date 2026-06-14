@@ -8,11 +8,15 @@ import {
   LogOut,
   Check,
   Tags,
+  AlignLeft,
+  AlignJustify,
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useFinanceContext } from '../context/FinanceContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useDensity } from '../hooks/useDensity';
 
 interface AccountMenuProps {
   onShowHelp: () => void;
@@ -34,6 +38,10 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
     dispatch,
   } = useTheme();
   const { isLoggedIn, logout } = useAuth();
+
+  const location = useLocation();
+  const { density, toggleDensity } = useDensity();
+  const isDensityPage = ['/dashboard', '/history'].includes(location.pathname);
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -200,6 +208,29 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
                 />
               </div>
             </button>
+
+            {isDensityPage && (
+              <button
+                onClick={toggleDensity}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  {density === 'compact' ? (
+                    <AlignJustify size={18} className="text-slate-400" />
+                  ) : (
+                    <AlignLeft size={18} className="text-slate-400" />
+                  )}
+                  <span>{density === 'comfortable' ? t('densityCompact') : t('densityComfortable')}</span>
+                </div>
+                <div
+                  className={`w-8 h-4 rounded-full p-0.5 transition-colors ${density === 'compact' ? 'bg-blue-500' : 'bg-slate-300'}`}
+                >
+                  <div
+                    className={`w-3 h-3 bg-white rounded-full transition-transform ${density === 'compact' ? 'translate-x-4' : ''}`}
+                  />
+                </div>
+              </button>
+            )}
 
             <div className="h-px bg-slate-100 dark:bg-slate-700 my-2 mx-2" />
 

@@ -3,6 +3,7 @@ import { FixedSizeList as List } from 'react-window';
 import { HistoryEntry } from '../types';
 import { formatCurrencyNoDecimals } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
+import { useDensity } from '../hooks/useDensity';
 import { Trash2, CalendarDays } from 'lucide-react';
 import ConfirmDialog from './ConfirmDialog';
 import EmptyState from './EmptyState';
@@ -77,7 +78,7 @@ const HistoryRow = React.memo(
         style={style}
         className={`border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors group relative ${rowBg}`}
       >
-        <div className="flex flex-col md:flex-row p-4 md:px-6 md:py-0 md:h-[60px] md:items-center">
+        <div className="flex flex-col md:flex-row p-4 md:px-6 md:py-0 md:h-full md:items-center">
           {/* Mobile Header */}
           <div className="md:hidden flex justify-between items-start mb-4">
             <div className="flex flex-col">
@@ -195,6 +196,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
   isLoading,
 }) => {
   const { t, language } = useLanguage();
+  const { isCompact } = useDensity();
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const colStats = useMemo<Record<ColKey, ColStat>>(() => {
@@ -240,12 +242,14 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
 
   const dataKeys: ColKey[] = ['savings', 'debt', 'balance', 'retirement'];
 
-  const [rowHeight, setRowHeight] = useState(window.innerWidth < 768 ? 230 : 60);
+  const desktopRowHeight = isCompact ? 48 : 60;
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
-    const handleResize = () => setRowHeight(window.innerWidth < 768 ? 230 : 60);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  const rowHeight = isMobile ? 230 : desktopRowHeight;
 
   // Grow with content instead of leaving dead space, capped at the previous fixed height
   const listHeight = Math.min(550, Math.max(rowHeight, history.length * rowHeight));
@@ -253,7 +257,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col transition-colors relative z-0">
-        <div className="hidden md:flex bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="hidden md:flex bg-slate-50 dark:bg-slate-700/30 border-b border-slate-200 dark:border-slate-700 px-6 py-4 density-header-py text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           <div className="w-20 text-left">{t('year')}</div>
           <div className="flex-1 text-left">{t('date')}</div>
           <div className="w-28 text-right">{t('savings')}</div>

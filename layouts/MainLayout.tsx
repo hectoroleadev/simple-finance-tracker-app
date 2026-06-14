@@ -3,8 +3,6 @@ import {
   LayoutDashboard,
   History as HistoryIcon,
   PieChart as PieChartIcon,
-  AlignJustify,
-  AlignLeft,
   User,
 } from 'lucide-react';
 import { useDensity } from '../hooks/useDensity';
@@ -42,7 +40,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
   const [showSharingManager, setShowSharingManager] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isReadOnly } = useFinanceContext();
-  const { density, toggleDensity } = useDensity();
+  const { toggleDensity } = useDensity();
+  const DENSITY_PAGES = ['/dashboard', '/history'];
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -55,6 +54,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         action: () => setShowShortcutsHelp(true),
       },
       { key: 't', description: 'Toggle theme', action: () => dispatch({ type: 'TOGGLE_THEME' }) },
+      {
+        key: 'c',
+        description: 'Toggle compact view',
+        action: () => {
+          if (DENSITY_PAGES.includes(location.pathname)) toggleDensity();
+        },
+      },
       { key: '1', description: 'Go to Dashboard', action: () => navigate('/dashboard') },
       { key: '2', description: 'Go to History', action: () => navigate('/history') },
       { key: '3', description: 'Go to Charts', action: () => navigate('/charts') },
@@ -165,17 +171,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
             </nav>
 
             <div className="hidden lg:flex items-center gap-4 sm:gap-6 border-l border-slate-200 dark:border-slate-700 pl-4 sm:pl-6 h-10">
-              <button
-                onClick={toggleDensity}
-                title={density === 'comfortable' ? t('densityCompact') : t('densityComfortable')}
-                aria-label={
-                  density === 'comfortable' ? t('densityCompact') : t('densityComfortable')
-                }
-                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
-              >
-                {density === 'comfortable' ? <AlignLeft size={16} /> : <AlignJustify size={16} />}
-              </button>
-
               <div className="text-right">
                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   {t('netWorth')}

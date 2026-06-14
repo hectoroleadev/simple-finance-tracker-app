@@ -108,12 +108,8 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="flex justify-between items-center gap-4 flex-wrap">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t('summary')}</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('dashboardDesc')}</p>
-        </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="flex justify-end items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           {snapshotAge !== null && (
             <span
               title={lastSnapshotDate!.toLocaleDateString(locale, {
@@ -128,13 +124,14 @@ const DashboardPage: React.FC = () => {
               }`}
             >
               <Clock size={12} />
-              {t('lastSnapshot')} {snapshotAge}
+              <span className="hidden sm:inline">{t('lastSnapshot')} </span>
+              {snapshotAge}
             </span>
           )}
           {!isReadOnly && (
             <button
               onClick={() => setShowSnapshotConfirm(true)}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
+              className="inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
             >
               <Camera size={16} />
               {t('snapshot')}
