@@ -4,8 +4,10 @@ import {
   History as HistoryIcon,
   PieChart as PieChartIcon,
   User,
+  Camera,
 } from 'lucide-react';
 import { useDensity } from '../hooks/useDensity';
+import { useSnapshot } from '../hooks/useSnapshot';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -15,6 +17,7 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import MobileNav from '../components/MobileNav';
 import AccountMenu from '../components/AccountMenu';
 import PageTransition from '../components/PageTransition';
+import SnapshotConfirmDialog from '../components/SnapshotConfirmDialog';
 import { useFinanceContext } from '../context/FinanceContext';
 
 const ShortcutsHelpModal = lazy(() => import('../components/ShortcutsHelpModal'));
@@ -39,9 +42,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
   const [showSharingManager, setShowSharingManager] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showSnapshotConfirm, setShowSnapshotConfirm] = useState(false);
   const { isReadOnly } = useFinanceContext();
+  const { isStale, snapshotAge, hasSnapshot, canSnapshot } = useSnapshot();
   const { toggleDensity } = useDensity();
   const DENSITY_PAGES = ['/dashboard', '/history'];
+
+  const snapshotTitle = hasSnapshot ? `${t('lastSnapshot')} ${snapshotAge}` : t('snapshot');
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -64,6 +71,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
       { key: '1', description: 'Go to Dashboard', action: () => navigate('/dashboard') },
       { key: '2', description: 'Go to History', action: () => navigate('/history') },
       { key: '3', description: 'Go to Charts', action: () => navigate('/charts') },
+      {
+        key: 's',
+        description: 'Take snapshot',
+        action: () => {
+          if (canSnapshot) setShowSnapshotConfirm(true);
+        },
+      },
     ],
   });
 
@@ -104,6 +118,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
                 isReadOnly={isReadOnly}
               />
             </div>
+
             <button
               className={`lg:hidden relative w-9 h-9 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-800 ${
                 mobileMenuOpen
@@ -148,6 +163,27 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
                   <tab.icon size={20} />
                 </button>
               ))}
+
+              {/* Snapshot — reduced message on small screens */}
+              {canSnapshot && (
+                <button
+                  onClick={() => setShowSnapshotConfirm(true)}
+                  title={snapshotTitle}
+                  aria-label={snapshotTitle}
+                  className="flex items-center gap-1 p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all"
+                >
+                  <Camera size={20} />
+                  {hasSnapshot && (
+                    <span
+                      className={`text-[11px] font-medium whitespace-nowrap ${
+                        isStale ? 'text-amber-600 dark:text-amber-400' : ''
+                      }`}
+                    >
+                      {snapshotAge}
+                    </span>
+                  )}
+                </button>
+              )}
             </nav>
 
             <nav
@@ -168,6 +204,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
                   {tab.label}
                 </button>
               ))}
+
+              {/* Snapshot — action grouped with the nav tabs */}
+              {canSnapshot && (
+                <button
+                  onClick={() => setShowSnapshotConfirm(true)}
+                  title={snapshotTitle}
+                  aria-label={snapshotTitle}
+                  className="flex items-center gap-2 px-4 py-1.5 ml-1 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-l border-slate-200 dark:border-slate-600 transition-all"
+                >
+                  <Camera size={16} />
+                  {hasSnapshot && (
+                    <span
+                      className={`text-xs font-medium whitespace-nowrap ${
+                        isStale ? 'text-amber-600 dark:text-amber-400' : ''
+                      }`}
+                    >
+                      <span className="hidden xl:inline">{t('lastSnapshot')} </span>
+                      {snapshotAge}
+                    </span>
+                  )}
+                </button>
+              )}
             </nav>
 
             <div className="hidden lg:flex items-center gap-4 sm:gap-6 border-l border-slate-200 dark:border-slate-700 pl-4 sm:pl-6 h-10">
@@ -241,6 +299,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
           onClose={() => setShowSharingManager(false)}
         />
       </Suspense>
+
+      <SnapshotConfirmDialog
+        isOpen={showSnapshotConfirm}
+        onClose={() => setShowSnapshotConfirm(false)}
+      />
     </div>
   );
 };

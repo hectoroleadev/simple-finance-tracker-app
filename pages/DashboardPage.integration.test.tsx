@@ -78,27 +78,4 @@ describe('DashboardPage Integration', () => {
 
     expect(mockActions.addItem).toHaveBeenCalled();
   });
-
-  it('triggers snapshotHistory after confirming the snapshot dialog', () => {
-    renderWithContext(<DashboardPage />);
-
-    // The button text is "Record Snapshot" or "Registrar Snapshot" depending on locale (default en here)
-    const snapshotButton =
-      screen.queryByText(/Record Snapshot/i) || screen.queryByText(/Registrar Snapshot/i);
-    if (!snapshotButton) {
-      throw new Error('Snapshot button not found');
-    }
-    fireEvent.click(snapshotButton);
-
-    // Clicking the header button only opens the confirmation dialog
-    expect(mockActions.snapshotHistory).not.toHaveBeenCalled();
-
-    const confirmButton = screen.queryByText(/^Save$/) || screen.queryByText(/^Guardar$/);
-    if (!confirmButton) {
-      throw new Error('Confirm button not found');
-    }
-    fireEvent.click(confirmButton);
-
-    expect(mockActions.snapshotHistory).toHaveBeenCalled();
-  });
 });

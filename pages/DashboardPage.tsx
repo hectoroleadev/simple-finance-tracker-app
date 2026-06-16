@@ -1,22 +1,11 @@
 import React, { useState, Suspense, lazy } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  PiggyBank,
-  Camera,
-  Clock,
-  FolderPlus,
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, FolderPlus } from 'lucide-react';
 import { BalanceEffect } from '../types';
 import StatCard from '../components/StatCard';
 import CategoryTable from '../components/CategoryTable';
-import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
-import { formatCurrency } from '../utils/format';
 import { useLanguage } from '../context/LanguageContext';
 import { useFinanceContext } from '../context/FinanceContext';
-import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 const CategoriesManagerModal = lazy(() => import('../components/CategoriesManagerModal'));
 
@@ -27,9 +16,7 @@ const calcTrend = (current: number, previous: number): number | null => {
 
 const DashboardPage: React.FC = () => {
   const { items, categories, totals, isReadOnly, actions, loading, history } = useFinanceContext();
-  const { t, language } = useLanguage();
-  const locale = language === 'es' ? 'es-MX' : 'en-US';
-  const [showSnapshotConfirm, setShowSnapshotConfirm] = useState(false);
+  const { t } = useLanguage();
   const [showCategoriesManager, setShowCategoriesManager] = useState(false);
 
   // Last 6 snapshots, oldest first, for the StatCard sparklines
@@ -38,24 +25,6 @@ const DashboardPage: React.FC = () => {
       .slice(0, 6)
       .map((h) => h[key])
       .reverse();
-
-  const lastSnapshotDate = history.length > 0 ? new Date(history[0].date) : null;
-  const daysSinceSnapshot =
-    lastSnapshotDate && !isNaN(lastSnapshotDate.getTime())
-      ? Math.max(0, Math.floor((Date.now() - lastSnapshotDate.getTime()) / 86_400_000))
-      : null;
-  const snapshotAge =
-    daysSinceSnapshot === null
-      ? null
-      : daysSinceSnapshot >= 30
-        ? new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(
-            -Math.round(daysSinceSnapshot / 30),
-            'month'
-          )
-        : new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(
-            -daysSinceSnapshot,
-            'day'
-          );
 
   const lastSnapshot = history.length > 0 ? history[1] : null;
   const trends = lastSnapshot
@@ -69,36 +38,6 @@ const DashboardPage: React.FC = () => {
 
   const getItemsByCategory = (catId: string) => items.filter((i) => i.category === catId);
 
-  // Page-specific keyboard shortcuts
-  useKeyboardShortcuts({
-    shortcuts: [
-      {
-        key: 's',
-        description: 'Take snapshot',
-        action: () => {
-          if (!isReadOnly) setShowSnapshotConfirm(true);
-        },
-      },
-    ],
-  });
-
-  const handleSnapshotConfirm = () => {
-    actions.snapshotHistory();
-    setShowSnapshotConfirm(false);
-  };
-
-  // Values frozen by a snapshot, in the same order/colors used by HistoryTable
-  const snapshotPreview = [
-    { label: t('savings'), value: totals.income, color: 'text-emerald-600 dark:text-emerald-400' },
-    { label: t('totalDebt'), value: totals.expenses, color: 'text-rose-600 dark:text-rose-400' },
-    { label: t('netBalance'), value: totals.balance, color: 'text-blue-600 dark:text-blue-400' },
-    {
-      label: t('retirementCapital'),
-      value: totals.informative,
-      color: 'text-amber-600 dark:text-amber-400',
-    },
-  ];
-
   // Helper: derive a TailwindCSS color class from category config
   const colorClass = (effect: BalanceEffect): 'green' | 'red' | 'yellow' => {
     if (effect === BalanceEffect.POSITIVE) return 'green';
@@ -108,38 +47,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="flex justify-end items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          {snapshotAge !== null && (
-            <span
-              title={lastSnapshotDate!.toLocaleDateString(locale, {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                daysSinceSnapshot! >= 30
-                  ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                  : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-              }`}
-            >
-              <Clock size={12} />
-              <span className="hidden sm:inline">{t('lastSnapshot')} </span>
-              {snapshotAge}
-            </span>
-          )}
-          {!isReadOnly && (
-            <button
-              onClick={() => setShowSnapshotConfirm(true)}
-              className="inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
-            >
-              <Camera size={16} />
-              {t('snapshot')}
-            </button>
-          )}
-        </div>
-      </div>
-
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
@@ -251,37 +158,6 @@ const DashboardPage: React.FC = () => {
           ))
         )}
       </div>
-
-      <ConfirmDialog
-        isOpen={showSnapshotConfirm}
-        title={t('confirmSnapshot')}
-        message={t('confirmSnapshotMessage')}
-        confirmText={t('save')}
-        cancelText={t('cancel')}
-        onConfirm={handleSnapshotConfirm}
-        onCancel={() => setShowSnapshotConfirm(false)}
-        variant="info"
-      >
-        <div className="grid grid-cols-2 gap-2">
-          {snapshotPreview.map(({ label, value, color }) => (
-            <div key={label} className="rounded-lg bg-slate-50 dark:bg-slate-700/30 px-3 py-2">
-              <span className="block text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 mb-0.5">
-                {label}
-              </span>
-              <span className={`text-sm font-bold tabular-nums ${color}`}>
-                {formatCurrency(value)}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-xs text-slate-400 dark:text-slate-500 text-right capitalize">
-          {new Date().toLocaleDateString(locale, {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })}
-        </p>
-      </ConfirmDialog>
 
       {showCategoriesManager && (
         <Suspense fallback={null}>
