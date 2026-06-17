@@ -39,6 +39,17 @@ export const useSnapshot = () => {
 
   const hasSnapshot = daysSinceSnapshot !== null;
   const isStale = daysSinceSnapshot !== null && daysSinceSnapshot >= 30;
+
+  // Recency bucket for the compact (small-screen) indicator dot:
+  // fresh ≤ 1 week, aging ≤ 3 weeks, stale > 3 weeks.
+  const recency: 'fresh' | 'aging' | 'stale' | null =
+    daysSinceSnapshot === null
+      ? null
+      : daysSinceSnapshot <= 7
+        ? 'fresh'
+        : daysSinceSnapshot <= 21
+          ? 'aging'
+          : 'stale';
   const canSnapshot = !isReadOnly && !viewAs;
 
   // Values frozen by a snapshot, in the same order/colors used by HistoryTable
@@ -59,6 +70,7 @@ export const useSnapshot = () => {
     snapshotAge,
     hasSnapshot,
     isStale,
+    recency,
     canSnapshot,
     locale,
     snapshotPreview,

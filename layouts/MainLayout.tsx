@@ -44,11 +44,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSnapshotConfirm, setShowSnapshotConfirm] = useState(false);
   const { isReadOnly } = useFinanceContext();
-  const { isStale, snapshotAge, hasSnapshot, canSnapshot } = useSnapshot();
+  const { isStale, snapshotAge, hasSnapshot, canSnapshot, recency } = useSnapshot();
   const { toggleDensity } = useDensity();
   const DENSITY_PAGES = ['/dashboard', '/history'];
 
   const snapshotTitle = hasSnapshot ? `${t('lastSnapshot')} ${snapshotAge}` : t('snapshot');
+  const recencyDotClass = {
+    fresh: 'bg-emerald-500',
+    aging: 'bg-amber-500',
+    stale: 'bg-rose-500',
+  } as const;
 
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -170,17 +175,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
                   onClick={() => setShowSnapshotConfirm(true)}
                   title={snapshotTitle}
                   aria-label={snapshotTitle}
-                  className="flex items-center gap-1 p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all"
+                  className="relative flex items-center p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-all"
                 >
                   <Camera size={20} />
-                  {hasSnapshot && (
+                  {hasSnapshot && recency && (
                     <span
-                      className={`text-[11px] font-medium whitespace-nowrap ${
-                        isStale ? 'text-amber-600 dark:text-amber-400' : ''
-                      }`}
-                    >
-                      {snapshotAge}
-                    </span>
+                      className={`absolute top-1 right-1 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-slate-800 ${recencyDotClass[recency]}`}
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               )}
