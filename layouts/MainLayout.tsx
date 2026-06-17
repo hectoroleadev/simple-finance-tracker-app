@@ -93,7 +93,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       <MobileNav
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
@@ -255,13 +255,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
         </div>
       </header>
 
-      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <PageTransition>{children}</PageTransition>
       </main>
 
-      <footer className="py-10 text-center border-t border-slate-200 dark:border-slate-800 transition-colors">
-        <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          {t('footer')}
+      <footer className="py-6 text-center border-t border-slate-200/70 dark:border-slate-800/70 transition-colors">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          © {new Date().getFullYear()} {t('footer')}
         </p>
       </footer>
 
