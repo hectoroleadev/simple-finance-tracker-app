@@ -47,6 +47,10 @@ test.describe('Simple Finance Tracker Critical Flows', () => {
       .locator('.animate-spin')
       .waitFor({ state: 'hidden', timeout: 20000 })
       .catch(() => {});
+
+    // Ensure the dashboard content actually loaded (not showing an error boundary)
+    // and wait for network to settle so background refetches don't interfere with mutations
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
   });
 
   test('User can see dashboard and stats format', async ({ page }) => {
@@ -61,41 +65,63 @@ test.describe('Simple Finance Tracker Critical Flows', () => {
   });
 
   test('User can add a new item to a category', async ({ page }) => {
-    // Clicks the '+' button in the Pending Payments section
-    const pendingPaymentsSection = page
-      .locator('div, section')
-      .filter({ hasText: /Pending Payments/i });
-    const addButton = pendingPaymentsSection
-      .getByRole('button')
-      .filter({ has: page.locator('svg') });
+    // Unique name per run so the test never collides with leftover data and stays idempotent
+    const itemName = `E2E Item ${Date.now()}`;
 
-    await addButton.first().click();
+    // The add button's accessible name is "<addItem>: <category name>". The category name
+    // ("Pending Payments") is stored data, not translated, so match on it to stay language-agnostic.
+    const addButton = page.getByRole('button', { name: /Pending Payments/i });
+    await expect(addButton).toBeVisible();
+    await addButton.click();
 
-    // The input should appear. We expect it to be auto-focused or we can pick it
-    const nameInput = page.locator('input[type="text"]');
-    await expect(nameInput).toBeVisible();
+    // Adding optimistically inserts a row in edit mode with the name input auto-focused.
+    // getByRole('textbox') matches the only text input on the page (the editing row).
+    const nameInput = page.getByRole('textbox').first();
+    await expect(nameInput).toBeVisible({ timeout: 10000 });
 
-    await nameInput.fill('E2E Rent');
+    await nameInput.fill(itemName);
     await page.keyboard.press('Tab');
 
     const amountInput = page.locator('input[type="number"]');
     await amountInput.fill('1200');
     await page.keyboard.press('Enter');
 
-    // Verify the value was visually persisted
-    await expect(page.getByText('E2E Rent')).toBeVisible();
+    // The saved item appears in the list
+    await expect(page.getByText(itemName)).toBeVisible({ timeout: 10000 });
+
+    // Clean up: delete the item so the test leaves no residual data behind
+    const row = page.locator('div.group.animate-fade-in').filter({ hasText: itemName });
+    await row.hover();
+    await row.getByRole('button', { name: /^Delete$|^Eliminar$/i }).click();
+
+    // Confirm the deletion in the dialog
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: /^Delete$|^Eliminar$/i })
+      .click();
+
+    await expect(page.getByText(itemName)).toHaveCount(0);
   });
 
   test('User can save a snapshot and view it in History tab', async ({ page }) => {
-    // Click Record Snapshot button
-    const snapshotBtn = page.getByRole('button', { name: /Record Snapshot/i });
+    // The snapshot button's accessible name includes "snapshot" in all states
+    // (e.g. "Record Snapshot" with no prior snapshot, "Last snapshot X ago" otherwise)
+    const snapshotBtn = page.getByRole('button', { name: /snapshot/i }).first();
     await expect(snapshotBtn).toBeVisible();
     await snapshotBtn.click();
 
-    // It should navigate to /history automatically
+    // Clicking opens a confirmation dialog — confirm it
+    const saveBtn = page.getByRole('button', { name: /^save$|^guardar$/i });
+    await expect(saveBtn).toBeVisible({ timeout: 5000 });
+    await saveBtn.click();
+
+    // Navigate to the History tab manually (snapshot does not auto-navigate)
+    await page.getByRole('button', { name: /^History$|^Historial$/i }).first().click();
+
+    // Confirm the URL updated to the history route
     await expect(page).toHaveURL(/.*history$/);
 
-    // Expect the History table or virtual list to be visible
-    await expect(page.locator('.virtual-list').or(page.getByRole('table'))).toBeVisible();
+    // The history virtual list should be visible
+    await expect(page.locator('.virtual-list').first()).toBeVisible();
   });
 });

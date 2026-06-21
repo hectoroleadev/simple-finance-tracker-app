@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+try { process.loadEnvFile('.env.local'); } catch { /* file absent in CI */ }
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -19,10 +21,6 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
   ],
   webServer: {

@@ -57,6 +57,7 @@ const CategoryRow = React.memo(
       <div className="flex-1 overflow-hidden">
         {editingId === item.id ? (
           <input
+            type="text"
             autoFocus={isNewItem}
             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-slate-900 dark:text-white transition-all"
             value={editName}
