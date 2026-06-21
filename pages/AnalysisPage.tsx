@@ -62,9 +62,11 @@ const makeLastDot =
     return (
       <g key={`dot-${index}`}>
         <circle cx={cx} cy={cy} r={5} fill={color} stroke="#fff" strokeWidth={2} />
-        <text x={cx} y={cy - 12} textAnchor="middle" fontSize={10} fontWeight="600" fill={color}>
-          {formatCurrencyNoDecimals(value)}
-        </text>
+        {value != null && isFinite(value) && (
+          <text x={cx} y={cy - 12} textAnchor="middle" fontSize={10} fontWeight="600" fill={color}>
+            {formatCurrencyNoDecimals(value)}
+          </text>
+        )}
       </g>
     );
   };
