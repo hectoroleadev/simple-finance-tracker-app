@@ -79,3 +79,29 @@ router/        — AppRoutes: /dashboard, /history, /charts (lazy-loaded, auth-g
 ### Path Alias
 
 `@` resolves to the project root (e.g. `import { foo } from '@/domain/finance.logic'`).
+
+## Spec-Driven Workflow
+
+Two installed skills (`.claude/skills/`, pinned in `skills-lock.json`, source `Klerith/fernando-skills`) drive a spec-first flow for large features. Specs live in `specs/` and are numbered sequentially (`NN-slug.md`).
+
+### `/spec <short feature description>`
+
+Guided spec designer. **Writes no code** — produces a spec `.md` file. Four phases:
+
+1. **Context** — reads `CLAUDE.md`, lists existing `specs/`, reads the two most recent for conventions.
+2. **Clarify** — asks questions in blocks of 3–5 (scope, data, integration, persistence, UX/states, risks) until file changes, first/last step, and "done" criteria are unambiguous.
+3. **Develop** — writes the spec section by section (header → scope → data model → implementation plan → acceptance criteria → decisions → risks), confirming each with the user.
+4. **Save** — writes `specs/NN-slug.md` in `Draft` state. User re-reads and flips it to `Approved` manually.
+
+Use before writing code on a big feature. Replies match the prompt's language.
+
+### `/spec-impl <NN-spec-name>`
+
+Implements an **approved** spec. Accepts full name, number, or slug. Flow:
+
+1. Locate the spec in `specs/`.
+2. Validate status means `Approved` (any language) — otherwise stops, no branch, no code.
+3. Create/switch to branch `spec-NN-slug`, echo objective/scope/plan/criteria.
+4. Implement one plan step at a time, pausing after each for diff review. Out-of-scope requests are deferred to a new spec.
+
+On finishing all steps: verify acceptance criteria, then user sets status to `Implemented` and commits.
