@@ -129,7 +129,7 @@ const ItemHistoryModal: React.FC<ItemHistoryModalProps> = ({
                 let title = t('itemHistory.updated');
 
                 if (isCreate) {
-                  bgColor = 'bg-emerald-500';
+                  bgColor = 'bg-positive-500';
                   title = t('itemHistory.created');
                 } else if (isDelete) {
                   bgColor = 'bg-rose-500';

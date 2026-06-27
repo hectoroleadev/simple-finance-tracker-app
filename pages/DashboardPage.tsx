@@ -133,7 +133,7 @@ const DashboardPage: React.FC = () => {
                 !isReadOnly ? (
                   <button
                     onClick={() => setShowCategoriesManager(true)}
-                    className="inline-flex items-center gap-2 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 text-white font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
+                    className="inline-flex items-center gap-2 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm text-sm hover:shadow-lg"
                   >
                     {t('categoriesManager.title')}
                   </button>

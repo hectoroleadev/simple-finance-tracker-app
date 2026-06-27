@@ -208,10 +208,10 @@ const AnalysisPage: React.FC = () => {
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-        {/* Chart 1: Wealth Trend — emerald/rose palette */}
+        {/* Chart 1: Wealth Trend — positive/negative palette */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-8 h-[400px] sm:h-[500px] shadow-sm flex flex-col card-interactive overflow-hidden">
           <div className="mb-4 sm:mb-6">
-            <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 mb-2">
+            <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-positive-100 dark:bg-positive-900/40 text-positive-700 dark:text-positive-300 mb-2">
               {t('badgeWealth')}
             </span>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
@@ -222,7 +222,7 @@ const AnalysisPage: React.FC = () => {
             </p>
             <div className="flex items-center gap-4 mt-2">
               <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                <span className="inline-block w-4 border-t-2 border-emerald-500 rounded-full" />
+                <span className="inline-block w-4 border-t-2 border-positive-500 rounded-full" />
                 {t('netBalance')}
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">

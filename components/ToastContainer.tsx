@@ -10,7 +10,7 @@ const ICONS: Record<ToastType, React.FC<{ className?: string }>> = {
 
 const STYLES: Record<ToastType, string> = {
   success:
-    'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300',
+    'bg-positive-50 border-positive-200 text-positive-800 dark:bg-positive-900/20 dark:border-positive-800 dark:text-positive-300',
   error:
     'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300',
   info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',

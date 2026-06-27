@@ -94,7 +94,7 @@ const CategoryRow = React.memo(
         {editingId === item.id ? (
           <button
             onClick={saveEdit}
-            className="text-emerald-600 dark:text-emerald-400 hover:scale-110 transition-transform"
+            className="text-positive-600 dark:text-positive-400 hover:scale-110 transition-transform"
           >
             <Check size={16} />
           </button>
@@ -158,7 +158,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   const animatedTotal = useCounterAnimation(total, { duration: 300 });
 
   const accentColor = {
-    green: 'text-emerald-600 dark:text-emerald-400',
+    green: 'text-positive-600 dark:text-positive-400',
     red: 'text-rose-600 dark:text-rose-400',
     yellow: 'text-amber-600 dark:text-amber-400',
   }[color];

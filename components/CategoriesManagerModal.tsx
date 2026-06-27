@@ -23,7 +23,7 @@ const EFFECT_OPTIONS = [
 
 const EFFECT_COLORS = {
   [BalanceEffect.POSITIVE]:
-    'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
+    'text-positive-600 dark:text-positive-400 bg-positive-50 dark:bg-positive-900/20 border-positive-200 dark:border-positive-800',
   [BalanceEffect.NEGATIVE]:
     'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
   [BalanceEffect.INFORMATIVE]:
@@ -314,7 +314,7 @@ const CategoriesManagerModal: React.FC<CategoriesManagerModalProps> = ({ isOpen,
               <button
                 type="submit"
                 disabled={saving || !form.name.trim()}
-                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 rounded-lg transition-colors disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 rounded-lg transition-colors disabled:opacity-50"
               >
                 <Save size={14} />
                 {saving ? cm('saving') : cm('save')}

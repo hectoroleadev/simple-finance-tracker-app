@@ -55,14 +55,14 @@ const StatCard: React.FC<StatCardProps> = ({
   const animatedValue = useCounterAnimation(value, { duration: 300 });
 
   const colorMap = {
-    green: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30',
+    green: 'text-positive-600 dark:text-positive-400 bg-positive-50 dark:bg-positive-900/30',
     red: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30',
     blue: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30',
     yellow: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30',
   };
 
   const sparkColorMap = {
-    green: 'text-emerald-500/60 dark:text-emerald-400/60',
+    green: 'text-positive-500/60 dark:text-positive-400/60',
     red: 'text-rose-500/60 dark:text-rose-400/60',
     blue: 'text-blue-500/60 dark:text-blue-400/60',
     yellow: 'text-amber-500/60 dark:text-amber-400/60',
@@ -71,7 +71,7 @@ const StatCard: React.FC<StatCardProps> = ({
   // V12: Subtle directional gradient tint per KPI sign
   const gradientMap = {
     green:
-      'bg-gradient-to-br from-white to-emerald-50/70 dark:from-slate-800 dark:to-emerald-900/20',
+      'bg-gradient-to-br from-white to-positive-50/70 dark:from-slate-800 dark:to-positive-900/20',
     red: 'bg-gradient-to-br from-white to-rose-50/70 dark:from-slate-800 dark:to-rose-900/20',
     blue: 'bg-gradient-to-br from-white to-blue-50/70 dark:from-slate-800 dark:to-blue-900/20',
     yellow: 'bg-gradient-to-br from-white to-amber-50/70 dark:from-slate-800 dark:to-amber-900/20',
@@ -83,7 +83,7 @@ const StatCard: React.FC<StatCardProps> = ({
   const trendColor = trendFlat
     ? 'text-slate-400 dark:text-slate-500'
     : trendPositive
-      ? 'text-emerald-500 dark:text-emerald-400'
+      ? 'text-positive-500 dark:text-positive-400'
       : 'text-rose-500 dark:text-rose-400';
 
   return (
