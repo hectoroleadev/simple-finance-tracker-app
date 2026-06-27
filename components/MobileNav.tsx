@@ -224,7 +224,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
                 onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
                 className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
               >
-                <Globe size={20} className="text-emerald-500 mb-2" />
+                <Globe size={20} className="text-brand-500 mb-2" />
                 <span className="text-[10px] font-bold uppercase tracking-tight text-center">
                   {language === 'en' ? 'ESPAÑOL' : 'ENGLISH'}
                 </span>

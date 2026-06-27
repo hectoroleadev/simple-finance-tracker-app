@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => {
           name: 'Simple Finance Tracker',
           short_name: 'Finance',
           description: 'Sigue tus finanzas de forma simple y elegante',
-          theme_color: '#10b981',
+          theme_color: '#475569',
           background_color: '#0f172a',
           display: 'standalone',
           orientation: 'portrait-primary',

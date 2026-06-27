@@ -50,7 +50,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
 
   const snapshotTitle = hasSnapshot ? `${t('lastSnapshot')} ${snapshotAge}` : t('snapshot');
   const recencyDotClass = {
-    fresh: 'bg-emerald-500',
+    fresh: 'bg-positive-500',
     aging: 'bg-amber-500',
     stale: 'bg-rose-500',
   } as const;
@@ -236,7 +236,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
                   {t('netWorth')}
                 </span>
                 <span
-                  className={`text-lg sm:text-xl font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                  className={`text-lg sm:text-xl font-bold tabular-nums ${netWorth >= 0 ? 'text-positive-600 dark:text-positive-400' : 'text-rose-600 dark:text-rose-400'}`}
                 >
                   {formatCurrency(animatedNetWorth)}
                 </span>
@@ -246,7 +246,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, netWorth }) => {
             {/* Mobile: net worth only */}
             <div className="text-right lg:hidden">
               <span
-                className={`text-lg font-bold tabular-nums ${netWorth >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                className={`text-lg font-bold tabular-nums ${netWorth >= 0 ? 'text-positive-600 dark:text-positive-400' : 'text-rose-600 dark:text-rose-400'}`}
               >
                 {formatCurrency(animatedNetWorth)}
               </span>

@@ -30,7 +30,7 @@ const colBarColors: Record<ColKey, string> = {
 };
 
 const colTextColors: Record<ColKey, string> = {
-  savings: 'text-emerald-700 dark:text-emerald-400',
+  savings: 'text-positive-700 dark:text-positive-400',
   debt: 'text-rose-700 dark:text-rose-400',
   balance: 'text-blue-700 dark:text-blue-400',
   retirement: 'text-amber-700 dark:text-amber-400',
@@ -68,7 +68,7 @@ const HistoryRow = React.memo(
     const bPct = (entry.balance - bMin) / bRange;
     const rowBg =
       bPct > 0.6
-        ? 'bg-emerald-50/40 dark:bg-emerald-900/15'
+        ? 'bg-positive-50/40 dark:bg-positive-900/15'
         : bPct < 0.3
           ? 'bg-rose-50/30 dark:bg-rose-900/10'
           : '';
@@ -88,7 +88,7 @@ const HistoryRow = React.memo(
               <span className="font-bold text-slate-800 dark:text-slate-200 text-lg capitalize">
                 {formatDate(entry.date)}
                 {isLatest && (
-                  <span className="ml-2 align-middle text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                  <span className="ml-2 align-middle text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-positive-100 dark:bg-positive-900/40 text-positive-700 dark:text-positive-300">
                     {t('latest')}
                   </span>
                 )}
@@ -111,7 +111,7 @@ const HistoryRow = React.memo(
           <div className="hidden md:flex flex-1 items-center gap-2 font-semibold text-slate-700 dark:text-slate-300 text-sm capitalize">
             {formatDate(entry.date)}
             {isLatest && (
-              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-positive-100 dark:bg-positive-900/40 text-positive-700 dark:text-positive-300">
                 {t('latest')}
               </span>
             )}
@@ -131,7 +131,7 @@ const HistoryRow = React.memo(
                 delta === 0
                   ? 'text-slate-400 dark:text-slate-500'
                   : deltaGood
-                    ? 'text-emerald-500 dark:text-emerald-400'
+                    ? 'text-positive-500 dark:text-positive-400'
                     : 'text-rose-500 dark:text-rose-400';
               return (
                 <div

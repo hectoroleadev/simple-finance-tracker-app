@@ -54,7 +54,7 @@ export const useSnapshot = () => {
 
   // Values frozen by a snapshot, in the same order/colors used by HistoryTable
   const snapshotPreview: SnapshotPreviewItem[] = [
-    { label: t('savings'), value: totals.income, color: 'text-emerald-600 dark:text-emerald-400' },
+    { label: t('savings'), value: totals.income, color: 'text-positive-600 dark:text-positive-400' },
     { label: t('totalDebt'), value: totals.expenses, color: 'text-rose-600 dark:text-rose-400' },
     { label: t('netBalance'), value: totals.balance, color: 'text-blue-600 dark:text-blue-400' },
     {

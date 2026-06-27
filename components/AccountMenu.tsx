@@ -81,7 +81,7 @@ const AccountMenu: React.FC<AccountMenuProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 left-0 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden animate-scale-in origin-top-left backdrop-blur-xl bg-white/90 dark:bg-slate-800/90">
+        <div className="absolute top-full mt-2 left-0 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden animate-scale-in origin-top-left">
           <div className="p-2 space-y-1">
             {/* Account Selection Section */}
             <div className="px-3 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">

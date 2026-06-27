@@ -203,7 +203,7 @@ const ConfirmSignupPage: React.FC = () => {
             <input
               type="text"
               id="username"
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder-gray-400"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all placeholder-gray-400"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -220,7 +220,7 @@ const ConfirmSignupPage: React.FC = () => {
             <input
               type="text"
               id="code"
-              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder-gray-400"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition-all placeholder-gray-400"
               placeholder="123456"
               value={code}
               onChange={(e) => setCode(e.target.value)}
@@ -230,7 +230,7 @@ const ConfirmSignupPage: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-500/20 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 disabled:opacity-50 transition-all transform active:scale-[0.98]"
+            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-500/20 focus:outline-none focus:ring-4 focus:ring-brand-500/50 disabled:opacity-50 transition-all transform active:scale-[0.98]"
             disabled={loading}
           >
             {loading ? t('auth.loading') || 'Loading...' : t('auth.confirmButton') || 'Confirm'}
@@ -241,7 +241,7 @@ const ConfirmSignupPage: React.FC = () => {
           {t('auth.didntReceiveCode') || "Didn't receive the code?"}{' '}
           <button
             type="button"
-            className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline focus:outline-none ml-1"
+            className="text-brand-600 dark:text-brand-400 font-bold hover:underline focus:outline-none ml-1"
             onClick={handleResendCode}
             disabled={loading}
           >

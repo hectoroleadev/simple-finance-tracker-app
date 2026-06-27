@@ -3,6 +3,7 @@
 
 /* Design Tokens */
 :root {
+  --color-brand: #475569;
   --color-positive: #10b981;
   --color-negative: #f43f5e;
   --color-neutral: #3b82f6;
@@ -10,6 +11,7 @@
 }
 
 .dark {
+  --color-brand: #94a3b8;
   --color-positive: #34d399;
   --color-negative: #fb7185;
   --color-neutral: #60a5fa;
