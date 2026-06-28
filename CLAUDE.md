@@ -2,21 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
 
-```bash
-npm run dev          # Start dev server at http://localhost:3000
-npm run build        # tsc --noEmit + Vite production build
-npm run preview      # Preview production build locally
-npm test             # Vitest in watch mode
-npm run test:run     # Run tests once (CI mode)
-npm run test:run path/to/file.test.ts  # Run a single test file
-npm run test:coverage  # Tests with v8 coverage
-npm run typecheck    # tsc --noEmit only
-npm run lint         # ESLint (lint:fix to autofix)
-npm run format       # Prettier write (format:check to verify)
-npm run test:e2e     # Playwright E2E (loads .env.local)
-```
 
 ## Environment Setup
 
@@ -105,3 +91,7 @@ Implements an **approved** spec. Accepts full name, number, or slug. Flow:
 4. Implement one plan step at a time, pausing after each for diff review. Out-of-scope requests are deferred to a new spec.
 
 On finishing all steps: verify acceptance criteria, then user sets status to `Implemented` and commits.
+
+## Skills
+
+Always use /frontend-design to design the interface user experience before writing code. 
