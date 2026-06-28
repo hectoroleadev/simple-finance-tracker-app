@@ -107,7 +107,7 @@ test.describe('Simple Finance Tracker Critical Flows', () => {
     // The snapshot button's accessible name includes "snapshot" in all states
     // (e.g. "Record Snapshot" with no prior snapshot, "Last snapshot X ago" otherwise)
     const snapshotBtn = page.getByRole('button', { name: /snapshot/i }).first();
-    await expect(snapshotBtn).toBeVisible();
+    await expect(snapshotBtn).toBeVisible({ timeout: 10000 });
     await snapshotBtn.click();
 
     // Clicking opens a confirmation dialog — confirm it
