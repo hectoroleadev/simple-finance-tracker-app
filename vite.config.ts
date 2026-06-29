@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
           theme_color: '#475569',
           background_color: '#0f172a',
           display: 'standalone',
-          orientation: 'portrait-primary',
+          orientation: 'any',
           categories: ['finance', 'productivity'],
           icons: [
             {
